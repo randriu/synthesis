@@ -2,7 +2,7 @@
 
 #include "synthesis/synthesis.h"
 
-PYBIND11_MODULE(synthesis, m) {
+PYBIND11_MODULE(_synthesis, m) {
     m.doc() = "Synthesis extension of Stormpy.";
 
 #ifdef STORMPY_DISABLE_SIGNATURE_DOC

@@ -2,7 +2,7 @@
 # command-line arguments can be specified e.g. as follows: --build-arg no_threads=8
 
 # base image
-ARG BASE_IMAGE=movesrwth/stormpy:ci
+ARG BASE_IMAGE=movesrwth/stormpy:stable
 FROM $BASE_IMAGE
 
 # additional arguments for compiling payntbind
@@ -19,5 +19,5 @@ RUN apt-get install -y graphviz
 # install paynt
 WORKDIR /opt/paynt
 COPY . .
-RUN pip install -r build-requirements.txt
-RUN pip install . --no-build-isolation
+
+# paynt installed on the outside

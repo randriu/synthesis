@@ -14,8 +14,8 @@
 #include <storm/utility/vector.h>
 #include <storm/utility/graph.h>
 #include <storm/storage/MaximalEndComponentDecomposition.h>
-#include <storm/settings/SettingsManager.h>
-#include <storm/settings/modules/ModelCheckerSettings.h>
+//#include <storm/settings/SettingsManager.h>
+//#include <storm/settings/modules/ModelCheckerSettings.h>
 #include <storm/exceptions/InvalidPropertyException.h>
 
 #include "internal/GameViHelper.h"

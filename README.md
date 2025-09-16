@@ -1,74 +1,79 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs and Dec-POMDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
+[![Build Status](https://github.com/randriu/synthesis/workflows/Build%20Test/badge.svg)](https://github.com/moves-rwth/stormpy/actions)
+
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs, Dec-POMDPs and one-sided POSMGs, synthesis of decision trees for MDPs and synthesis of policy trees for families of MDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
 
 PAYNT is described in 
-- [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
-
-Most of the algorithms are described in 
-- [2] Inductive Synthesis for Probabilistic Programs Reaches New Horizons by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, TACAS 2021
-- [3] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen, FM 2019.
-- [4] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen, TACAS 2019
-- [5] Inductive Synthesis of Finite-State Controllers for POMDPs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, UAI 2022.
-- [6] Search and Explore: Symbiotic Policy Synthesis in POMDPs by Roman Andriushchenko, Alexander Bork, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, Filip Macak, CAV 2023.
+- [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky. In: CAV'21.
+- [2] An Oracle-Guided Approach to Constrained Policy Synthesis Under Uncertainty by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Filip Macak. Journal of Artificial Intelligence Research (2025).
 
 
 ## Installation
 
-To download PAYNT, use
+### (a) For users
+
+To download and install PAYNT, use:
 
 ```shell
-git clone https://github.com/randriu/synthesis.git synthesis
+pip install paynt
+```
+
+Alternatively, you may build PAYNT from source:
+
+```shell
+git clone https://github.com/randriu/synthesis.git
 cd synthesis
+python3 -m venv venv && source venv/bin/activate
+pip install .
 ```
 
-PAYNT requires [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy). If you have Stormpy installed (e.g. within a Python environment), PAYNT and its dependencies can be installed by
+### (b) For developers
+
+PAYNT depends on [Storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy). For developers, we recommend having local installations of both Storm and stormpy (see [section below](#installing-storm-and-stormpy)). If you have stormpy installed in your developer environment, you can use:
 
 ```shell
-sudo apt install -y graphviz
-source ${VIRTUAL_ENV}/bin/activate
-pip3 install click z3-solver psutil graphviz
-cd payntbind
-python3 setup.py develop
-cd ..
-python3 paynt.py --help
+pip install -r build-requirements.txt
+pip install . --no-build-isolation
 ```
 
-If you do not have Stormpy installed, you can run the installation script `install.sh` to install Storm, Stormpy and other required dependencies. Complete compilation might take up to an hour. The Python environment will be available in `prerequisistes/venv`:
-
-```shell
-./install.sh
-source prerequisistes/venv/bin/activate
-python3 paynt.py --help
-```
+which builds and installs PAYNT directly into your environment. **Note that the Storm backends used by both PAYNT and stormpy need to be the same.** While we implemented several routines that check the backend compatibility, it is up to the developer to make sure of it.
 
 PAYNT is also available as a docker image:
 
 ```shell
 docker pull randriu/paynt
 docker run --rm -it randriu/paynt
-python3 paynt.py --help
+python3 -m paynt --help
 ```
 
+#### Installing Storm and stormpy
 
-## Running PAYNT
-
-Upon enabling the Python environment, e.g.
+Please refer to [Storm documentation](https://www.stormchecker.org/documentation/obtain-storm/build.html) and [stormpy documentation](https://moves-rwth.github.io/stormpy/installation.html) for more information. Here we provide a list of commands that build master branch of Storm and stormpy in virtual environment without further explanation:
 
 ```shell
-source ${VIRTUAL_ENV}/bin/activate
+python3 -m venv venv && source venv/bin/activate
+mkdir prerequisites && cd prerequisites
+git clone https://github.com/moves-rwth/storm.git
+git clone https://github.com/moves-rwth/stormpy.git
+mkdir storm/build && cd storm/build
+cmake ..
+make storm storm-cli storm-pomdp
+cd - && cd stormpy
+pip install . --config-settings=cmake.define.USE_STORM_DFT=OFF --config-settings=cmake.define.USE_STORM_GSPN=OFF
 ```
+
+## Running PAYNT
 
 PAYNT can be executed using the command in the following form:
 
 ```shell
-python3 paynt.py PROJECT [OPTIONS]
+python3 -m paynt PROJECT [OPTIONS]
 ```
 where ``PROJECT`` is the path to the benchmark folder and the most important options are:
 - ``--sketch SKETCH``: the file in the ``PROJECT`` folder containing the template description or a POMDP program [default: ``sketch.templ``]
-- ``--constants STRING``: the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1``
 - ``--props PROPS``: the file in the ``PROJECT`` folder containing synthesis specification [default: ``sketch.props``]
-- ``--method [onebyone|ar|cegis|hybrid|ar_multicore]``: the synthesis method  [default: ``ar``]
+- ``--method [ar|cegis|hybrid]``: the synthesis method  [default: ``ar``]
 
 Options associated with the synthesis of finite-state controllers (FSCs) for a POMDP include:
 - ``--fsc-memory-size INTEGER``    implicit memory size for (Dec-)POMDP FSCs [default: 1]
@@ -92,14 +97,14 @@ Other options:
 
 Here are various PAYNT calls:
 ```shell
-python3 paynt.py models/archive/cav21-paynt/maze --props hard.props
-python3 paynt.py models/archive/cav21-paynt/maze --props hard.props --method hybrid
-python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0
-python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 2
-python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 5
-timeout 10s python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-synthesis
-python3 paynt.py models/archive/cav23-saynt/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
-python3 paynt.py models/archive/cav23-saynt/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
+python3 -m paynt models/archive/cav21-paynt/maze --props hard.props
+python3 -m paynt models/archive/cav21-paynt/maze --props hard.props --method hybrid
+python3 -m paynt models/archive/uai22-pomdp/grid-avoid-4-0
+python3 -m paynt models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 2
+python3 -m paynt models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 5
+timeout 10s python3 -m paynt models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-synthesis
+python3 -m paynt models/archive/cav23-saynt/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
+python3 -m paynt models/archive/cav23-saynt/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
 The Python environment can be deactivated by running
@@ -121,7 +126,7 @@ paynt() {
 For instance, here is a simple PAYNT call:
 
 ```shell
-python3 paynt.py models/archive/cav21-paynt/grid --props easy.props hybrid
+python3 -m paynt models/archive/cav21-paynt/grid --props easy.props hybrid
 ```
 
 Now we will investigate the __Grid__ model discussed in [1].
@@ -136,7 +141,7 @@ Having the tool installed, you can quickly test it by navigating to the tool fol
 ```sh
 cd /home/cav21/synthesis
 source env/bin/activate
-python3 paynt.py models/archive/cav21-paynt/dpm-demo --method hybrid
+python3 -m paynt models/archive/cav21-paynt/dpm-demo --method hybrid
 ```
 
 The syntax of the command is described in more detail in the following chapters of this README.
@@ -175,7 +180,7 @@ Running PAYNT produces a sequence of log and a summary printed at the end of the
 For instance, if we run
 
 ```sh
-python3 paynt.py models/archive/cav21-paynt/dpm-demo --method hybrid
+python3 -m paynt models/archive/cav21-paynt/dpm-demo --method hybrid
 ```
 we obtain the following summary:
 
@@ -329,7 +334,7 @@ from which we can see that PAYNT indeed proved non-existence of a better solutio
 We might further consider a more complex program sketch __Grid__ (discussed in [1]), where we synthesize controller for a robot in an unpredictable environment.
 
 ```shell
-python3 paynt.py models/archive/cav21-paynt/grid --props easy.props --method hybrid
+python3 -m paynt models/archive/cav21-paynt/grid --props easy.props --method hybrid
 ```
 
 This sketch describes a family of 65K members, where each member has, on average 1225 states.
@@ -337,7 +342,7 @@ Even though this is a much larger family with much larger chains than in the ske
 Meanwhile, one-by-one enumeration
 
 ```shell
-python3 paynt.py models/archive/cav21-paynt/grid --props easy.props --method onebyone
+python3 -m paynt models/archive/cav21-paynt/grid --props easy.props --method onebyone
 ```
 might take up to 20 minutes.
 
@@ -353,3 +358,17 @@ python3 -m pytest --cov=./../paynt/ --cov-report term-missing test_synthesis.py 
 ```
 This command prints the coverage report, displaying the resulting coverage for individual source files.
 Our tests currently cover more than `90%` of the source code lines, even though the result shows `82%` because `~10%` of the source code is only temporary functions for debugging purposes that have no functionality.
+
+
+---
+
+# References
+
+Most of the algorithms are described in:
+- [3] Inductive Synthesis for Probabilistic Programs Reaches New Horizons by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen. In: TACAS'21.
+- [4] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen. In: FM'19.
+- [5] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen. In: TACAS'19.
+- [6] Inductive Synthesis of Finite-State Controllers for POMDPs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen. In: UAI'22.
+- [7] Search and Explore: Symbiotic Policy Synthesis in POMDPs by Roman Andriushchenko, Alexander Bork, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, Filip Macak. In: CAV'23.
+- [8] Policies Grow on Trees: Model Checking Families of MDPs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, and Filip Macak. In: ATVA'24.
+- [9] Small Decision Trees for MDPs with Deductive Synthesis by by Roman Andriushchenko, Milan Ceska, Sebastian Junges, and Filip Macak. In: CAV'25.
