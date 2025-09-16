@@ -74,7 +74,8 @@ class Property:
         se = cls.environment.solver_environment
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
-        se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
+        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
+        se.set_linear_equation_solver_type(stormpy.EquationSolverType.topological)
 
         if use_exact:
             se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
