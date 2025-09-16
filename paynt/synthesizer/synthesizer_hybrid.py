@@ -94,7 +94,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
     def synthesize_one(self, family):
 
         self.conflict_generator.initialize()
-        smt_solver = paynt.family.smt.SmtSolver(self.quotient.family)
+        smt_solver = paynt.family.smt.SmtSolver(self.quotient)
 
         # AR-CEGIS loop
         families = [family]
