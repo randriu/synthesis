@@ -1,6 +1,15 @@
 #include "synthesis.h"
+#include "storm/utility/initialize.h"
+#include "storm/settings/SettingsManager.h"
 
 void define_synthesis(py::module& m) {
+
+    m.def("_set_up", [](std::string const& args) {
+            storm::utility::setUp();
+            storm::settings::initializeAll("payntbind", "payntbind");
+            storm::settings::mutableManager().setFromString(args);
+        }, "Initialize Storm", py::arg("arguments"));
+
     define_helpers(m);
 
     bindings_translation(m);

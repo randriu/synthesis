@@ -4,7 +4,7 @@
 
 #include "NativeMultiplier.h"
 
-#include <storm/settings/modules/CoreSettings.h>
+//#include <storm/settings/modules/CoreSettings.h>
 #include <storm/storage/SparseMatrix.h>
 #include <storm/utility/macros.h>
 
@@ -267,11 +267,7 @@ namespace synthesis {
 
     template<typename ValueType>
     bool NativeMultiplier<ValueType>::parallelize(storm::Environment const& env) const {
-#ifdef STORM_HAVE_INTELTBB
-        return storm::settings::getModule<storm::settings::modules::CoreSettings>().isUseIntelTbbSet();
-#else
         return false;
-#endif
     }
 
     template<typename ValueType>

@@ -5,7 +5,7 @@
 #include "GmmxxMultiplier.h"
 
 #include <boost/optional.hpp>
-#include <storm/settings/modules/CoreSettings.h>
+//#include <storm/settings/modules/CoreSettings.h>
 #include <storm/exceptions/NotSupportedException.h>
 #include <storm/utility/macros.h>
 
