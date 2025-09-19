@@ -4,7 +4,6 @@
 
 #include "NativeMultiplier.h"
 
-//#include <storm/settings/modules/CoreSettings.h>
 #include <storm/storage/SparseMatrix.h>
 #include <storm/utility/macros.h>
 
