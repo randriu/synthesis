@@ -30,7 +30,6 @@ PYTHON3_10_BIN=/usr/local/bin/python3.10
 
 ${PYTHON3_10_BIN} -m ensurepip
 ${PYTHON3_10_BIN} -m pip install --upgrade pip
-${PYTHON3_10_BIN} -m pip install venv
 
 # python3.10-devel is provided by headers and config files installed by make altinstall
 
