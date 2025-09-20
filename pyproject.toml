@@ -12,7 +12,7 @@ authors = [
     { name = "R. Andriushchenko", email = "iandri@fit.vut.cz" },
     { name = "F. Macák", email = "imacak@fit.vut.cz" },
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "stormpy>=1.11.0",
     "z3-solver>=4.14.0.0",
@@ -77,7 +77,7 @@ provider = "scikit_build_core.metadata.regex"
 input = "paynt/_version.py"
 
 [tool.cibuildwheel]
-manylinux-x86_64-image = "manylinux_2_39"
+manylinux-x86_64-image = "manylinux_2_34"
 skip = "*musllinux*"
 
 [tool.cibuildwheel.linux]
