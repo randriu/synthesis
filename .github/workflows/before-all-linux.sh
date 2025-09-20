@@ -4,20 +4,18 @@
 
 set -e -u
 
-ginac_version=1.8.9
-
-dnf install -y boost-devel cln-devel gmp-devel glpk-devel hwloc-devel z3-devel xerces-c-devel eigen3-devel python3-devel python3.10-devel # missing ginac
+dnf install -y boost-devel cln-devel gmp-devel glpk-devel hwloc-devel z3-devel xerces-c-devel eigen3-devel python3-devel # missing ginac
 
 cd /tmp
 
 # Install ginac
-curl -fsSLO https://www.ginac.de/ginac-${ginac_version}.tar.bz2
-tar -jxf ginac-${ginac_version}.tar.bz2
-cd ginac-${ginac_version}
-./configure CXXFLAGS="-O2"
-make -j ${NR_JOBS}
-make install
-cd ..
+# curl -fsSLO https://www.ginac.de/ginac-${ginac_version}.tar.bz2
+# tar -jxf ginac-${ginac_version}.tar.bz2
+# cd ginac-${ginac_version}
+# ./configure CXXFLAGS="-O2"
+# make -j ${NR_JOBS}
+# make install
+# cd ..
 
 # Install Storm
 # git clone https://github.com/moves-rwth/storm.git -b ${STORM_VERSION}
