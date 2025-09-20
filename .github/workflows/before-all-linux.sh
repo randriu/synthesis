@@ -34,6 +34,7 @@ ${PYTHON3_10_BIN} -m pip install --upgrade pip
 # python3.10-devel is provided by headers and config files installed by make altinstall
 
 # Install ginac
+ginac_version=1.8.9
 curl -fsSLO https://www.ginac.de/ginac-${ginac_version}.tar.bz2
 tar -jxf ginac-${ginac_version}.tar.bz2
 cd ginac-${ginac_version}
