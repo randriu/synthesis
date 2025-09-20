@@ -12,7 +12,7 @@ authors = [
     { name = "R. Andriushchenko", email = "iandri@fit.vut.cz" },
     { name = "F. Macák", email = "imacak@fit.vut.cz" },
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "stormpy>=1.11.0",
     "z3-solver>=4.14.0.0",
