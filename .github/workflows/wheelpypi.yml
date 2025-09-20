@@ -44,14 +44,14 @@ jobs:
           - os: linux-intel
             runs-on: ubuntu-latest
             archs: x86_64
-          - os: macos-intel
-            runs-on: macos-13 # macos-13 was the last x86_64 runner
-            xcode: 14.3
-            deploy_target: 13.0
-          - os: macos-arm
-            runs-on: macos-14 # macos-14+ (including latest) are ARM64 runners
-            xcode: 15.3
-            deploy_target: 14.0
+          # - os: macos-intel
+          #   runs-on: macos-13 # macos-13 was the last x86_64 runner
+          #   xcode: 14.3
+          #   deploy_target: 13.0
+          # - os: macos-arm
+          #   runs-on: macos-14 # macos-14+ (including latest) are ARM64 runners
+          #   xcode: 15.3
+          #   deploy_target: 14.0
       fail-fast: false
     steps:
       - uses: actions/checkout@v5

@@ -6,7 +6,7 @@ set -e -u
 
 ginac_version=1.8.9
 
-dnf install -y boost-devel cln-devel gmp-devel glpk-devel hwloc-devel z3-devel xerces-c-devel eigen3-devel python3-devel # missing ginac
+dnf install -y boost-devel cln-devel gmp-devel glpk-devel hwloc-devel z3-devel xerces-c-devel eigen3-devel python3-devel python3.10-devel # missing ginac
 
 cd /tmp
 
@@ -20,12 +20,12 @@ make install
 cd ..
 
 # Install Storm
-git clone https://github.com/moves-rwth/storm.git -b ${STORM_VERSION}
-cd storm
-mkdir build
-cd build
-cmake .. -DSTORM_BUILD_TESTS=OFF -DSTORM_BUILD_EXECUTABLES=OFF -DSTORM_PORTABLE=ON
-make -j ${NR_JOBS}
-make install
-cd ..
-rm -rf build
+# git clone https://github.com/moves-rwth/storm.git -b ${STORM_VERSION}
+# cd storm
+# mkdir build
+# cd build
+# cmake .. -DSTORM_BUILD_TESTS=OFF -DSTORM_BUILD_EXECUTABLES=OFF -DSTORM_PORTABLE=ON
+# make -j ${NR_JOBS}
+# make install
+# cd ..
+# rm -rf build
