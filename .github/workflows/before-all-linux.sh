@@ -34,13 +34,13 @@ ${PYTHON3_10_BIN} -m pip install --upgrade pip
 # python3.10-devel is provided by headers and config files installed by make altinstall
 
 # Install ginac
-# curl -fsSLO https://www.ginac.de/ginac-${ginac_version}.tar.bz2
-# tar -jxf ginac-${ginac_version}.tar.bz2
-# cd ginac-${ginac_version}
-# ./configure CXXFLAGS="-O2"
-# make -j ${NR_JOBS}
-# make install
-# cd ..
+curl -fsSLO https://www.ginac.de/ginac-${ginac_version}.tar.bz2
+tar -jxf ginac-${ginac_version}.tar.bz2
+cd ginac-${ginac_version}
+./configure CXXFLAGS="-O2"
+make -j ${NR_JOBS}
+make install
+cd ..
 
 # Install Storm
 # git clone https://github.com/moves-rwth/storm.git -b ${STORM_VERSION}
