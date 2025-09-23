@@ -211,7 +211,7 @@ jobs:
     permissions:
       id-token: write
     # Only upload if not using test.pypi and using original repo
-    if: ${{ !inputs.test_pypi && github.repository_owner == 'randriu' }}
+    if: ${{ !inputs.test_pypi && github.repository_owner == 'randriu' && (startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/stable'))}}
     steps:
       - uses: actions/download-artifact@v5
         with:
