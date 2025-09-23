@@ -23,7 +23,7 @@ def check_stormpy_compatibility():
         logger.warning(f"Storm used by payntbind ({payntbind.info.storm_origin_info()}) and stormpy ({stormpy.info.storm_origin_info()}) have different origin information!")
         incompatibility_found = True
     if payntbind.info.storm_directory() != stormpy.info.storm_directory():
-        logger.warning(f"Storm used by payntbind is located at {payntbind.info.storm_directory()} while stormpy is located at {stormpy.info.storm_directory()}.")
+        logger.warning(f"Storm used by payntbind is located at {payntbind.info.storm_directory()} while Storm used by stormpy is located at {stormpy.info.storm_directory()}.")
         incompatibility_found = True
 
     if not incompatibility_found:
