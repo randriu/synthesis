@@ -92,5 +92,4 @@ jobs:
     uses: ./.github/workflows/wheelpypi.yml
     with:
       test_pypi: false
-      storm_version: ${{ needs.env_storm_versions.outputs.storm_version }}
     secrets: inherit

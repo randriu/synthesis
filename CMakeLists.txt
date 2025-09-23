@@ -11,8 +11,6 @@ option(ALLOW_STORM_FETCH "Allow fetching storm" ON)
 set(STORM_GIT_REPO "" CACHE STRING  "Git repo used for fetching storm")
 set(STORM_GIT_TAG "" CACHE STRING "Git repo tag used for fetching storm")
 
-find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development)
-
 # Query stormpy.info to determine Storm configuration
 execute_process(
     COMMAND "${Python_EXECUTABLE}" -c "import stormpy.info; print(stormpy.info.storm_from_system())"

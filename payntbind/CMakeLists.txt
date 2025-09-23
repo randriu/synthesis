@@ -27,8 +27,6 @@ if (DEFINED DISABLE_SMG)
     add_definitions(-DDISABLE_SMG)
 endif()
 
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
-set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 CONFIG REQUIRED)
 message(STATUS "PAYNT - Using pybind11 version ${pybind11_VERSION}")
 
