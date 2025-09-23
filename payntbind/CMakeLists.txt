@@ -150,9 +150,6 @@ else()
     message(STATUS "PAYNT - Disabled use of ccache.")
 endif()
 
-# Set configurations
-set(STORM_VERSION ${storm_VERSION})
-
 # Helper functions
 function(build_module MOD_NAME # Module name
                       OUT_DIR OUT_NAME # Output directory and name for library
