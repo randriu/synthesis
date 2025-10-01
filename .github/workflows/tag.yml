@@ -86,10 +86,32 @@ jobs:
       stormpy_tag: stable
     secrets: inherit
 
+  create_wheels:
+    # Create wheels and sdist
+    needs: env_storm_versions
+    uses: ./.github/workflows/create_wheel.yml
+    secrets: inherit
+
   deploy_pypi:
     # Create pypi package
-    needs: [env_storm_versions, deploy_docker, deploy_docker_stable]
-    uses: ./.github/workflows/wheelpypi.yml
-    with:
-      test_pypi: false
-    secrets: inherit
+    needs: create_wheels
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/paynt
+    permissions:
+      id-token: write
+    # Only upload if not using test.pypi and using original repo
+    if: ${{ github.repository_owner == 'randriu' && (startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/stable'))}}
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          # unpacks all paynt artifacts into dist/
+          pattern: paynt-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          skip-existing: true
