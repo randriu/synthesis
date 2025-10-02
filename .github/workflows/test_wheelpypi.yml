@@ -1,4 +1,4 @@
-name: Build and upload to PyPI
+name: Test building wheel and upload to TestPyPI
 
 on:
   # needed to trigger the workflow manually
