@@ -65,7 +65,7 @@ class Sketch:
 
     @classmethod
     def load_sketch(cls, sketch_path, properties_path,
-        export=None, relative_error=0, precision=1e-4, constraint_bound=None, tree_helper_path = None, use_exact=False):
+        export=None, relative_error=0, precision=1e-4, constraint_bound=None, use_exact=False):
 
         prism = None
         explicit_quotient = None
@@ -148,12 +148,6 @@ class Sketch:
         assert filetype is not None, "unknown format of input file"
         logger.info("sketch parsing OK")
 
-        tree_helper = None
-        if tree_helper_path is not None:
-            tree_helper = paynt.utils.tree_helper.parse_tree_helper(tree_helper_path)
-            logger.info("tree helper loaded")
-
-
         paynt.verification.property.Property.initialize()
         updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
         paynt.verification.property.Property.initialize(use_exact)
@@ -194,7 +188,7 @@ class Sketch:
             elif isinstance(explicit_quotient, payntbind.synthesis.Posmg):
                 quotient_container = paynt.quotient.posmg.PosmgQuotient(explicit_quotient, specification)
             elif not explicit_quotient.is_partially_observable:
-                quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification, tree_helper)
+                quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification)
             else:
                 quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
         return quotient_container

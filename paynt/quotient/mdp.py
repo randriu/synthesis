@@ -465,7 +465,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             state_valuations.append(valuation)
         return variable_name,state_valuations
 
-    def __init__(self, mdp, specification, tree_helper=None):
+    def __init__(self, mdp, specification):
         super().__init__(specification=specification)
 
         # mask of relevant states: non-absorbing states with more than one action
@@ -530,8 +530,6 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         self.variables = [Variable.create_variable(variable,name,variable_domain[variable]) for variable,name in enumerate(variable_name)]
         self.relevant_state_valuations = state_valuations
         logger.debug(f"found the following {len(self.variables)} variables: {[str(v) for v in self.variables]}")
-
-        self.tree_helper = tree_helper
 
 
     def get_variable_id(self, var):
