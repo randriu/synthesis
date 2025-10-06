@@ -2,21 +2,13 @@ import paynt.synthesizer.synthesizer_ar
 import paynt.quotient.mdp
 import paynt.utils.timer
 
-from paynt.utils.tree_helper import parse_tree_helper
-
-import paynt.utils.tree_helper
 import stormpy
 import payntbind
 
 import os
 import json
 
-import os
-import shutil
-import subprocess
-
 import logging
-from datetime import datetime
 logger = logging.getLogger(__name__)
 
 class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
@@ -154,7 +146,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         else:
             tree_sequence_timer = paynt.utils.timer.Timer(overall_timeout)
             tree_sequence_timer.start()
-        depth_timeout = overall_timeout / 2 / (max_depth-1) if max_depth > 1 else overall_timeout / 2
+        depth_timeout = overall_timeout / 2 / (max_depth-1) if max_depth > 1 else overall_timeout
         for depth in range(max_depth):
             print()
             self.quotient.reset_tree(depth)
@@ -265,8 +257,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 mc_result_positive = opt_result_value > 0
                 if self.quotient.specification.optimality.maximizing == mc_result_positive:
                     epsilon *= -1
-                optimum_threshold = opt_result_value * (1 + epsilon)
-            # self.set_optimality_threshold(optimum_threshold)
+                # optimum_threshold = opt_result_value * (1 + epsilon)
+            self.set_optimality_threshold(optimum_threshold)
 
             if not SynthesizerDecisionTree.tree_enumeration:
                 self.synthesize_tree(SynthesizerDecisionTree.tree_depth)
@@ -302,9 +294,5 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         logger.info(f"synthesis finished after {time_total} seconds")
 
         print()
-        if False: # TODO remove this
-            for name,time in self.quotient.coloring.getProfilingInfo():
-                time_percent = round(time/time_total*100,1)
-                print(f"{name} = {time} s ({time_percent} %)")
 
         return self.best_tree

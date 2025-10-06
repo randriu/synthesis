@@ -1,5 +1,3 @@
-import paynt.utils
-import paynt.utils.tree_helper
 import stormpy
 import payntbind
 
@@ -15,8 +13,6 @@ import paynt.verification.property
 
 from paynt.parser.prism_parser import PrismParser
 from paynt.parser.drn_parser import DrnParser
-
-from paynt.utils.tree_helper import parse_tree_helper
 
 import uuid
 import os
@@ -136,7 +132,7 @@ class Sketch:
                 pass
         if filetype is None:
             try:
-                # TODO Storm does not support building JANI with choice labels currently so for now this is useless
+                # TODO not tested yet
                 logger.info(f"assuming sketch in JANI format...")
                 jani_model, properties = stormpy.parse_jani_model(sketch_path)
                 specification = paynt.verification.property.Specification(properties)
@@ -148,8 +144,6 @@ class Sketch:
         assert filetype is not None, "unknown format of input file"
         logger.info("sketch parsing OK")
 
-        paynt.verification.property.Property.initialize()
-        updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
         paynt.verification.property.Property.initialize(use_exact)
         if explicit_quotient.is_exact:
             updated = payntbind.synthesis.addMissingChoiceLabelsExact(explicit_quotient)
