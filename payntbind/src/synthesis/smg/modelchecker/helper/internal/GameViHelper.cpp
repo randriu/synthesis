@@ -1,5 +1,7 @@
-/* 
+/*
  * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+
+ * The checkConvergence method was modified
  */
 
 #include "GameViHelper.h"
@@ -83,6 +85,8 @@ namespace synthesis {
         }
     }
 
+    // The convergence criterion is base on *Automatic Verification of Competitive Stochastic Systems*
+    // and *Optimistic Value Iteration* papers
     template <typename ValueType>
     bool GameViHelper<ValueType>::checkConvergence(ValueType threshold) const {
         STORM_LOG_ASSERT(_multiplier, "tried to check for convergence without doing an iteration first.");
@@ -91,22 +95,10 @@ namespace synthesis {
         auto x1It = xOld().begin();
         auto x1Ite = xOld().end();
         auto x2It = xNew().begin();
-        ValueType maxDiff = (*x2It - *x1It);
-        ValueType minDiff = maxDiff;
-        // The difference between maxDiff and minDiff is zero at this point. Thus, it doesn't make sense to check the threshold now.
-        for (++x1It, ++x2It; x1It != x1Ite; ++x1It, ++x2It) {
-            ValueType diff = (*x2It - *x1It);
-            // Potentially update maxDiff or minDiff
-            bool skipCheck = false;
-            if (maxDiff < diff) {
-                maxDiff = diff;
-            } else if (minDiff > diff) {
-                minDiff = diff;
-            } else {
-                skipCheck = true;
-            }
-            // Check convergence
-            if (!skipCheck && (maxDiff - minDiff) > threshold) {
+        for (; x1It != x1Ite; ++x1It, ++x2It) {
+            ValueType diff = std::abs(*x2It - *x1It);
+            if (diff > threshold)
+            {
                 return false;
             }
         }

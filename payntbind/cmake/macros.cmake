@@ -11,8 +11,7 @@ endfunction(set_variable_string)
 # Sets variable HAVE_STORM_XYZ
 function(storm_with_lib NAME)
     string(TOLOWER ${NAME} NAME_LOWER)
-    find_library(STORM_${NAME} NAMES storm-${NAME_LOWER} HINTS "${storm_DIR}/lib/")
-    if(STORM_${NAME})
+    if(TARGET storm-${NAME_LOWER})
         set(HAVE_STORM_${NAME} TRUE PARENT_SCOPE)
     else()
         set(HAVE_STORM_${NAME} FALSE PARENT_SCOPE)
@@ -37,7 +36,7 @@ endfunction(set_dependency_var)
 # which can be checked with HAVE_STORM_XYZ and optiona USE_STORM_XYZ
 # Sets variable STORM_WITH_XYZ_BOOL
 function(set_optional_lib_var NAME)
-    if ((USE_STORM_${NAME}) AND (HAVE_STORM_${NAME}))
+    if (HAVE_STORM_${NAME})
         set(STORM_WITH_${NAME}_BOOL "True" PARENT_SCOPE)
     else()
         set(STORM_WITH_${NAME}_BOOL "False" PARENT_SCOPE)

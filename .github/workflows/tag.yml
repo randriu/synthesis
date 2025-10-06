@@ -1,0 +1,138 @@
+name: New tag release
+# Triggered by new a tag
+# - deploys Docker containers
+# - updates stable branch
+# - create new pypi package
+
+on:
+  push:
+    tags:
+      - 'v*'  # Matches all tags starting with 'v'
+
+jobs:
+
+  check_stormpy_version:
+    name: Check stormpy version in pyproject.toml
+    runs-on: ubuntu-latest
+    outputs:
+        stormpy_fixed: ${{ steps.check.outputs.stormpy_fixed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        # with:
+        #   ref: ${{ github.ref_name }}
+      - name: Check stormpy version pinning
+        id: check
+        run: |
+          # Check if the second line starting with 'requires =' contains 'stormpy=='
+          requires_line=$(grep -n '^requires *=.*' pyproject.toml | head -n1 | cut -d: -f1)
+          if [ -z "$requires_line" ]; then
+                echo "No 'requires =' line found in pyproject.toml"
+                exit 1
+          fi
+          line_content=$(sed -n "${requires_line}p" pyproject.toml)
+          if ! echo "$line_content" | grep -q 'stormpy=='; then
+            echo "'stormpy' version not fixed for build requirements in pyproject.toml"
+            exit 1
+          fi
+          # Check that 'stormpy==' appears exactly twice in pyproject.toml
+          count=$(grep -o 'stormpy==' pyproject.toml | wc -l)
+          if [ "$count" -ne 2 ]; then
+            echo "'stormpy' version must be fixed in both build requirement and dependency sections of pyproject.toml, it seems it was not fixed as a dependency."
+            exit 1
+          fi
+          echo "stormpy_fixed=true" >> "$GITHUB_OUTPUT"
+
+  env_storm_versions:
+    # Set Storm and StormPy version in environment variable for later use
+    needs: check_stormpy_version
+    runs-on: ubuntu-latest
+    outputs:
+      storm_version: ${{ steps.getVersion.outputs.storm_version }}
+      stormpy_version: ${{ steps.getStormpyVersion.outputs.stormpy_version }}
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v5
+        # with:
+        #   ref: ${{ github.ref_name }}
+      - name: Get Storm version
+        id: getVersion
+        run: |
+          # Get Storm version from set(STORM_MIN_VERSION "x.y.z") in payntbind/CMakeLists.txt
+          echo "STORM_VERSION=$(sed -n -E 's/\s*set\(STORM_MIN_VERSION \"(.+)\"\)/\1/p' payntbind/CMakeLists.txt)" >> "$GITHUB_OUTPUT"
+      - name: Get stormpy version
+        id: getStormpyVersion
+        run: |
+          # Extract stormpy version in x.y.z format from pyproject.toml (first occurrence of stormpy==...)
+          version=$(grep -oE 'stormpy==[0-9]+\.[0-9]+\.[0-9]+' pyproject.toml | head -n1 | sed 's/stormpy==//')
+          echo "STORMPY_VERSION=$version" >> "$GITHUB_OUTPUT"
+
+  deploy_docker:
+    # Create Docker images for tag
+    needs: env_storm_versions
+    uses: ./.github/workflows/release_docker.yml
+    with:
+      # Use the git tag as a tag for the Docker image
+      tag: ${{ github.ref_name }}
+      stormpy_tag: ${{ needs.env_storm_versions.outputs.stormpy_version }}
+    secrets: inherit
+
+  update_stable:
+    # Update stable branch
+    needs: env_storm_versions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - name: Rebase
+        run: |
+          git config user.name 'PAYNT release bot'
+          git config user.email 'imacak@fit.vut.cz'
+          git fetch origin stable
+          git checkout stable
+          git rebase ${{ github.ref_name }}
+          git push origin stable
+
+  deploy_docker_stable:
+    # Create Docker images for stable branch
+    needs: update_stable
+    uses: ./.github/workflows/release_docker.yml
+    with:
+      tag: stable
+      stormpy_tag: stable
+    secrets: inherit
+
+  create_wheels:
+    # Create wheels and sdist
+    needs: [env_storm_versions, deploy_docker, deploy_docker_stable]
+    uses: ./.github/workflows/create_wheel.yml
+    secrets: inherit
+
+  deploy_pypi:
+    # Create pypi package
+    needs: create_wheels
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/paynt
+    permissions:
+      id-token: write
+    # Only upload if not using test.pypi and using original repo
+    if: ${{ github.repository_owner == 'randriu' && (startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/stable'))}}
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          # unpacks all paynt artifacts into dist/
+          pattern: paynt-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          skip-existing: true

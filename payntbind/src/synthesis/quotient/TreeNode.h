@@ -139,12 +139,10 @@ public:
 
     /** Add encoding of hole option in the given family. */
     virtual void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const {}
+    /** Set enabledness of true or false branch for a given state. */
+    virtual void arePathsEnabledInState(Family const& subfamily, std::vector<uint64_t> const& state_valuation) {};
     /** Check whether the path is enabled in the given state for the given subfamily. */
-    virtual bool isPathEnabledInState(
-        std::vector<bool> const& path,
-        Family const& subfamily,
-        std::vector<uint64_t> const& state_valuation
-    ) const {return false;};
+    virtual bool isPathEnabled(std::vector<bool> const& path) const {return true;};
     
     /** Extract hole assignments used in the SMT model. */
     virtual void loadHoleAssignmentFromModel(
@@ -194,11 +192,6 @@ public:
     void clearCache() override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
-    bool isPathEnabledInState(
-        std::vector<bool> const& path,
-        Family const& subfamily,
-        std::vector<uint64_t> const& state_valuation
-    ) const override;
 
     void loadHoleAssignmentFromModel(
         z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
@@ -224,6 +217,9 @@ public:
     std::vector<Hole> variable_hole;
 
     z3::expr_vector clauses;
+
+    bool true_branch_enabled;
+    bool false_branch_enabled;
 
     // Auxiliary variables to be reused during initalization for memory efficiency.
     // Calling \p clearCache clears these variables.
@@ -263,11 +259,8 @@ public:
     void clearCache() override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
-    bool isPathEnabledInState(
-        std::vector<bool> const& path,
-        Family const& subfamily,
-        std::vector<uint64_t> const& state_valuation
-    ) const override;
+    void arePathsEnabledInState(Family const& subfamily, std::vector<uint64_t> const& state_valuation) override;
+    bool isPathEnabled(std::vector<bool> const& path) const override;
 
     void loadHoleAssignmentFromModel(
         z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options

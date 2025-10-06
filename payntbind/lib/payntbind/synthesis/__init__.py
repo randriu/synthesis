@@ -1,1 +1,2 @@
-from . import synthesis
+from . import _synthesis
+from ._synthesis import *

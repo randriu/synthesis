@@ -3,6 +3,8 @@
 /**
  * The code below was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis) and adapted to the latest
  * Storm version.
+ *
+ * Methods to support reward computation were added.
  */
 
 #include <gmpxx.h>
@@ -46,6 +48,8 @@ namespace synthesis {
         std::unique_ptr<storm::modelchecker::CheckResult> computeGloballyProbabilities(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::GloballyFormula, ValueType> const& checkTask) override;
         std::unique_ptr<storm::modelchecker::CheckResult> computeNextProbabilities(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::NextFormula, ValueType> const& checkTask) override;
         std::unique_ptr<storm::modelchecker::CheckResult> computeBoundedUntilProbabilities(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::BoundedUntilFormula, ValueType> const& checkTask) override;
+
+        std::unique_ptr<storm::modelchecker::CheckResult> computeReachabilityRewards(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::EventuallyFormula, ValueType> const& checkTask) override;
 
         std::unique_ptr<storm::modelchecker::CheckResult> computeLongRunAverageProbabilities(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::StateFormula, ValueType> const& checkTask) override;
         std::unique_ptr<storm::modelchecker::CheckResult> computeLongRunAverageRewards(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::LongRunAverageRewardFormula, ValueType> const& checkTask) override;

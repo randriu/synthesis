@@ -1,0 +1,36 @@
+name: Test building wheel and upload to TestPyPI
+
+on:
+  # needed to trigger the workflow manually
+  workflow_dispatch:
+
+jobs:
+
+  create_wheels:
+    # Create wheels and sdist
+    uses: ./.github/workflows/create_wheel.yml
+    secrets: inherit
+
+  upload_testpypi:
+    needs: create_wheels
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/paynt
+    permissions:
+      id-token: write
+    # Only upload if using test.pypi and using original repo
+    if: ${{ github.repository_owner == 'randriu' }}
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          # unpacks all paynt artifacts into dist/
+          pattern: paynt-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          verbose: true
+          skip-existing: true

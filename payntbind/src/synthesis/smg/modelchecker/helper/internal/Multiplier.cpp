@@ -25,17 +25,12 @@ namespace synthesis {
     }
 
     template<typename ValueType>
-    void Multiplier<ValueType>::multiplyAndReduce(storm::Environment const& env, storm::solver::OptimizationDirection const& dir, std::vector<ValueType> const& x, std::vector<ValueType> const* b, std::vector<ValueType>& result, std::vector<uint_fast64_t>* choices, storm::storage::BitVector const* dirOverride) const {
+    void Multiplier<ValueType>::multiplyAndReduce(storm::Environment const& env, storm::solver::OptimizationDirection const& dir, std::vector<ValueType> const& x, std::vector<ValueType> *b, std::vector<ValueType>& result, std::vector<uint_fast64_t>* choices, storm::storage::BitVector const* dirOverride) const {
         multiplyAndReduce(env, dir, this->matrix.getRowGroupIndices(), x, b, result, choices, dirOverride);
     }
 
     template<typename ValueType>
-    void Multiplier<ValueType>::multiplyAndReduceGaussSeidel(storm::Environment const& env, storm::solver::OptimizationDirection const& dir, std::vector<ValueType>& x, std::vector<ValueType> const* b, std::vector<uint_fast64_t>* choices, storm::storage::BitVector const* dirOverride, bool backwards) const {
-        multiplyAndReduceGaussSeidel(env, dir, this->matrix.getRowGroupIndices(), x, b, choices, dirOverride, backwards);
-    }
-
-    template<typename ValueType>
-    void Multiplier<ValueType>::repeatedMultiply(storm::Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> const* b, uint64_t n) const {
+    void Multiplier<ValueType>::repeatedMultiply(storm::Environment const& env, std::vector<ValueType>& x, std::vector<ValueType> *b, uint64_t n) const {
         storm::utility::ProgressMeasurement progress("multiplications");
         progress.setMaxCount(n);
         progress.startNewMeasurement(0);
@@ -47,41 +42,6 @@ namespace synthesis {
                 break;
             }
         }
-    }
-
-    template<typename ValueType>
-    void Multiplier<ValueType>::repeatedMultiplyAndReduce(storm::Environment const& env, storm::solver::OptimizationDirection const& dir, std::vector<ValueType>& x, std::vector<ValueType> const* b, uint64_t n, storm::storage::BitVector const* dirOverride) const {
-        storm::utility::ProgressMeasurement progress("multiplications");
-        progress.setMaxCount(n);
-        progress.startNewMeasurement(0);
-        for (uint64_t i = 0; i < n; ++i) {
-            multiplyAndReduce(env, dir, x, b, x);
-            if (storm::utility::resources::isTerminate()) {
-                STORM_LOG_WARN("Aborting after " << i << " of " << n << " multiplications");
-                break;
-            }
-        }
-    }
-
-    template<typename ValueType>
-    void Multiplier<ValueType>::repeatedMultiplyAndReduceWithChoices(storm::Environment const& env, storm::solver::OptimizationDirection const& dir, std::vector<ValueType>& x, std::vector<ValueType> const* b, uint64_t n, storm::storage::BitVector const* dirOverride, std::vector<ValueType>& choiceValues, std::vector<storm::storage::SparseMatrix<double>::index_type> rowGroupIndices) const {
-        storm::utility::ProgressMeasurement progress("multiplications");
-        progress.setMaxCount(n);
-        progress.startNewMeasurement(0);
-        for (uint64_t i = 0; i < n; ++i) {
-            multiply(env, x, b, choiceValues);
-            reduce(env, dir, rowGroupIndices, choiceValues, x);
-            if (storm::utility::resources::isTerminate()) {
-                STORM_LOG_WARN("Aborting after " << i << " of " << n << " multiplications");
-                break;
-            }
-        }
-    }
-
-    template<typename ValueType>
-    void Multiplier<ValueType>::multiplyRow2(uint64_t const& rowIndex, std::vector<ValueType> const& x1, ValueType& val1, std::vector<ValueType> const& x2, ValueType& val2) const {
-        multiplyRow(rowIndex, x1, val1);
-        multiplyRow(rowIndex, x2, val2);
     }
 
     template<typename ValueType>
@@ -123,8 +83,8 @@ namespace synthesis {
         // Adjust the multiplier type if an eqsolver was specified but not a multiplier
         if (!env.solver().isLinearEquationSolverTypeSetFromDefaultValue() && env.solver().multiplier().isTypeSetFromDefault()) {
             bool changed = false;
-            if (env.solver().getLinearEquationSolverType() == storm::solver::EquationSolverType::Gmmxx && type != storm::solver::MultiplierType::Gmmxx) {
-                type = storm::solver::MultiplierType::Gmmxx;
+            if (env.solver().getLinearEquationSolverType() == storm::solver::EquationSolverType::Gmmxx && type != storm::solver::MultiplierType::ViOperator) {
+                type = storm::solver::MultiplierType::ViOperator;
                 changed = true;
             } else if (env.solver().getLinearEquationSolverType() == storm::solver::EquationSolverType::Native && type != storm::solver::MultiplierType::Native) {
                 type = storm::solver::MultiplierType::Native;
@@ -134,7 +94,7 @@ namespace synthesis {
         }
 
         switch (type) {
-            case storm::solver::MultiplierType::Gmmxx:
+            case storm::solver::MultiplierType::ViOperator:
                 return std::make_unique<synthesis::GmmxxMultiplier<ValueType>>(matrix);
             case storm::solver::MultiplierType::Native:
                 return std::make_unique<synthesis::NativeMultiplier<ValueType>>(matrix);

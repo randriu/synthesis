@@ -9,12 +9,13 @@ void bindings_pomdp_family(py::module& m) {
 
     py::class_<synthesis::ObservationEvaluator<double>>(m, "ObservationEvaluator")
         .def(py::init<storm::prism::Program &,storm::models::sparse::Model<double> const& >(), py::arg("prism"), py::arg("model"))
-        .def_property_readonly("num_obs_expressions", [](synthesis::ObservationEvaluator<double>& e) {return e.num_obs_expressions;} )
-        .def_property_readonly("obs_expr_label", [](synthesis::ObservationEvaluator<double>& e) {return e.obs_expr_label;} )
-        .def_property_readonly("obs_expr_is_boolean", [](synthesis::ObservationEvaluator<double>& e) {return e.obs_expr_is_boolean;} )
-        .def_property_readonly("num_obs_classes", [](synthesis::ObservationEvaluator<double>& e) {return e.num_obs_classes;} )
-        .def_property_readonly("state_to_obs_class", [](synthesis::ObservationEvaluator<double>& e) {return e.state_to_obs_class;} )
+        .def_readonly("num_obs_expressions", &synthesis::ObservationEvaluator<double>::num_obs_expressions)
+        .def_readonly("obs_expr_label", &synthesis::ObservationEvaluator<double>::obs_expr_label)
+        .def_readonly("obs_expr_is_boolean", &synthesis::ObservationEvaluator<double>::obs_expr_is_boolean)
+        .def_readonly("num_obs_classes", &synthesis::ObservationEvaluator<double>::num_obs_classes)
+        .def_property("state_to_obs_class", &synthesis::ObservationEvaluator<double>::get_state_to_obs_class, &synthesis::ObservationEvaluator<double>::set_state_to_obs_class, "number of observation classes")
         .def("obs_class_value", &synthesis::ObservationEvaluator<double>::observationClassValue, py::arg("obs_class"), py::arg("obs_expr"))
+        .def("obs_valuation", &synthesis::ObservationEvaluator<double>::observationValuation, py::arg("obs_class"))
         .def("add_observations_to_submdp", &synthesis::ObservationEvaluator<double>::addObservationsToSubMdp, py::arg("mdp"), py::arg("state_sub_to_full"))
         ;
 
@@ -25,7 +26,8 @@ void bindings_pomdp_family(py::module& m) {
             uint64_t,
             std::vector<uint64_t> const&>()
         )
-        .def("apply_fsc", &synthesis::FscUnfolder<double>::applyFsc, py::arg("action_function"), py::arg("udate_function"))
+        .def("applyFsc", &synthesis::FscUnfolder<double>::applyFsc, py::arg("transitions"))
+        .def("applyFscFactored", &synthesis::FscUnfolder<double>::applyFscFactored, py::arg("action_function"), py::arg("udate_function"))
         .def_property_readonly("product", [](synthesis::FscUnfolder<double>& m) {return m.product;} )
         .def_property_readonly("product_choice_to_choice", [](synthesis::FscUnfolder<double>& m) {return m.product_choice_to_choice;} )
         // .def_property_readonly("product_state_to_state", [](synthesis::FscUnfolder<double>& m) {return m.product_state_to_state;} )

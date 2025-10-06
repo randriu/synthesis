@@ -1,6 +1,8 @@
+import paynt.quotient.mdp_family
 from . import version
 
 import paynt.utils.timer
+import paynt.utils.version_check
 import paynt.parser.sketch
 
 import paynt.quotient.quotient
@@ -109,10 +111,6 @@ def setup_logger(log_path = None):
     show_default=True,
     help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
 
-@click.option("--export-fsc-storm", type=click.Path(), default=None,
-    help="path to output file for SAYNT belief FSC")
-@click.option("--export-fsc-paynt", type=click.Path(), default=None,
-    help="path to output file for SAYNT inductive FSC")
 @click.option("--export-synthesis", type=click.Path(), default=None,
     help="base filename to output synthesis result")
 
@@ -152,7 +150,7 @@ def paynt_run(
     fsc_synthesis, fsc_memory_size, posterior_aware,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
     use_storm_cutoffs, unfold_strategy_storm,
-    export_fsc_storm, export_fsc_paynt, export_synthesis,
+    export_synthesis,
     mdp_discard_unreachable_choices,
     tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
     constraint_bound,
@@ -168,6 +166,7 @@ def paynt_run(
     paynt.utils.timer.GlobalTimer.start(timeout)
 
     logger.info("This is Paynt version {}.".format(version()))
+    paynt.utils.version_check.check_stormpy_compatibility()
 
     # set CLI parameters
     paynt.quotient.quotient.Quotient.disable_expected_visits = disable_expected_visits
@@ -177,6 +176,8 @@ def paynt_run(
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
     paynt.quotient.decpomdp.DecPomdpQuotient.initial_memory_size = fsc_memory_size
     paynt.quotient.posmg.PosmgQuotient.initial_memory_size = fsc_memory_size
+
+    paynt.quotient.mdp_family.MdpFamilyQuotient.initial_memory_size = fsc_memory_size
 
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
 
@@ -190,7 +191,7 @@ def paynt_run(
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
         storm_control.set_options(
             storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
-            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt
+            unfold_strategy_storm, prune_storm
         )
 
     sketch_path = os.path.join(project, sketch)
