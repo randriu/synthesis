@@ -21,13 +21,6 @@ logger = logging.getLogger(__name__)
 
 class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
 
-    # tree depth
-    tree_depth = 0
-    # if set, all trees of size at most tree_depth will be enumerated
-    tree_enumeration = False
-    # path to a scheduler to be mapped to a decision tree
-    scheduler_path = None
-
     def __init__(self, *args):
         super().__init__(*args)
         self.best_tree = None
@@ -35,7 +28,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
 
     @property
     def method_name(self):
-        return "dtNest"
+        return "dtNESt"
 
     def counters_reset(self):
         # integration stats
@@ -43,29 +36,25 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
         self.dtcontrol_successes = 0
         self.dtcontrol_recomputed_calls = 0
         self.dtcontrol_recomputed_successes = 0
-        self.paynt_calls = 0
-        self.paynt_successes_smaller = 0
-        self.paynt_tree_found = 0
+        self.dtpaynt_calls = 0
+        self.dtpaynt_successes_smaller = 0
+        self.dtpaynt_tree_found = 0
         self.all_larger = 0
 
-    def choose_tree_to_use(self, current_tree, paynt_tree, dtcontrol_trees, recomputed_scheduler_trees, values=[1,1,1], maximize=True):
-        # this also defines the priority in case of a tie, therefore: current > paynt > dtcontrol > recomputed
-        # nodes = {"current": len(current_tree.collect_nonterminals()), "paynt": len(paynt_tree.collect_nonterminals()), "dtcontrol": len(dtcontrol_tree.collect_nonterminals()) if dtcontrol_tree is not None else None, "recomputed": len(recomputed_scheduler_tree.collect_nonterminals()) if recomputed_scheduler_tree is not None else None}
-        # nodes = {"current": (len(current_tree.collect_nonterminals()), current_tree.get_depth()), "recomputed": (len(recomputed_scheduler_tree.collect_nonterminals()), recomputed_scheduler_tree.get_depth()) if recomputed_scheduler_tree is not None else None, "dtcontrol": (len(dtcontrol_tree.collect_nonterminals()), dtcontrol_tree.get_depth()) if dtcontrol_tree is not None else None, "paynt": (len(paynt_tree.collect_nonterminals()), paynt_tree.get_depth())}
+    def choose_tree_to_use(self, current_tree, dtpaynt_tree, dtcontrol_trees, recomputed_scheduler_trees):
+        # this also defines the priority in case of a tie, therefore: current > dtpaynt > dtcontrol > recomputed
         current_nodes = len(current_tree.collect_nonterminals())
         nodes = {"current": [current_nodes, current_tree.get_depth(), 1]}
         for setting, dtcontrol_tree in recomputed_scheduler_trees.items():
             nodes["recomputed-"+setting] = [len(dtcontrol_tree[1].collect_nonterminals()), dtcontrol_tree[1].get_depth(), 1]
         for setting, dtcontrol_tree in dtcontrol_trees.items():
             nodes["dtcontrol-"+setting] = [len(dtcontrol_tree[1].collect_nonterminals()), dtcontrol_tree[1].get_depth(), 1]
-        nodes["paynt"] = [len(paynt_tree.collect_nonterminals()), paynt_tree.get_depth(), 1]
+        nodes["dtpaynt"] = [len(dtpaynt_tree.collect_nonterminals()), dtpaynt_tree.get_depth(), 1]
         nodes = {k: v for k, v in nodes.items() if v is not None}
         sorted_nodes = sorted(nodes.items(), key=lambda item: item[1][1])
         sorted_nodes = sorted(nodes.items(), key=lambda item: item[1][0])
-        # TODO experimental sort by value
-        # sorted_nodes = sorted(nodes.items(), key=lambda item: item[1][2])
 
-        print(sorted_nodes)
+        logger.info(f"subtree information: {sorted_nodes}")
         return sorted_nodes[0][0]
     
 
@@ -106,20 +95,21 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
 
         # SETTINGS
         subtree_depth = 7
-        max_iter = 1000
+        max_iter = 100000 # max number of subtrees to be investigated
         epsilon = 0.05
-        timeout = 1200
+        timeout = 180
         depth_fine_tuning = True # decreases sub-tree depth once all subtrees of the current depth have been explored
-        break_on_small_tree = True # PAYNT synthesis ends when a implementable tree with good enough value if found
+        break_on_small_tree = True # dtPAYNT synthesis ends when an implementable tree with good enough value is found
         use_dtcontrol = True
         recompute_scheduler = True # recomputes scheduler for the subtree outside of the replaced subtree
         dtcontrol_settings = ["default"] # this defines the different settings we run dtcontrol with
-        # dtcontrol_settings = ["default", "gini", "entropy", "maxminority"]
+        # dtcontrol_settings = ["default", "gini", "entropy", "maxminority"] # other possible settings: gini, entropy, maxminority
         use_states_for_node_priority = False # this is super slow for some models but should mean better prioritization
 
-        # complete init
+        # init
         self.counters_reset()
         if random_result_value is None:
+            # if we dont have the random result value just make the threshold to be the epsilon of optimum value
             mc_result_positive = opt_result_value > 0
             if self.quotient.specification.optimality.maximizing == mc_result_positive:
                 epsilon *= -1
@@ -137,9 +127,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
         
         current_iter = 0
         current_depth = subtree_depth
-        # current_value = opt_result_value
 
-        # TODO think about this fine tuning more...
         while (depth_fine_tuning and current_depth > 1) or (current_depth == subtree_depth):
 
             if self.synthesis_timer.time_limit_reached():
@@ -147,11 +135,11 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                     break
 
             logger.info(f"starting iteration with subtree depth {current_depth}")
-            # TODO this is not guaranteed to work in subsequent iterations when the PAYNT tree is used
+            # TODO this is not guaranteed to work in subsequent iterations when the dtPAYNT tree is used
+            # I don't know what this means anymore...
             node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth, use_states_for_node_priority=use_states_for_node_priority)
-            nodes_to_skip = [] # this will include nodes that were already processed
 
-            while len(node_queue) > 0 and (True or (current_iter < max_iter)):
+            while len(node_queue) > 0 and current_iter < max_iter:
 
                 if self.synthesis_timer.time_limit_reached():
                     logger.info(f"timeout reached")
@@ -163,8 +151,6 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                 current_iter += 1
                 node = node_queue.pop(0)
 
-                # print(tree_helper_tree.to_graphviz([node["id"]]))
-
                 # subtree synthesis
                 if use_states_for_node_priority:
                     node_states = node["states"]
@@ -174,12 +160,9 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                 logger.info(f"subtree quotient has {submdp.model.nr_states} states and {submdp.model.nr_choices} choices")
                 subtree_spec = self.quotient.specification.copy()
                 subtree_quotient = paynt.quotient.mdp.MdpQuotient(submdp.model, subtree_spec)
-                # if subtree_quotient.self.state_is_relevant_bv.number_of_set_bits() == 0:
-                #     logger.info(f"no relevant states in subtree quotient")
-                #     continue
                 subtree_quotient.specification.optimality.update_optimum(eps_optimum_threshold)
                 subtree_synthesizer = paynt.synthesizer.decision_tree.SynthesizerDecisionTree(subtree_quotient)
-                self.paynt_calls += 1
+                self.dtpaynt_calls += 1
                 
                 if subtree_quotient.state_is_relevant_bv.number_of_set_bits() == 0:
                     random_tree = subtree_quotient.create_uniform_random_tree()
@@ -190,33 +173,23 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                 # create new tree
                 if subtree_synthesizer.best_tree is not None:
                     logger.info(f"admissible subtree found from node {node['id']}")
-                    self.paynt_tree_found += 1
+                    self.dtpaynt_tree_found += 1
                     relevant_state_valuations = [subtree_quotient.relevant_state_valuations[state] for state in subtree_quotient.state_is_relevant_bv]
                     subtree_synthesizer.best_tree.simplify(relevant_state_valuations)
-                    paynt_subtree_helper_tree_copy = tree_helper_tree.copy()
-                    paynt_subtree_helper_tree_copy.append_tree_as_subtree(subtree_synthesizer.best_tree, node["id"], subtree_quotient)
-                    paynt_subtree_helper_tree_copy.root.assign_identifiers(keep_old=True)
-                    logger.info(f'new tree has depth {paynt_subtree_helper_tree_copy.get_depth()} and {len(paynt_subtree_helper_tree_copy.collect_nonterminals())} nodes')
+                    dtpaynt_subtree_helper_tree_copy = tree_helper_tree.copy()
+                    dtpaynt_subtree_helper_tree_copy.append_tree_as_subtree(subtree_synthesizer.best_tree, node["id"], subtree_quotient)
+                    dtpaynt_subtree_helper_tree_copy.root.assign_identifiers(keep_old=True)
+                    logger.info(f'new tree has depth {dtpaynt_subtree_helper_tree_copy.get_depth()} and {len(dtpaynt_subtree_helper_tree_copy.collect_nonterminals())} nodes')
 
-                    self.quotient.tree_helper_tree = paynt_subtree_helper_tree_copy
+                    self.quotient.tree_helper_tree = dtpaynt_subtree_helper_tree_copy
 
                     new_dtcontrol_tree_helper_tree = None
                     recomputed_scheduler_tree_helper_tree = None
                     dtcontrol_trees = {}
                     recomputed_dtcontrol_trees = {}
 
-                    # paynt_subtree_value = subtree_synthesizer.best_tree_value
-
                     if use_dtcontrol:
                         submdp_for_tree = self.quotient.get_submdp_from_unfixed_states()
-                        # double check
-                        # res = submdp.check_specification(self.quotient.specification)
-                        # print(res)
-                        # TODO debugging the value getting below eps_optimum_threshold
-                        # if opt_result_value < eps_optimum_threshold:
-                        #     assert res.optimality_result.value <= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not below threshold {eps_optimum_threshold}"
-                        # else:
-                        #     assert res.optimality_result.value >= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not above threshold {eps_optimum_threshold}"
                         reachable_states = stormpy.BitVector(self.quotient.quotient_mdp.nr_states, False)
                         for state in range(submdp_for_tree.model.nr_states):
                             reachable_states.set(submdp_for_tree.quotient_state_map[state], True)
@@ -224,8 +197,6 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                     if use_dtcontrol and recompute_scheduler:
                         submpd_outside_of_subtree = self.quotient.get_submdp_from_unfixed_states(~node_states)
                         oos_result = submpd_outside_of_subtree.check_specification(self.quotient.specification)
-
-                        # recompute_scheduler_value = oos_result.optimality_result.result.at(0)
 
                         recomputed_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
                         quotient_mdp_nci = self.quotient.quotient_mdp.nondeterministic_choice_indices.copy()
@@ -250,7 +221,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                         temp_file_name = "subtree_test" + timestamp
                         try:
                             os.makedirs(temp_file_name, exist_ok=True)
-                            open(f"{temp_file_name}/scheduler.storm.json", "w").write(paynt_subtree_helper_tree_copy.to_scheduler_json(reachable_states))
+                            open(f"{temp_file_name}/scheduler.storm.json", "w").write(dtpaynt_subtree_helper_tree_copy.to_scheduler_json(reachable_states))
 
                             for setting in dtcontrol_settings:
                                 self.dtcontrol_calls += 1
@@ -301,24 +272,17 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                                 shutil.rmtree(f"{temp_file_name}")
                                 raise Exception("error when calling dtcontrol. Possible KeyboardInterrupt?")
 
-                    # current_normalized_value = self.compute_normalized_value(current_value, opt_result_value, random_result_value)
-                    # paynt_subtree_normalized_value = self.compute_normalized_value(paynt_subtree_value, opt_result_value, random_result_value)
-                    # recompute_scheduler_normalized_value = self.compute_normalized_value(recompute_scheduler_value, opt_result_value, random_result_value)
+                    chosen_tree = self.choose_tree_to_use(tree_helper_tree, dtpaynt_subtree_helper_tree_copy, dtcontrol_trees, recomputed_dtcontrol_trees)
 
-                    chosen_tree = self.choose_tree_to_use(tree_helper_tree, paynt_subtree_helper_tree_copy, dtcontrol_trees, recomputed_dtcontrol_trees)
-
-                    print(f"{chosen_tree} tree was chosen")
-                            
-                    # if False: # TODO remove this
                     if chosen_tree == "current":
                         logger.info(f"None of the new trees are smaller, continuing with current tree")
-                        # nodes_to_skip.append(node["id"])
                         self.all_larger += 1
                         self.quotient.tree_helper_tree = tree_helper_tree
-                    elif chosen_tree == "paynt":
-                        logger.info(f"New PAYNT tree is smallest")
-                        self.paynt_successes_smaller += 1
-                        tree_helper_tree = paynt_subtree_helper_tree_copy
+
+                    elif chosen_tree == "dtpaynt":
+                        logger.info(f"New dtPAYNT tree is smallest")
+                        self.dtpaynt_successes_smaller += 1
+                        tree_helper_tree = dtpaynt_subtree_helper_tree_copy
                         self.quotient.tree_helper_tree = tree_helper_tree
                         for node in node_queue:
                             nodes = self.quotient.tree_helper_tree.collect_nodes(lambda x : x.old_identifier == node["id"])
@@ -327,16 +291,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                             node["id"] = new_node.identifier
                         new_nodes = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth, nodes_to_skip=[node["id"] for node in node_queue], use_states_for_node_priority=use_states_for_node_priority)
                         node_queue += new_nodes
-                        # current_value = paynt_subtree_value
-                        # new_nodes_to_skip = []
-                        # for node_skip_id in nodes_to_skip:
-                        #     nodes = self.quotient.tree_helper_tree.collect_nodes(lambda x : x.old_identifier == node_skip_id)
-                        #     if len(nodes) == 0:
-                        #         continue
-                        #     assert len(nodes) == 1, f'only one node should have the old_identifier equal to {node_skip_id}'
-                        #     new_node = nodes[0]
-                        #     new_nodes_to_skip.append(new_node.identifier)
-                        # nodes_to_skip = new_nodes_to_skip
+
                     elif use_dtcontrol and chosen_tree.startswith("dtcontrol"):
                         logger.info(f"New DtControl tree ({chosen_tree}) is smallest")
                         dtcontrol_setting = chosen_tree.split("-")[1]
@@ -347,8 +302,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                         self.quotient.tree_helper_tree = new_dtcontrol_tree_helper_tree
                         tree_helper_tree = new_dtcontrol_tree_helper_tree
                         node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, use_states_for_node_priority=use_states_for_node_priority)
-                        # current_value = paynt_subtree_value
-                        # nodes_to_skip = []
+
                     elif use_dtcontrol and recompute_scheduler and chosen_tree.startswith("recomputed"):
                         logger.info(f"New DtControl tree ({chosen_tree}) for recomputed scheduler is smallest")
                         dtcontrol_setting = chosen_tree.split("-")[1]
@@ -359,19 +313,13 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                         self.quotient.tree_helper_tree = recomputed_scheduler_tree_helper_tree
                         tree_helper_tree = recomputed_scheduler_tree_helper_tree
                         node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, use_states_for_node_priority=use_states_for_node_priority)
-                        # current_value = recompute_scheduler_value
-                        # nodes_to_skip = []
                     
-                    # exit()
                 else:
                     logger.info(f"no admissible subtree found from node {node['id']}")
-                    # nodes_to_skip.append(node["id"])
 
             current_depth -= 1
 
         self.quotient.tree_helper_tree = tree_helper_tree
-        
-        # print(self.quotient.tree_helper_tree.to_graphviz())
         
         self.synthesis_timer.stop()
 
@@ -382,11 +330,6 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
             logger.info(f"tree did not induce dtmc?")
         # assert dtmc.model.nr_states == dtmc.model.nr_choices, "tree did not induce dtmc"
         result = dtmc.check_specification(self.quotient.specification)
-        result_negate = dtmc.check_specification(self.quotient.specification.negate())
-
-        print(result)
-        print(result_negate)
-        print()
 
         # TODO find out why this would not hold????
         if opt_result_value < eps_optimum_threshold:
@@ -398,9 +341,6 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
         self.best_tree_value = result.optimality_result.value
 
         logger.info(f'final tree has value {result.optimality_result.value} with depth {self.quotient.tree_helper_tree.get_depth()} and {len(self.quotient.tree_helper_tree.collect_nonterminals())} nodes')
-
-        print(result.optimality_result.value, round(self.synthesis_timer.read(), 2), self.quotient.tree_helper_tree.get_depth(), len(self.quotient.tree_helper_tree.collect_nonterminals()))
-
 
 
     def run(self, optimum_threshold=None):
@@ -483,15 +423,10 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                 logger.info(f"dtcontrol successes: {self.dtcontrol_successes}")
                 logger.info(f"dtcontrol recomputed calls: {self.dtcontrol_recomputed_calls}")
                 logger.info(f"dtcontrol recomputed successes: {self.dtcontrol_recomputed_successes}")
-                logger.info(f"paynt calls: {self.paynt_calls}")
-                logger.info(f"paynt successes smaller: {self.paynt_successes_smaller}")
-                logger.info(f"paynt tree found: {self.paynt_tree_found}")
+                logger.info(f"dtpaynt calls: {self.dtpaynt_calls}")
+                logger.info(f"dtpaynt successes smaller: {self.dtpaynt_successes_smaller}")
+                logger.info(f"dtpaynt tree found: {self.dtpaynt_tree_found}")
                 logger.info(f"all larger: {self.all_larger}")
-
-            # print(self.best_tree.to_string())
-            # print(self.best_tree.to_graphviz())
-            # logger.info(f"printing the PRISM module below:")
-            # print(self.best_tree.to_prism())
 
             if self.export_synthesis_filename_base is not None:
                 self.export_decision_tree(self.best_tree, self.export_synthesis_filename_base)
