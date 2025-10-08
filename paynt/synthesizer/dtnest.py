@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
 
+    initial_tree_path = None
+
     def __init__(self, *args):
         super().__init__(*args)
         self.best_tree = None
@@ -146,7 +148,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                     break
 
                 logger.info(f"starting iteration {current_iter} with {len(node_queue)} nodes in node queue")
-                logger.info(f"current tree size: {len(tree_helper_tree.collect_nodes())} decision nodes")
+                logger.info(f"current tree size: {len(tree_helper_tree.collect_nonterminals())} decision nodes")
             
                 current_iter += 1
                 node = node_queue.pop(0)
@@ -349,38 +351,45 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
         paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
         mc_result = paynt_mdp.model_check_property(self.quotient.get_property())
         opt_scheduler = mc_result.result.scheduler
+
+        if self.initial_tree_path is None:
         
-        # creating the initial scheduler for dtcontrol
-        relevant_opt_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
-        for state in range(self.quotient.quotient_mdp.nr_states):
-            quotient_choice = opt_scheduler.get_choice(state).get_deterministic_choice()
-            if quotient_choice is None or not self.quotient.state_is_relevant_bv.get(state):
-                payntbind.synthesis.set_dont_care_state_for_scheduler(relevant_opt_scheduler, state, 0, False)
-                index = 0
-            else:
-                index = quotient_choice
-            scheduler_choice = stormpy.storage.SchedulerChoice(index)
-            relevant_opt_scheduler.set_choice(scheduler_choice, state)
+            # creating the initial scheduler for dtcontrol
+            relevant_opt_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
+            for state in range(self.quotient.quotient_mdp.nr_states):
+                quotient_choice = opt_scheduler.get_choice(state).get_deterministic_choice()
+                if quotient_choice is None or not self.quotient.state_is_relevant_bv.get(state):
+                    payntbind.synthesis.set_dont_care_state_for_scheduler(relevant_opt_scheduler, state, 0, False)
+                    index = 0
+                else:
+                    index = quotient_choice
+                scheduler_choice = stormpy.storage.SchedulerChoice(index)
+                relevant_opt_scheduler.set_choice(scheduler_choice, state)
 
-        relevant_opt_scheduler_full = json.loads(relevant_opt_scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
-        relevant_opt_scheduler_str = json.dumps(relevant_opt_scheduler_full, indent=4)
+            relevant_opt_scheduler_full = json.loads(relevant_opt_scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
+            relevant_opt_scheduler_str = json.dumps(relevant_opt_scheduler_full, indent=4)
 
-        # creating the initial DT
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-        temp_file_name = "subtree_test" + timestamp
-        try:
-            os.makedirs(temp_file_name, exist_ok=True)
-            open(f"{temp_file_name}/scheduler.storm.json", "w").write(relevant_opt_scheduler_str)
-            command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
-            subprocess.run(command, cwd=f"{temp_file_name}")
-            logger.info(f"parsing initial dtcontrol tree for the optimal scheduler")
-            opt_scheduler_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
-            shutil.rmtree(f"{temp_file_name}")
-        except:
-            shutil.rmtree(f"{temp_file_name}")
-            raise Exception("error when calling dtcontrol for the optimal scheduler. Possible KeyboardInterrupt?")
+            # creating the initial DT
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+            temp_file_name = "subtree_test" + timestamp
+            try:
+                os.makedirs(temp_file_name, exist_ok=True)
+                open(f"{temp_file_name}/scheduler.storm.json", "w").write(relevant_opt_scheduler_str)
+                command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
+                subprocess.run(command, cwd=f"{temp_file_name}")
+                logger.info(f"parsing initial dtcontrol tree for the optimal scheduler")
+                initial_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
+                shutil.rmtree(f"{temp_file_name}")
+            except:
+                shutil.rmtree(f"{temp_file_name}")
+                raise Exception("error when calling dtcontrol for the optimal scheduler. Possible KeyboardInterrupt?")
+            
+        else:
 
-        self.quotient.tree_helper = opt_scheduler_tree_helper
+            logger.info(f"parsing initial tree from {self.initial_tree_path}")
+            initial_tree_helper = paynt.utils.tree_helper.parse_tree_helper(self.initial_tree_path)
+
+        self.quotient.tree_helper = initial_tree_helper
 
         opt_result_value = mc_result.value
         logger.info(f"the optimal scheduler has value: {opt_result_value}")

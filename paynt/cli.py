@@ -16,6 +16,7 @@ import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
 import paynt.synthesizer.decision_tree
+import paynt.synthesizer.dtnest
 
 import click
 import sys
@@ -132,6 +133,7 @@ def setup_logger(log_path = None):
 
 # dtNest related options
 @click.option("--dtnest", is_flag=True, default=False, help="run dtNest algorithm for decision tree synthesis")
+@click.option("--dtnest-initial-tree", type=click.Path(), default=None, help="path to initial decision tree for dtNest")
 
 @click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
@@ -152,7 +154,7 @@ def paynt_run(
     mdp_discard_unreachable_choices,
     tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
     constraint_bound,
-    dtnest,
+    dtnest, dtnest_initial_tree,
     ce_generator,
     profiling
 ):
@@ -183,6 +185,8 @@ def paynt_run(
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_enumeration = tree_enumeration
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.scheduler_path = tree_map_scheduler
     paynt.quotient.mdp.MdpQuotient.add_dont_care_action = add_dont_care_action
+
+    paynt.synthesizer.dtnest.DtNest.initial_tree_path = dtnest_initial_tree
 
     storm_control = None
     if storm_pomdp:
