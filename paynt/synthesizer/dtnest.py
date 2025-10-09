@@ -96,7 +96,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
         break_on_small_tree = True # dtPAYNT synthesis ends when an implementable tree with good enough value is found
         use_dtcontrol = True
         recompute_scheduler = True # recomputes scheduler for the subtree outside of the replaced subtree
-        dtcontrol_settings = ["default"] # this defines the different settings we run dtcontrol with
+        # dtcontrol_settings = ["default"] # this defines the different settings we run dtcontrol with # TODO this is currently not nicely supported in dtcontrol
         # dtcontrol_settings = ["default", "gini", "entropy", "maxminority"] # other possible settings: gini, entropy, maxminority
         use_states_for_node_priority = False # this is super slow for some models but should mean better prioritization
 
