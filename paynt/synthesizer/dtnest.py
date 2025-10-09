@@ -2,21 +2,13 @@ import paynt.synthesizer.decision_tree
 import paynt.quotient.mdp
 import paynt.utils.timer
 
-from paynt.utils.tree_helper import parse_tree_helper
-
-import paynt.utils.tree_helper
+import paynt.utils.dtnest_helper
 import stormpy
 import payntbind
 
-import os
 import json
 
-import os
-import shutil
-import subprocess
-
 import logging
-from datetime import datetime
 logger = logging.getLogger(__name__)
 
 class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
@@ -218,61 +210,28 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                         recomputed_json_str = json.dumps(recomputed_json_scheduler_full, indent=4)
 
                     # calling dtcontrol
+                    # TODO I removed the option to call multiple dtcontrol settings, because they are not nicely implemented in dtcontrol, if they fix that I will reintroduce it
                     if use_dtcontrol:
-                        timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-                        temp_file_name = "subtree_test" + timestamp
-                        try:
-                            os.makedirs(temp_file_name, exist_ok=True)
-                            open(f"{temp_file_name}/scheduler.storm.json", "w").write(dtpaynt_subtree_helper_tree_copy.to_scheduler_json(reachable_states))
+                        scheduler_json = dtpaynt_subtree_helper_tree_copy.to_scheduler_json(reachable_states)
 
-                            for setting in dtcontrol_settings:
-                                self.dtcontrol_calls += 1
+                        new_dtcontrol_tree_helper = paynt.utils.dtnest_helper.run_dtcontrol(scheduler_json)
+                        self.dtcontrol_calls += 1
 
-                                if setting == "default":
-                                    command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
-                                else:
-                                    command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", setting, "--config", "../prerequisites/dtcontrol/user-config.yml"]
-                                subprocess.run(command, cwd=f"{temp_file_name}")
+                        new_dtcontrol_tree_helper_tree = self.quotient.build_tree_helper_tree(new_dtcontrol_tree_helper)
+                        logger.info(f'new dtcontrol tree (default) has depth {new_dtcontrol_tree_helper_tree.get_depth()} and {len(new_dtcontrol_tree_helper_tree.collect_nonterminals())} nodes')
 
-                                logger.info(f"parsing new dtcontrol tree for setting {setting}")
-                                new_dtcontrol_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/{setting}/scheduler/{setting}.json")
-                                new_dtcontrol_tree_helper_tree = self.quotient.build_tree_helper_tree(new_dtcontrol_tree_helper)
-                                logger.info(f'new dtcontrol tree ({setting}) has depth {new_dtcontrol_tree_helper_tree.get_depth()} and {len(new_dtcontrol_tree_helper_tree.collect_nonterminals())} nodes')
-
-                                dtcontrol_trees[setting] = (new_dtcontrol_tree_helper, new_dtcontrol_tree_helper_tree)
-
-                            shutil.rmtree(f"{temp_file_name}")
-                        except:
-                            shutil.rmtree(f"{temp_file_name}")
-                            raise Exception("error when calling dtcontrol. Possible KeyboardInterrupt?")
+                        dtcontrol_trees["default"] = (new_dtcontrol_tree_helper, new_dtcontrol_tree_helper_tree)
 
                         if recompute_scheduler:
-                            timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-                            temp_file_name = "subtree_test" + timestamp
-                            try:
-                                os.makedirs(temp_file_name, exist_ok=True)
-                                open(f"{temp_file_name}/scheduler.storm.json", "w").write(recomputed_json_str)
 
-                                for setting in dtcontrol_settings:
-                                    self.dtcontrol_recomputed_calls += 1
+                            recomputed_scheduler_tree_helper = paynt.utils.dtnest_helper.run_dtcontrol(recomputed_json_str)
+                            self.dtcontrol_recomputed_calls += 1
 
-                                    if setting == "default":
-                                        command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
-                                    else:
-                                        command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", setting, "--config", "../prerequisites/dtcontrol/user-config.yml"]
-                                    subprocess.run(command, cwd=f"{temp_file_name}")
+                            recomputed_scheduler_tree_helper_tree = self.quotient.build_tree_helper_tree(recomputed_scheduler_tree_helper)
+                            logger.info(f'new dtcontrol tree (default) based on recomputed scheduler has depth {recomputed_scheduler_tree_helper_tree.get_depth()} and {len(recomputed_scheduler_tree_helper_tree.collect_nonterminals())} nodes')
 
-                                    logger.info(f"parsing new dtcontrol tree for recomputed scheduler for setting {setting}")
-                                    recomputed_scheduler_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/{setting}/scheduler/{setting}.json")
-                                    recomputed_scheduler_tree_helper_tree = self.quotient.build_tree_helper_tree(recomputed_scheduler_tree_helper)
-                                    logger.info(f'new dtcontrol tree ({setting}) based on recomputed scheduler has depth {recomputed_scheduler_tree_helper_tree.get_depth()} and {len(recomputed_scheduler_tree_helper_tree.collect_nonterminals())} nodes')
+                            recomputed_dtcontrol_trees["default"] = (recomputed_scheduler_tree_helper, recomputed_scheduler_tree_helper_tree)
 
-                                    recomputed_dtcontrol_trees[setting] = (recomputed_scheduler_tree_helper, recomputed_scheduler_tree_helper_tree)
-                                
-                                shutil.rmtree(f"{temp_file_name}")
-                            except:
-                                shutil.rmtree(f"{temp_file_name}")
-                                raise Exception("error when calling dtcontrol. Possible KeyboardInterrupt?")
 
                     chosen_tree = self.choose_tree_to_use(tree_helper_tree, dtpaynt_subtree_helper_tree_copy, dtcontrol_trees, recomputed_dtcontrol_trees)
 
@@ -369,25 +328,12 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
             relevant_opt_scheduler_full = json.loads(relevant_opt_scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
             relevant_opt_scheduler_str = json.dumps(relevant_opt_scheduler_full, indent=4)
 
-            # creating the initial DT
-            timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-            temp_file_name = "subtree_test" + timestamp
-            try:
-                os.makedirs(temp_file_name, exist_ok=True)
-                open(f"{temp_file_name}/scheduler.storm.json", "w").write(relevant_opt_scheduler_str)
-                command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
-                subprocess.run(command, cwd=f"{temp_file_name}")
-                logger.info(f"parsing initial dtcontrol tree for the optimal scheduler")
-                initial_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
-                shutil.rmtree(f"{temp_file_name}")
-            except:
-                shutil.rmtree(f"{temp_file_name}")
-                raise Exception("error when calling dtcontrol for the optimal scheduler. Possible KeyboardInterrupt?")
+            initial_tree_helper = paynt.utils.dtnest_helper.run_dtcontrol(relevant_opt_scheduler_str)
             
         else:
 
             logger.info(f"parsing initial tree from {self.initial_tree_path}")
-            initial_tree_helper = paynt.utils.tree_helper.parse_tree_helper(self.initial_tree_path)
+            initial_tree_helper = paynt.utils.dtnest_helper.parse_tree_helper(self.initial_tree_path)
 
         self.quotient.tree_helper = initial_tree_helper
 

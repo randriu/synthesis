@@ -3,6 +3,9 @@ import os
 import json
 
 from math import floor
+import shutil
+import subprocess
+from datetime import datetime
 
 import logging
 logger = logging.getLogger(__name__)
@@ -35,3 +38,24 @@ def parse_tree_helper(tree_helper_path):
         tree_helper = json.load(file)
     tree_helper =  build_tree_helper(tree_helper, [])
     return tree_helper
+
+
+def run_dtcontrol(scheduler_json):
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    temp_file_name = "subtree_test" + timestamp
+    try:
+        os.makedirs(temp_file_name, exist_ok=True)
+        open(f"{temp_file_name}/scheduler.storm.json", "w").write(scheduler_json)
+
+        command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
+        subprocess.run(command, cwd=f"{temp_file_name}")
+
+        logger.info(f"parsing new dtcontrol tree for setting default")
+        dtcontrol_tree_helper = parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
+
+        shutil.rmtree(f"{temp_file_name}")
+    except:
+        shutil.rmtree(f"{temp_file_name}")
+        raise Exception("error when calling dtcontrol. Possible KeyboardInterrupt?")
+    
+    return dtcontrol_tree_helper
