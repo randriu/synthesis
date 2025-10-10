@@ -214,7 +214,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
                     if use_dtcontrol:
                         scheduler_json = dtpaynt_subtree_helper_tree_copy.to_scheduler_json(reachable_states)
 
-                        new_dtcontrol_tree_helper = paynt.utils.dtnest_helper.run_dtcontrol(scheduler_json)
+                        new_dtcontrol_tree_helper = paynt.utils.dtnest_helper.run_dtcontrol(scheduler_json, "storm.json")
                         self.dtcontrol_calls += 1
 
                         new_dtcontrol_tree_helper_tree = self.quotient.build_tree_helper_tree(new_dtcontrol_tree_helper)
@@ -224,7 +224,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
 
                         if recompute_scheduler:
 
-                            recomputed_scheduler_tree_helper = paynt.utils.dtnest_helper.run_dtcontrol(recomputed_json_str)
+                            recomputed_scheduler_tree_helper = paynt.utils.dtnest_helper.run_dtcontrol(recomputed_json_str, "storm.json")
                             self.dtcontrol_recomputed_calls += 1
 
                             recomputed_scheduler_tree_helper_tree = self.quotient.build_tree_helper_tree(recomputed_scheduler_tree_helper)
@@ -328,7 +328,7 @@ class DtNest(paynt.synthesizer.decision_tree.SynthesizerDecisionTree):
             relevant_opt_scheduler_full = json.loads(relevant_opt_scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
             relevant_opt_scheduler_str = json.dumps(relevant_opt_scheduler_full, indent=4)
 
-            initial_tree_helper = paynt.utils.dtnest_helper.run_dtcontrol(relevant_opt_scheduler_str)
+            initial_tree_helper = paynt.utils.dtnest_helper.run_dtcontrol(relevant_opt_scheduler_str, "storm.json")
             
         else:
 

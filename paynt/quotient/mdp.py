@@ -553,9 +553,9 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             current_node = parent_node
         return states
     
-    def get_chosen_action_for_state_from_tree_helper(self, state):
+    def get_chosen_action_for_state_from_tree_helper(self, state, tree):
         state_valuation = self.relevant_state_valuations[state]
-        current_node = self.tree_helper_tree.root
+        current_node = tree.root
         while not current_node.is_terminal:
             bound = self.variables[current_node.variable].domain[current_node.variable_bound]
             if state_valuation[current_node.variable] <= bound:
@@ -564,7 +564,9 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 current_node = current_node.child_false
         return self.action_labels[current_node.action]
     
-    def get_selected_choices_from_tree_helper(self, state_to_exclude):
+    def get_selected_choices_from_tree_helper(self, state_to_exclude, tree=None):
+        if tree is None:
+            tree = self.tree_helper_tree
         selected_choices = stormpy.storage.BitVector(self.quotient_mdp.nr_choices, False)
         mdp_nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
         for state in range(self.quotient_mdp.nr_states):
@@ -572,7 +574,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 for choice in range(mdp_nci[state],mdp_nci[state+1]):
                     selected_choices.set(choice, True)
                 continue
-            chosen_action_label = self.get_chosen_action_for_state_from_tree_helper(state)
+            chosen_action_label = self.get_chosen_action_for_state_from_tree_helper(state, tree)
             action_index = self.action_labels.index(chosen_action_label)
             for choice in range(mdp_nci[state],mdp_nci[state+1]):
                 if self.choice_to_action[choice] == action_index:

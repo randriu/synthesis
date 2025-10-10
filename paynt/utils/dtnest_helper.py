@@ -40,18 +40,24 @@ def parse_tree_helper(tree_helper_path):
     return tree_helper
 
 
-def run_dtcontrol(scheduler_json):
+def run_dtcontrol(scheduler_represenation, representation_file_type, metadata=None, preset="default", show_stdout=False):
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     temp_file_name = "subtree_test" + timestamp
     try:
         os.makedirs(temp_file_name, exist_ok=True)
-        open(f"{temp_file_name}/scheduler.storm.json", "w").write(scheduler_json)
+        open(f"{temp_file_name}/scheduler.{representation_file_type}", "w").write(scheduler_represenation)
 
-        command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
-        subprocess.run(command, cwd=f"{temp_file_name}")
+        if metadata is not None:
+            open(f"{temp_file_name}/scheduler_config.json", "w").write(metadata)
 
-        logger.info(f"parsing new dtcontrol tree for setting default")
-        dtcontrol_tree_helper = parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
+        command = ["dtcontrol", "--input", f"scheduler.{representation_file_type}", "-r", "--use-preset", preset]
+        if show_stdout:
+            subprocess.run(command, cwd=f"{temp_file_name}")
+        else:
+            subprocess.run(command, cwd=f"{temp_file_name}", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        logger.info(f"parsing new dtcontrol tree for setting {preset}")
+        dtcontrol_tree_helper = parse_tree_helper(f"{temp_file_name}/decision_trees/{preset}/scheduler/{preset}.json")
 
         shutil.rmtree(f"{temp_file_name}")
     except:
