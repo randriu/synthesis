@@ -2,7 +2,7 @@ name: New tag release
 # Triggered by new a tag
 # - deploys Docker containers
 # - updates stable branch
-# - create new pypi package
+# - creates new pypi package
 
 on:
   push:
