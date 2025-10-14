@@ -78,6 +78,7 @@ input = "paynt/_version.py"
 
 [tool.cibuildwheel]
 manylinux-x86_64-image = "manylinux_2_34"
+manylinux-aarch64-image = "manylinux_2_34"
 skip = "*musllinux*"
 
 [tool.cibuildwheel.linux]
