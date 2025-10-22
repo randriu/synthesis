@@ -130,6 +130,16 @@ class Sketch:
                 filetype = "cassandra"
             except SyntaxError:
                 pass
+        if filetype is None:
+            try:
+                # TODO not tested yet
+                logger.info(f"assuming sketch in JANI format...")
+                jani_model, properties = stormpy.parse_jani_model(sketch_path)
+                specification = paynt.verification.property.Specification(properties)
+                explicit_quotient = paynt.models.model_builder.ModelBuilder.from_jani(jani_model, specification)
+                filetype = "jani"
+            except SyntaxError:
+                pass
 
         assert filetype is not None, "unknown format of input file"
         logger.info("sketch parsing OK")
