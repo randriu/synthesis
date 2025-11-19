@@ -12,8 +12,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     # implicit initial FSC size
     initial_memory_size = 1
 
-    def __init__(self, decpomdp_manager, specification):
-        super().__init__(specification = specification)
+    def __init__(self, decpomdp_manager, specification, use_exact=False):
+        super().__init__(specification = specification, use_exact=use_exact)
 
         assert decpomdp_manager.num_agents > 1
 

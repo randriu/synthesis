@@ -22,10 +22,13 @@ class ModelBuilder:
         return builder_options
 
     @classmethod
-    def from_jani(cls, program, specification = None):
+    def from_jani(cls, program, specification = None, use_exact=False):
         builder_options = cls.default_builder_options(specification)
         builder_options.set_build_choice_labels(False)
-        model = stormpy.build_sparse_model_with_options(program, builder_options)
+        if use_exact:
+            model = stormpy.build_sparse_exact_model_with_options(program, builder_options)
+        else:
+            model = stormpy.build_sparse_model_with_options(program, builder_options)
         return model
 
     @classmethod

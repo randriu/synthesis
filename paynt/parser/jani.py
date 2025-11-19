@@ -36,7 +36,7 @@ class CombinationColoring:
 class JaniUnfolder:
     ''' Unfolder of hole combinations into JANI program. '''
 
-    def __init__(self, prism, hole_expressions, specification, family):
+    def __init__(self, prism, hole_expressions, specification, family, use_exact=False):
 
         logger.debug("constructing JANI program...")
         
@@ -53,20 +53,25 @@ class JaniUnfolder:
                 p = paynt.verification.property.Property(prop_new)
             else:
                 epsilon = prop_old.epsilon
-                p = paynt.verification.property.OptimalityProperty(prop_new,epsilon)
+                p = paynt.verification.property.OptimalityProperty(prop_new,epsilon,use_exact)
             properties_unpacked.append(p)
         self.specification = paynt.verification.property.Specification(properties_unpacked)
         self.jani_unfolded,edge_to_hole_options = JaniUnfolder.unfold_jani(jani, family, hole_expressions)
 
         logger.debug("constructing the quotient...")
-        quotient_mdp = paynt.models.model_builder.ModelBuilder.from_jani(self.jani_unfolded, self.specification)
+        quotient_mdp = paynt.models.model_builder.ModelBuilder.from_jani(self.jani_unfolded, self.specification, use_exact=use_exact)
 
         # associate each action of a quotient MDP with hole options
         # reconstruct choice labels from choice origins
         logger.debug("associating choices of the quotient with hole assignments...")
-        choice_is_valid,choice_to_hole_options = payntbind.synthesis.janiMapChoicesToHoleAssignments(
-            quotient_mdp,family.family,edge_to_hole_options
-        )
+        if use_exact:
+            choice_is_valid,choice_to_hole_options = payntbind.synthesis.janiMapChoicesToHoleAssignmentsExact(
+                quotient_mdp,family.family,edge_to_hole_options
+            )
+        else:
+            choice_is_valid,choice_to_hole_options = payntbind.synthesis.janiMapChoicesToHoleAssignments(
+                quotient_mdp,family.family,edge_to_hole_options
+            )
 
         # handle conflicting colors
         num_choices_all = quotient_mdp.nr_choices

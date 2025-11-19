@@ -17,8 +17,8 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
     # implicit size for POSMG unfolding
     initial_memory_size = 1
 
-    def __init__(self, posmg, specification):
-        super().__init__(specification = specification)
+    def __init__(self, posmg, specification, use_exact=False):
+        super().__init__(specification = specification, use_exact=use_exact)
 
 
         # defualt POSMG model

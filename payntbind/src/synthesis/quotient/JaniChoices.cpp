@@ -49,4 +49,5 @@ namespace synthesis {
     
 
     template std::shared_ptr<storm::models::sparse::Model<double>> addChoiceLabelsFromJani(storm::models::sparse::Model<double> const& model);
+    template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> addChoiceLabelsFromJani(storm::models::sparse::Model<storm::RationalNumber> const& model);
 }

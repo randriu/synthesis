@@ -160,21 +160,21 @@ class Sketch:
 
         if jani_unfolder is not None:
             if prism.model_type == stormpy.storage.PrismModelType.DTMC:
-                quotient_container = paynt.quotient.quotient.Quotient(explicit_quotient, family, coloring, specification)
+                quotient_container = paynt.quotient.quotient.Quotient(explicit_quotient, family, coloring, specification, use_exact=use_exact)
             elif prism.model_type == stormpy.storage.PrismModelType.MDP:
-                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification)
+                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification, use_exact=use_exact)
             elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
-                quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
+                quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator, use_exact=use_exact)
         else:
             # assert explicit_quotient.is_nondeterministic_model, "expected nondeterministic model"
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
-                quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
+                quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification, use_exact=use_exact)
             elif isinstance(explicit_quotient, payntbind.synthesis.Posmg):
-                quotient_container = paynt.quotient.posmg.PosmgQuotient(explicit_quotient, specification)
+                quotient_container = paynt.quotient.posmg.PosmgQuotient(explicit_quotient, specification, use_exact=use_exact)
             elif not explicit_quotient.is_partially_observable:
-                quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification)
+                quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification, use_exact=use_exact)
             else:
-                quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
+                quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager, use_exact=use_exact)
         return quotient_container
 
 

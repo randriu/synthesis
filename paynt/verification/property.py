@@ -289,7 +289,7 @@ class OptimalityProperty(Property):
         return f"{str(self.formula)} {eps}"
 
     def copy(self):
-        return OptimalityProperty(self.property_copy(), self.epsilon)
+        return OptimalityProperty(self.property_copy(), self.epsilon, self.use_exact)
 
     def reset(self):
         self.optimum = None

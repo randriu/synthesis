@@ -50,13 +50,16 @@ class PrismParser:
         if family is not None:
             assert prism_model_type in ["DTMC","MDP","POMDP"], "hole detected, but the program is neither DTMC nor (PO)MDP"
             # unfold hole options via Jani
-            jani_unfolder = paynt.parser.jani.JaniUnfolder(prism, hole_expressions, specification, family)
+            jani_unfolder = paynt.parser.jani.JaniUnfolder(prism, hole_expressions, specification, family, use_exact=use_exact)
             specification = jani_unfolder.specification
             quotient_mdp = jani_unfolder.quotient_mdp
             coloring = payntbind.synthesis.Coloring(family.family, quotient_mdp.nondeterministic_choice_indices, jani_unfolder.choice_to_hole_options)
             if prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 obs_evaluator = payntbind.synthesis.ObservationEvaluator(prism, quotient_mdp)
-            quotient_mdp = payntbind.synthesis.addChoiceLabelsFromJani(quotient_mdp)
+            if use_exact:
+                quotient_mdp = payntbind.synthesis.addChoiceLabelsFromJaniExact(quotient_mdp)
+            else:
+                quotient_mdp = payntbind.synthesis.addChoiceLabelsFromJani(quotient_mdp)
         else:
             quotient_mdp = paynt.models.model_builder.ModelBuilder.from_prism(prism, specification, use_exact)
 

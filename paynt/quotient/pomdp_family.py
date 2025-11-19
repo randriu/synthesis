@@ -27,8 +27,8 @@ class SubPomdp:
 
 class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
-    def __init__(self, quotient_mdp, family, coloring, specification, obs_evaluator):
-        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
+    def __init__(self, quotient_mdp, family, coloring, specification, obs_evaluator, use_exact=False):
+        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification, use_exact=use_exact)
 
         # if memory was unfolded we need to update obs_evaluator
         if paynt.quotient.mdp_family.MdpFamilyQuotient.initial_memory_size > 1:
