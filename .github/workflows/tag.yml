@@ -18,7 +18,7 @@ jobs:
         stormpy_fixed: ${{ steps.check.outputs.stormpy_fixed }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         # with:
         #   ref: ${{ github.ref_name }}
       - name: Check stormpy version pinning
@@ -52,7 +52,7 @@ jobs:
       stormpy_version: ${{ steps.getStormpyVersion.outputs.stormpy_version }}
     steps:
       - name: Git clone
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         # with:
         #   ref: ${{ github.ref_name }}
       - name: Get Storm version
@@ -85,7 +85,7 @@ jobs:
       contents: write
     steps:
       - name: Git clone
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
