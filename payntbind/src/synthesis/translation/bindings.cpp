@@ -1,10 +1,15 @@
 #include "../synthesis.h"
 #include "SubPomdpBuilder.h"
 
+#include <queue>
+
 #include "src/synthesis/translation/componentTranslations.h"
 #include "src/synthesis/translation/choiceTransformation.h"
 #include <storm/adapters/RationalNumberAdapter.h>
 #include <storm/storage/SparseMatrix.h>
+#include <storm/storage/BitVector.h>
+
+#include "storm/utility/macros.h"
 
 namespace synthesis {
 template <typename ValueType>
@@ -79,6 +84,114 @@ std::vector<storm::storage::MatrixEntry<uint_fast64_t, ValueType>> createCombina
     return combinedEntries;
 }
 
+template <typename ValueType>
+std::pair<std::shared_ptr<storm::models::sparse::Mdp<ValueType>>, std::vector<std::vector<int64_t>>> createSlidingWindowMemoryMdp(storm::models::sparse::Mdp<ValueType> originalMdp, uint64_t windowMemorySize) {
+    STORM_LOG_ASSERT(windowMemorySize > 0, "Sliding window memory size must be greater than 0");
+
+    // compute state space
+    std::vector<int64_t> initialStateWindow(windowMemorySize, -1);
+    uint64_t initialState = *(originalMdp.getInitialStates().begin());
+    initialStateWindow[0] = static_cast<int64_t>(initialState);
+    std::queue<std::vector<int64_t>> stateQueue;
+    stateQueue.emplace(initialStateWindow);
+    std::vector<std::vector<int64_t>> newStates;
+    newStates.push_back(initialStateWindow);
+
+    const auto originalMatrix = originalMdp.getTransitionMatrix();
+    const auto rowGroupIndices = originalMatrix.getRowGroupIndices();
+
+    //bfs
+    while (!stateQueue.empty()) {
+        std::vector<int64_t> currentStateWindow = stateQueue.front();
+        stateQueue.pop();
+
+        uint64_t originalState = static_cast<uint64_t>(currentStateWindow[0]);
+        for (uint64_t row = rowGroupIndices[originalState]; row < rowGroupIndices[originalState+1]; row++) {
+            auto rowData = originalMatrix.getRow(row);
+            for (const auto &entry : rowData) {
+                std::vector<int64_t> newStateWindow = currentStateWindow;
+                // Shift all elements right by one position
+                for (size_t i = newStateWindow.size() - 1; i > 0; --i) {
+                    newStateWindow[i] = newStateWindow[i - 1];
+                }
+                // Set the first element to the new state
+                newStateWindow[0] = static_cast<int64_t>(entry.getColumn());
+                
+                if (std::find(newStates.begin(), newStates.end(), newStateWindow) == newStates.end()) {
+                    newStates.push_back(newStateWindow);
+                    stateQueue.push(newStateWindow);
+                }
+            }
+        }
+    }
+
+    uint64_t row_count = 0;
+    for (const auto& v : newStates) {
+        uint64_t originalState = static_cast<uint64_t>(v[0]);
+        row_count += rowGroupIndices[originalState+1] - rowGroupIndices[originalState];
+    }
+
+    storm::storage::SparseMatrixBuilder<ValueType> builder(
+        row_count, newStates.size(), 0, false, true, newStates.size()
+    );
+
+    std::map<std::string, storm::storage::BitVector> stateLabelsBitVectors;
+
+    storm::models::sparse::StateLabeling labeling(newStates.size());
+    for (auto const& label : originalMdp.getStateLabeling().getLabels()) {
+        stateLabelsBitVectors[label] = storm::storage::BitVector(newStates.size(), false);
+    }
+
+    uint64_t current_row = 0;
+    uint64_t stateIndex = 0;
+    for (const auto& stateWindow : newStates) {
+        uint64_t originalState = static_cast<uint64_t>(stateWindow[0]);
+        builder.newRowGroup(current_row);
+        for (uint64_t row = rowGroupIndices[originalState]; row < rowGroupIndices[originalState+1]; row++) {
+            auto rowData = originalMatrix.getRow(row);
+            for (const auto &entry : rowData) {
+                std::vector<int64_t> newStateWindow = stateWindow;
+                // Shift all elements right by one position
+                for (size_t i = newStateWindow.size() - 1; i > 0; --i) {
+                    newStateWindow[i] = newStateWindow[i - 1];
+                }
+                // Set the first element to the new state
+                newStateWindow[0] = static_cast<int64_t>(entry.getColumn());
+                uint64_t newStateIndex = std::distance(newStates.begin(), std::find(newStates.begin(), newStates.end(), newStateWindow));
+                builder.addNextValue(current_row, newStateIndex, entry.getValue());
+            }
+            current_row++;
+        }
+
+        for (auto const& label : originalMdp.getStateLabeling().getLabels()) {
+            if (originalMdp.getStateLabeling().getLabelsOfState(originalState).count(label) > 0) {
+                stateLabelsBitVectors[label].set(stateIndex, true);
+            }
+        }
+        stateIndex++;
+    }
+
+    storm::storage::sparse::ModelComponents<ValueType> components;
+
+    components.transitionMatrix =  builder.build();
+
+    for (auto const& label : originalMdp.getStateLabeling().getLabels()) {
+        if (label == "init") {
+            storm::storage::BitVector initLabeling(newStates.size(), false);
+            initLabeling.set(0, true); // only the initial state gets the init label
+            labeling.addLabel(label, std::move(initLabeling));
+            continue;
+        }
+        labeling.addLabel(label, std::move(stateLabelsBitVectors[label]));
+    }
+
+    components.stateLabeling = labeling;
+
+    auto newMdp = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
+
+    return {newMdp, newStates};
+} 
+
 }
 
 template <typename ValueType>
@@ -96,6 +209,7 @@ void bindings_translation_vt(py::module& m, std::string const& vtSuffix) {
     m.def(("createMdpFromVectorMatrix" + vtSuffix).c_str(), &synthesis::createMdpFromVectorMatrix<ValueType>);
     m.def(("getVectorFromMatrix" + vtSuffix).c_str(), &synthesis::getVectorFromMatrix<ValueType>);
     m.def(("createCombinationOfRows" + vtSuffix).c_str(), &synthesis::createCombinationOfRows<ValueType>);
+    m.def(("createSlidingWindowMemoryMdp" + vtSuffix).c_str(), &synthesis::createSlidingWindowMemoryMdp<ValueType>);
 
     m.def(("get_matrix_rows" + vtSuffix).c_str(), [](storm::storage::SparseMatrix<ValueType>& matrix, std::vector<typename storm::storage::SparseMatrix<ValueType>::index_type> rows) {
         std::vector<typename storm::storage::SparseMatrix<ValueType>::rows> result;
