@@ -1,6 +1,9 @@
 name: Build wheels
 
 on:
+  schedule:
+    # run weekly
+    - cron: '0 10 * * 3'
   workflow_call:
   # needed to trigger the workflow manually
   workflow_dispatch:
