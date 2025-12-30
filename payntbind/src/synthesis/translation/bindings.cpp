@@ -8,6 +8,10 @@
 #include <storm/adapters/RationalNumberAdapter.h>
 #include <storm/storage/SparseMatrix.h>
 #include <storm/storage/BitVector.h>
+#include <storm/models/sparse/Dtmc.h>
+#include <storm/builder/RewardModelBuilder.h>
+#include <storm/builder/RewardModelInformation.h>
+#include <storm/models/sparse/StandardRewardModel.h>
 
 #include "storm/utility/macros.h"
 
@@ -190,9 +194,164 @@ std::pair<std::shared_ptr<storm::models::sparse::Mdp<ValueType>>, std::vector<st
     auto newMdp = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
 
     return {newMdp, newStates};
-} 
-
 }
+
+
+template <typename ValueType>
+std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> applyRandomizedScheduler(
+    storm::models::sparse::Mdp<ValueType> const& mdp,
+    std::vector<std::vector<ValueType>> actionDistributions) {
+
+    const auto originalMatrix = mdp.getTransitionMatrix();
+    const auto rowGroupIndices = originalMatrix.getRowGroupIndices();
+
+    uint64_t num_states = originalMatrix.getRowGroupCount();
+
+    storm::storage::SparseMatrixBuilder<ValueType> builder(
+        num_states, num_states, 0, false, false, num_states
+    );
+
+    storm::builder::RewardModelInformation rewardModelInfo("rews", false, true, false);
+    storm::builder::RewardModelBuilder<ValueType> rewardBuilder(rewardModelInfo);
+
+    auto const& originalRewardModel = mdp.getRewardModel("rews");
+
+    for (uint64_t state = 0; state < num_states; ++state) {
+        uint64_t actionCount = rowGroupIndices[state+1] - rowGroupIndices[state];
+        STORM_LOG_ASSERT(actionDistributions[state].size() == actionCount, "Action distribution size must match the number of actions for the state");
+
+        // Combine the rows according to the action distribution
+        std::map<uint64_t, ValueType> combinedRow;
+        ValueType combinedReward = storm::utility::zero<ValueType>();
+        for (uint64_t action = 0; action < actionCount; ++action) {
+            ValueType actionProb = actionDistributions[state][action];
+            auto rowData = originalMatrix.getRow(rowGroupIndices[state] + action);
+            for (const auto &entry : rowData) {
+                combinedRow[entry.getColumn()] += entry.getValue() * actionProb;
+            }
+            combinedReward += actionProb * originalRewardModel.getStateActionReward(rowGroupIndices[state]+action);
+        }
+
+        for (const auto& [column, value] : combinedRow) {
+            builder.addNextValue(state, column, value);
+        }
+        rewardBuilder.addStateActionReward(combinedReward);
+    }
+
+    storm::storage::sparse::ModelComponents<ValueType> components;
+    components.transitionMatrix = builder.build();
+    components.stateLabeling = mdp.getStateLabeling();
+    components.rewardModels.emplace(rewardBuilder.getName(), rewardBuilder.build(num_states, num_states, num_states));
+
+    return std::make_shared<storm::models::sparse::Dtmc<ValueType>>(std::move(components));
+}
+
+template <typename ValueType>
+std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> applyRandomizedSchedulerFromTree(
+    storm::models::sparse::Mdp<ValueType> const& mdp,
+    std::vector<std::vector<ValueType>> actionDistributions,
+    std::map<uint64_t, uint64_t> nodeToStateMapping,
+    std::vector<std::map<uint64_t, uint64_t>> nodeToSuccessorToStatesMap) {
+
+    const auto originalMatrix = mdp.getTransitionMatrix();
+    const auto rowGroupIndices = originalMatrix.getRowGroupIndices();
+
+    uint64_t num_states = nodeToStateMapping.size() + originalMatrix.getRowGroupCount();
+
+    storm::storage::SparseMatrixBuilder<ValueType> builder(
+        num_states, num_states, 0, false, false, num_states
+    );
+
+    storm::builder::RewardModelInformation rewardModelInfo("rews", false, true, false);
+    storm::builder::RewardModelBuilder<ValueType> rewardBuilder(rewardModelInfo);
+
+    auto const& originalRewardModel = mdp.getRewardModel("rews");
+
+    for (uint64_t state = 0; state < num_states; ++state) {
+        uint64_t originalState;
+        bool treeNodeState = false;
+        if (state < nodeToStateMapping.size()) {
+            originalState = nodeToStateMapping.at(state);
+            treeNodeState = true;
+        } else {
+            originalState = state - nodeToStateMapping.size();
+        }
+
+        uint64_t actionCount = rowGroupIndices[originalState+1] - rowGroupIndices[originalState];
+        STORM_LOG_ASSERT(actionDistributions[state].size() == actionCount, "Action distribution size must match the number of actions for the state");
+
+        // Combine the rows according to the action distribution
+        std::map<uint64_t, ValueType> combinedRow;
+        ValueType combinedReward = storm::utility::zero<ValueType>();
+        for (uint64_t action = 0; action < actionCount; ++action) {
+            ValueType actionProb = actionDistributions[state][action];
+            auto rowData = originalMatrix.getRow(rowGroupIndices[originalState] + action);
+            for (const auto &entry : rowData) {
+                combinedRow[entry.getColumn()] += entry.getValue() * actionProb;
+            }
+            combinedReward += actionProb * originalRewardModel.getStateActionReward(rowGroupIndices[originalState]+action);
+        }
+
+        for (const auto& [column, value] : combinedRow) {
+            uint64_t mappedColumn;
+            if (treeNodeState && nodeToSuccessorToStatesMap[state].count(column) > 0) {
+                mappedColumn = nodeToSuccessorToStatesMap[state].at(column);
+            } else {
+                mappedColumn = column + nodeToStateMapping.size();
+            }
+            builder.addNextValue(state, mappedColumn, value);
+        }
+        rewardBuilder.addStateActionReward(combinedReward);
+    }
+
+    storm::storage::sparse::ModelComponents<ValueType> components;
+    components.transitionMatrix = builder.build();
+    components.rewardModels.emplace(rewardBuilder.getName(), rewardBuilder.build(num_states, num_states, num_states));
+
+    storm::models::sparse::StateLabeling labeling(num_states);
+    storm::storage::BitVector initLabeling(num_states, false);
+    initLabeling.set(0, true); // only the initial state gets the init label
+
+    std::map<std::string, storm::storage::BitVector> stateLabelsBitVectors;
+    for (auto const& label : mdp.getStateLabeling().getLabels()) {
+        if (label == "init") {
+            stateLabelsBitVectors["init"] = initLabeling;
+            continue;
+        }
+        stateLabelsBitVectors[label] = storm::storage::BitVector(num_states, false);
+    }
+
+    for (uint64_t state = 0; state < num_states; ++state) {
+        
+        uint64_t originalState;
+        bool treeNodeState = false;
+        if (state < nodeToStateMapping.size()) {
+            originalState = nodeToStateMapping.at(state);
+            treeNodeState = true;
+        } else {
+            originalState = state - nodeToStateMapping.size();
+        }
+        
+        for (auto const& label : mdp.getStateLabeling().getLabelsOfState(originalState)) {
+            if (label == "init") {
+                continue;
+            }
+            if (stateLabelsBitVectors.count(label) > 0) {
+                stateLabelsBitVectors[label].set(state, true);
+            }
+        }
+    }
+
+    for (auto const& label : mdp.getStateLabeling().getLabels()) {
+        labeling.addLabel(label, std::move(stateLabelsBitVectors[label]));
+    }
+
+    components.stateLabeling = labeling;
+
+    return std::make_shared<storm::models::sparse::Dtmc<ValueType>>(std::move(components));
+}
+
+}  // namespace synthesis
 
 template <typename ValueType>
 void bindings_translation_vt(py::module& m, std::string const& vtSuffix) {
@@ -210,6 +369,8 @@ void bindings_translation_vt(py::module& m, std::string const& vtSuffix) {
     m.def(("getVectorFromMatrix" + vtSuffix).c_str(), &synthesis::getVectorFromMatrix<ValueType>);
     m.def(("createCombinationOfRows" + vtSuffix).c_str(), &synthesis::createCombinationOfRows<ValueType>);
     m.def(("createSlidingWindowMemoryMdp" + vtSuffix).c_str(), &synthesis::createSlidingWindowMemoryMdp<ValueType>);
+    m.def(("applyRandomizedScheduler" + vtSuffix).c_str(), &synthesis::applyRandomizedScheduler<ValueType>);
+    m.def(("applyRandomizedSchedulerFromTree" + vtSuffix).c_str(), &synthesis::applyRandomizedSchedulerFromTree<ValueType>);
 
     m.def(("get_matrix_rows" + vtSuffix).c_str(), [](storm::storage::SparseMatrix<ValueType>& matrix, std::vector<typename storm::storage::SparseMatrix<ValueType>::index_type> rows) {
         std::vector<typename storm::storage::SparseMatrix<ValueType>::rows> result;
