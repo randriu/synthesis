@@ -19,6 +19,7 @@
 #include <storm/environment/solver/MultiplierEnvironment.h>
 #include <storm/exceptions/InvalidPropertyException.h>
 #include <storm/exceptions/InvalidArgumentException.h>
+#include "storm/exceptions/NotImplementedException.h"
 #include <storm/modelchecker/results/ExplicitParetoCurveCheckResult.h>
 #include <storm/logic/FragmentSpecification.h>
 
