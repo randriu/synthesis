@@ -351,6 +351,40 @@ std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> applyRandomizedScheduler
     return std::make_shared<storm::models::sparse::Dtmc<ValueType>>(std::move(components));
 }
 
+
+template <typename ValueType>
+std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> createDtmcFromVectorMatrixWithRewards(storm::models::sparse::Mdp<ValueType> mdp, std::vector<std::vector<storm::storage::MatrixEntry<uint_fast64_t, ValueType>>> vectorMatrix, std::vector<ValueType> rewards) {
+
+    const auto unfoldedMatrix = mdp.getTransitionMatrix();
+    uint64_t num_states = unfoldedMatrix.getRowGroupCount();
+
+    storm::storage::sparse::ModelComponents<ValueType> components;
+
+    storm::storage::SparseMatrixBuilder<ValueType> builder(
+        num_states, num_states, 0, false, false, num_states
+    );
+
+    storm::builder::RewardModelInformation rewardModelInfo("rews", false, true, false);
+    storm::builder::RewardModelBuilder<ValueType> rewardBuilder(rewardModelInfo);
+    
+    uint64_t current_row = 0;
+    for (const auto& row : vectorMatrix) {
+        for (const auto& entry : row) {
+            builder.addNextValue(current_row, entry.getColumn(), entry.getValue());
+        }
+        rewardBuilder.addStateActionReward(rewards[current_row]);
+        ++current_row;
+    }
+
+    components.transitionMatrix =  builder.build();
+    components.rewardModels.emplace(rewardBuilder.getName(), rewardBuilder.build(num_states, num_states, num_states));
+
+    components.stateLabeling = mdp.getStateLabeling();
+
+    return std::make_shared<storm::models::sparse::Dtmc<ValueType>>(std::move(components));
+}
+
+
 }  // namespace synthesis
 
 template <typename ValueType>
@@ -371,6 +405,7 @@ void bindings_translation_vt(py::module& m, std::string const& vtSuffix) {
     m.def(("createSlidingWindowMemoryMdp" + vtSuffix).c_str(), &synthesis::createSlidingWindowMemoryMdp<ValueType>);
     m.def(("applyRandomizedScheduler" + vtSuffix).c_str(), &synthesis::applyRandomizedScheduler<ValueType>);
     m.def(("applyRandomizedSchedulerFromTree" + vtSuffix).c_str(), &synthesis::applyRandomizedSchedulerFromTree<ValueType>);
+    m.def(("createDtmcFromVectorMatrixWithRewards" + vtSuffix).c_str(), &synthesis::createDtmcFromVectorMatrixWithRewards<ValueType>);
 
     m.def(("get_matrix_rows" + vtSuffix).c_str(), [](storm::storage::SparseMatrix<ValueType>& matrix, std::vector<typename storm::storage::SparseMatrix<ValueType>::index_type> rows) {
         std::vector<typename storm::storage::SparseMatrix<ValueType>::rows> result;
