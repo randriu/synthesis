@@ -385,6 +385,83 @@ std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> createDtmcFromVectorMatr
 }
 
 
+template <typename ValueType>
+std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> unfoldDtmcWithStepBound(storm::models::sparse::Dtmc<ValueType> dtmc, uint64_t stepBound) {
+
+    const auto originalMatrix = dtmc.getTransitionMatrix();
+    uint64_t num_states = originalMatrix.getRowCount()*stepBound + 1;
+
+    storm::storage::sparse::ModelComponents<ValueType> components;
+
+    storm::storage::SparseMatrixBuilder<ValueType> builder(
+        num_states, num_states, 0, false, false, num_states
+    );
+    
+    for (uint64_t new_state = 0; new_state < num_states; ++new_state) {
+        if (new_state == num_states - 1) {
+            // absorbing state
+            builder.addNextValue(new_state, new_state, storm::utility::one<ValueType>());
+            continue;
+        }
+        uint64_t original_state = new_state % originalMatrix.getRowCount();
+        uint64_t step = new_state / originalMatrix.getRowCount();
+
+        auto rowData = originalMatrix.getRow(original_state);
+        for (const auto &entry : rowData) {
+            uint64_t target_new_state;
+            if (step + 1 >= stepBound) {
+                target_new_state = num_states - 1; // go to absorbing state
+            } else {
+                target_new_state = entry.getColumn() + (step + 1) * originalMatrix.getRowCount();
+            }
+            builder.addNextValue(new_state, target_new_state, entry.getValue());
+        }
+    }
+
+    components.transitionMatrix =  builder.build();
+
+    storm::models::sparse::StateLabeling labeling(num_states);
+    storm::storage::BitVector initLabeling(num_states, false);
+    initLabeling.set(0, true); // only the initial state gets the init label
+
+    storm::storage::BitVector stepSinkLabeling(num_states, false);
+    stepSinkLabeling.set(num_states - 1, true);
+
+    std::map<std::string, storm::storage::BitVector> stateLabelsBitVectors;
+    for (auto const& label : dtmc.getStateLabeling().getLabels()) {
+        if (label == "init") {
+            stateLabelsBitVectors["init"] = initLabeling;
+            continue;
+        }
+        stateLabelsBitVectors[label] = storm::storage::BitVector(num_states, false);
+    }
+
+    stateLabelsBitVectors["step_sink"] = stepSinkLabeling;
+
+    for (uint64_t state = 0; state < num_states - 1; ++state) {
+        
+        uint64_t originalState = state % originalMatrix.getRowCount();
+        
+        for (auto const& label : dtmc.getStateLabeling().getLabelsOfState(originalState)) {
+            if (label == "init") {
+                continue;
+            }
+            if (stateLabelsBitVectors.count(label) > 0) {
+                stateLabelsBitVectors[label].set(state, true);
+            }
+        }
+    }
+
+    for (auto const& label : dtmc.getStateLabeling().getLabels()) {
+        labeling.addLabel(label, std::move(stateLabelsBitVectors[label]));
+    }
+
+    components.stateLabeling = labeling;
+
+    return std::make_shared<storm::models::sparse::Dtmc<ValueType>>(std::move(components));
+}
+
+
 }  // namespace synthesis
 
 template <typename ValueType>
@@ -406,6 +483,7 @@ void bindings_translation_vt(py::module& m, std::string const& vtSuffix) {
     m.def(("applyRandomizedScheduler" + vtSuffix).c_str(), &synthesis::applyRandomizedScheduler<ValueType>);
     m.def(("applyRandomizedSchedulerFromTree" + vtSuffix).c_str(), &synthesis::applyRandomizedSchedulerFromTree<ValueType>);
     m.def(("createDtmcFromVectorMatrixWithRewards" + vtSuffix).c_str(), &synthesis::createDtmcFromVectorMatrixWithRewards<ValueType>);
+    m.def(("unfoldDtmcWithStepBound" + vtSuffix).c_str(), &synthesis::unfoldDtmcWithStepBound<ValueType>);
 
     m.def(("get_matrix_rows" + vtSuffix).c_str(), [](storm::storage::SparseMatrix<ValueType>& matrix, std::vector<typename storm::storage::SparseMatrix<ValueType>::index_type> rows) {
         std::vector<typename storm::storage::SparseMatrix<ValueType>::rows> result;
