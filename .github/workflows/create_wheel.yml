@@ -1,6 +1,9 @@
 name: Build wheels
 
 on:
+  schedule:
+    # run weekly
+    - cron: '0 10 * * 3'
   workflow_call:
   # needed to trigger the workflow manually
   workflow_dispatch:
@@ -11,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     strategy:
       matrix:
-        os: [ linux-intel, macos-intel, macos-arm ]
+        os: [ linux-intel, linux-arm, macos-intel, macos-arm ]
         include:
           # Set defaults
           - archs: auto
@@ -21,6 +24,9 @@ jobs:
           - os: linux-intel
             runs-on: ubuntu-latest
             archs: x86_64
+          - os: linux-arm
+            runs-on: ubuntu-24.04-arm
+            archs: aarch64
           - os: macos-intel
             runs-on: macos-15-intel # x86_64 runner
             xcode: latest-stable
@@ -31,19 +37,19 @@ jobs:
             deploy_target: 14.0
       fail-fast: false
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: maxim-lobanov/setup-xcode@v1
         if: ${{ matrix.xcode != '' }}
         with:
           xcode-version: ${{ matrix.xcode }}
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.0
+        uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_PLATFORM: ${{ matrix.platform }}
           CIBW_ARCHS: ${{ matrix.archs }}
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deploy_target }}
           CIBW_ENVIRONMENT: NR_JOBS=4
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: paynt-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
@@ -53,35 +59,46 @@ jobs:
     name: Build source distribution
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Build sdist
         run: pipx run build --sdist
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: paynt-sdist
           path: dist/*.tar.gz
 
 
   test_wheels_linux:
-    name: Test wheel on ${{ matrix.distro }}
+    name: Test wheel on ${{ matrix.distro }} and ${{ matrix.arch.name }}
     needs: [build_wheels]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.arch.runner }}
     strategy:
       fail-fast: false
       matrix:
+        arch:
+          - {name: linux-intel,
+             runner: ubuntu-latest
+          }
+          - {name: linux-arm,
+             runner: ubuntu-24.04-arm
+          }
         distro:
-          - ubuntu:24.04
-          - debian:13
+          - ubuntu:latest
+          - ubuntu:rolling
+          - debian:latest
           - fedora:latest
           - archlinux:latest
+        exclude:
+          - arch: {name: linux-arm, runner: ubuntu-24.04-arm}
+            distro: archlinux:latest
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
-          pattern: paynt-wheels-linux-intel
+          pattern: paynt-wheels-${{ matrix.arch.name }}
           path: dist
           merge-multiple: true
       - name: Checkout test files
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: dist/test_files
           sparse-checkout: |
@@ -153,7 +170,7 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ matrix.distro.xcode }}
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           pattern: paynt-wheels-${{ matrix.distro.os }}
           path: dist
@@ -176,7 +193,7 @@ jobs:
           source venv/bin/activate
           python3 -m pip install "$WHEEL"
       - name: Checkout test files
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: dist/test_files
           sparse-checkout: |

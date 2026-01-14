@@ -456,8 +456,8 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             state_valuations.append(valuation)
         return variable_name,state_valuations
 
-    def __init__(self, mdp, specification):
-        super().__init__(specification=specification)
+    def __init__(self, mdp, specification, use_exact=False):
+        super().__init__(specification=specification, use_exact=use_exact)
 
         # mask of relevant states: non-absorbing states with more than one action
         self.state_is_relevant = None

@@ -21,8 +21,8 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
     # if True, posterior-aware unfolding will be applied
     posterior_aware = False
 
-    def __init__(self, pomdp, specification, decpomdp_manager=None):
-        super().__init__(specification=specification)
+    def __init__(self, pomdp, specification, decpomdp_manager=None, use_exact=False):
+        super().__init__(specification=specification, use_exact=use_exact)
 
         # unfolded POMDP
         self.quotient_mdp = None

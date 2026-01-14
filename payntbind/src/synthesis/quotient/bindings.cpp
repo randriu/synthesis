@@ -285,14 +285,19 @@ storm::storage::BitVector policyToChoicesForFamily(
 }
 
 
+template <typename ValueType>
+void bindings_coloring_vt(py::module& m, std::string const& vtSuffix) {
+
+    m.def(("addStateValuations" + vtSuffix).c_str(), &synthesis::addStateValuations<ValueType>);
+    m.def(("janiMapChoicesToHoleAssignments" + vtSuffix).c_str(), &synthesis::janiMapChoicesToHoleAssignments<ValueType>);
+    m.def(("addChoiceLabelsFromJani" + vtSuffix).c_str(), &synthesis::addChoiceLabelsFromJani<ValueType>);
+
+    m.def(("schedulerToStateToGlobalChoice" + vtSuffix).c_str(), &synthesis::schedulerToStateToGlobalChoice<ValueType>);
+}
+
 void bindings_coloring(py::module& m) {
-
-    m.def("addStateValuations", &synthesis::addStateValuations<double>);
-    m.def("janiMapChoicesToHoleAssignments", &synthesis::janiMapChoicesToHoleAssignments<double>);
-    m.def("addChoiceLabelsFromJani", &synthesis::addChoiceLabelsFromJani<double>);
-
-    m.def("schedulerToStateToGlobalChoice", &synthesis::schedulerToStateToGlobalChoice<double>);
-    m.def("schedulerToStateToGlobalChoiceExact", &synthesis::schedulerToStateToGlobalChoice<storm::RationalNumber>);
+    bindings_coloring_vt<double>(m, "");
+    bindings_coloring_vt<storm::RationalNumber>(m, "Exact");
 
     m.def("computeInconsistentHoleVariance", &synthesis::computeInconsistentHoleVariance);
 

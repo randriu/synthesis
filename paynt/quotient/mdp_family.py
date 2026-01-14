@@ -40,14 +40,14 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         return state_to_actions
 
     
-    def __init__(self, quotient_mdp, family, coloring, specification):
+    def __init__(self, quotient_mdp, family, coloring, specification, use_exact=False):
 
         self.memory_unfolder = None
 
         if MdpFamilyQuotient.initial_memory_size > 1:
             quotient_mdp, family, coloring = self.unfold_scheduler_memory(quotient_mdp, family, coloring)
 
-        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
+        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification, use_exact=use_exact)
 
         # number of distinct actions in the quotient
         self.num_actions = None

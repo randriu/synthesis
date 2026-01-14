@@ -2,7 +2,7 @@ name: New tag release
 # Triggered by new a tag
 # - deploys Docker containers
 # - updates stable branch
-# - create new pypi package
+# - creates new pypi package
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
         stormpy_fixed: ${{ steps.check.outputs.stormpy_fixed }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         # with:
         #   ref: ${{ github.ref_name }}
       - name: Check stormpy version pinning
@@ -52,7 +52,7 @@ jobs:
       stormpy_version: ${{ steps.getStormpyVersion.outputs.stormpy_version }}
     steps:
       - name: Git clone
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         # with:
         #   ref: ${{ github.ref_name }}
       - name: Get Storm version
@@ -85,7 +85,7 @@ jobs:
       contents: write
     steps:
       - name: Git clone
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
@@ -125,7 +125,7 @@ jobs:
     # Only upload if not using test.pypi and using original repo
     if: ${{ github.repository_owner == 'randriu' && (startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/stable'))}}
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           # unpacks all paynt artifacts into dist/
           pattern: paynt-*
