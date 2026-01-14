@@ -187,7 +187,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.best_tree.root.associate_assignment(self.best_assignment)
                 self.best_tree_value = self.best_assignment_value
 
-                if break_if_found or abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-3:
+                if break_if_found or (opt_result_value != 0 and abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-3) or (opt_result_value == 0 and self.best_assignment_value < 1e-3):
                     break
 
             if self.resource_limit_reached() or tree_sequence_timer is not None and tree_sequence_timer.time_limit_reached():
