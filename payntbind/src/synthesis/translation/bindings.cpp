@@ -386,25 +386,58 @@ std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> createDtmcFromVectorMatr
 
 
 template <typename ValueType>
-std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> unfoldDtmcWithStepBound(storm::models::sparse::Dtmc<ValueType> dtmc, uint64_t stepBound) {
+std::pair<std::shared_ptr<storm::models::sparse::Dtmc<ValueType>>, std::vector<std::pair<uint64_t, uint64_t>>> unfoldDtmcWithStepBound(storm::models::sparse::Dtmc<ValueType> dtmc, uint64_t stepBound) {
+
+
+    // compute state space
+    std::pair<uint64_t, uint64_t> initialStateAndStep = {*(dtmc.getInitialStates().begin()), 0};
+
+    std::queue<std::pair<uint64_t, uint64_t>> stateQueue;
+    stateQueue.emplace(initialStateAndStep);
+    std::vector<std::pair<uint64_t, uint64_t>> newStates;
+    newStates.push_back(initialStateAndStep);
 
     const auto originalMatrix = dtmc.getTransitionMatrix();
-    uint64_t num_states = originalMatrix.getRowCount()*stepBound + 1;
+    const auto originalStateCount = originalMatrix.getRowCount();
+
+    //bfs
+    while (!stateQueue.empty()) {
+        std::pair<uint64_t, uint64_t> currentStateAndStep = stateQueue.front();
+        stateQueue.pop();
+
+        uint64_t originalState = currentStateAndStep.first;
+        uint64_t currentStep = currentStateAndStep.second;
+        if (currentStep >= stepBound) {
+            continue;
+        }
+
+        auto rowData = originalMatrix.getRow(originalState);
+        for (const auto &entry : rowData) {
+            std::pair<uint64_t, uint64_t> newStateAndStep = {static_cast<uint64_t>(entry.getColumn()), currentStep + 1};
+                
+            if (std::find(newStates.begin(), newStates.end(), newStateAndStep) == newStates.end()) {
+                newStates.push_back(newStateAndStep);
+                stateQueue.push(newStateAndStep);
+            }
+        }
+    }
+
+    uint64_t num_states = newStates.size() + 1; // +1 for absorbing state
 
     storm::storage::sparse::ModelComponents<ValueType> components;
 
     storm::storage::SparseMatrixBuilder<ValueType> builder(
         num_states, num_states, 0, false, false, num_states
     );
-    
+
     for (uint64_t new_state = 0; new_state < num_states; ++new_state) {
         if (new_state == num_states - 1) {
             // absorbing state
             builder.addNextValue(new_state, new_state, storm::utility::one<ValueType>());
             continue;
         }
-        uint64_t original_state = new_state % originalMatrix.getRowCount();
-        uint64_t step = new_state / originalMatrix.getRowCount();
+        uint64_t original_state = newStates[new_state].first;
+        uint64_t step = newStates[new_state].second;
 
         auto rowData = originalMatrix.getRow(original_state);
         for (const auto &entry : rowData) {
@@ -412,7 +445,8 @@ std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> unfoldDtmcWithStepBound(
             if (step + 1 >= stepBound) {
                 target_new_state = num_states - 1; // go to absorbing state
             } else {
-                target_new_state = entry.getColumn() + (step + 1) * originalMatrix.getRowCount();
+                std::pair<uint64_t, uint64_t> targetStateAndStep = {entry.getColumn(), step + 1};
+                target_new_state = std::distance(newStates.begin(), std::find(newStates.begin(), newStates.end(), targetStateAndStep));
             }
             builder.addNextValue(new_state, target_new_state, entry.getValue());
         }
@@ -440,7 +474,7 @@ std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> unfoldDtmcWithStepBound(
 
     for (uint64_t state = 0; state < num_states - 1; ++state) {
         
-        uint64_t originalState = state % originalMatrix.getRowCount();
+        uint64_t originalState = newStates[state].first;
         
         for (auto const& label : dtmc.getStateLabeling().getLabelsOfState(originalState)) {
             if (label == "init") {
@@ -458,7 +492,7 @@ std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> unfoldDtmcWithStepBound(
 
     components.stateLabeling = labeling;
 
-    return std::make_shared<storm::models::sparse::Dtmc<ValueType>>(std::move(components));
+    return std::make_pair(std::make_shared<storm::models::sparse::Dtmc<ValueType>>(std::move(components)), newStates);
 }
 
 
