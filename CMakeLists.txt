@@ -101,5 +101,3 @@ endif()
 # return()
 
 add_subdirectory(payntbind)
-
-add_subdirectory(paynt)

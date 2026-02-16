@@ -8,3 +8,6 @@ except ImportError:
 
 def version():
     return __version__
+
+# Expose API functions at package level
+from .api import *
