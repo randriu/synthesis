@@ -87,6 +87,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             return
         self.harmonize_inconsistent_scheduler(family)
 
+    def compute_normalized_value(self, value, opt, random):
+        return (value-random)/(opt-random) if opt-random != 0 else 1.0
 
     def counters_reset(self):
         self.num_families_considered = 0
@@ -119,8 +121,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         tree.render(export_filename_base, format="png", cleanup=True) # using export_filename_base since graphviz appends .png by default
         logger.info(f"exported decision tree visualization to {tree_visualization_filename}")
 
-
-    def synthesize_tree(self, depth:int):
+    def synthesize_tree(self, depth:int, family=None):
         self.counters_reset()
         self.quotient.reset_tree(depth)
         self.best_assignment = self.best_assignment_value = None
@@ -132,23 +133,30 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.best_assignment = self.best_assignment_value = None
         self.counters_print()
 
-    def synthesize_tree_sequence(self, opt_result_value):
+    def synthesize_tree_sequence(self, opt_result_value, overall_timeout=None, max_depth=None, break_if_found=False):
         self.best_tree = self.best_tree_value = None
 
-        global_timeout = paynt.utils.timer.GlobalTimer.global_timer.time_limit_seconds
-        if global_timeout is None: global_timeout = 900
-        depth_timeout = global_timeout / 2 / SynthesizerDecisionTree.tree_depth
-        for depth in range(SynthesizerDecisionTree.tree_depth+1):
+        if max_depth is None:
+            max_depth = SynthesizerDecisionTree.tree_depth+1
+        if overall_timeout is None:
+            global_timeout = paynt.utils.timer.GlobalTimer.global_timer.time_limit_seconds
+            if global_timeout is None: global_timeout = 900
+            overall_timeout = global_timeout
+            tree_sequence_timer = None
+        else:
+            tree_sequence_timer = paynt.utils.timer.Timer(overall_timeout)
+            tree_sequence_timer.start()
+        depth_timeout = overall_timeout / 2 / (max_depth-1) if max_depth > 1 else overall_timeout
+        for depth in range(max_depth):
             print()
             self.quotient.reset_tree(depth)
             best_assignment_old = self.best_assignment
-
             family = self.quotient.family
             self.explored = 0
             self.counters_reset()
             self.stat = paynt.synthesizer.statistic.Statistic(self)
             self.stat.start(family)
-            timeout = depth_timeout if depth < SynthesizerDecisionTree.tree_depth else None
+            timeout = depth_timeout if depth < max_depth-1 else overall_timeout / 2 # second half of the time for the last depth
             self.synthesis_timer = paynt.utils.timer.Timer(timeout)
             self.synthesis_timer.start()
             families = [family]
@@ -179,10 +187,10 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.best_tree.root.associate_assignment(self.best_assignment)
                 self.best_tree_value = self.best_assignment_value
 
-                if abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-3:
+                if break_if_found or (opt_result_value != 0 and abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-3) or (opt_result_value == 0 and self.best_assignment_value < 1e-3):
                     break
 
-            if self.resource_limit_reached():
+            if self.resource_limit_reached() or tree_sequence_timer is not None and tree_sequence_timer.time_limit_reached():
                 break
 
     def map_scheduler(self, scheduler_choices):
@@ -245,7 +253,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             self.map_scheduler(scheduler_choices)
         else:
             if self.quotient.specification.has_optimality:
-                epsilon = 1e-1
+                epsilon = 0.05
                 mc_result_positive = opt_result_value > 0
                 if self.quotient.specification.optimality.maximizing == mc_result_positive:
                     epsilon *= -1
@@ -271,9 +279,11 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.quotient.specification.has_optimality:
                 logger.info(f"the synthesized tree has value {self.best_tree_value}")
             if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
-                logger.info(f"the synthesized tree has relative value: {(self.best_tree_value-random_result_value)/(opt_result_value-random_result_value)}")
+                logger.info(f"the synthesized tree has relative value: {self.compute_normalized_value(self.best_tree_value, opt_result_value, random_result_value)}")
             logger.info(f"printing the synthesized tree below:")
-            print(self.best_tree.to_string())
+
+            # print(self.best_tree.to_string())
+            # print(self.best_tree.to_graphviz())
             # logger.info(f"printing the PRISM module below:")
             # print(self.best_tree.to_prism())
 
@@ -284,8 +294,5 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         logger.info(f"synthesis finished after {time_total} seconds")
 
         print()
-        for name,time in self.quotient.coloring.getProfilingInfo():
-            time_percent = round(time/time_total*100,1)
-            print(f"{name} = {time} s ({time_percent} %)")
 
         return self.best_tree

@@ -63,7 +63,7 @@ ColoringSmt<ValueType>::ColoringSmt(
 
     // create the tree
     uint64_t num_nodes = tree_list.size();
-    this->num_actions = *std::max_element(choice_to_action.begin(),choice_to_action.end())+1;
+    // this->num_actions = *std::max_element(choice_to_action.begin(),choice_to_action.end())+1;
     for(uint64_t node = 0; node < num_nodes; ++node) {
         auto [parent,child_true,child_false] = tree_list[node];
         STORM_LOG_THROW(

@@ -16,6 +16,7 @@ import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
 import paynt.synthesizer.decision_tree
+import paynt.synthesizer.dtnest
 
 import click
 import sys
@@ -130,6 +131,10 @@ def setup_logger(log_path = None):
     "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for Cassandra models",
 )
 
+# dtNest related options
+@click.option("--dtnest", is_flag=True, default=False, help="run dtNest algorithm for decision tree synthesis")
+@click.option("--dtnest-initial-tree", type=click.Path(), default=None, help="path to initial decision tree for dtNest")
+
 @click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
     help="counterexample generator",
@@ -149,6 +154,7 @@ def paynt_run(
     mdp_discard_unreachable_choices,
     tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
     constraint_bound,
+    dtnest, dtnest_initial_tree,
     ce_generator,
     profiling
 ):
@@ -180,6 +186,8 @@ def paynt_run(
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.scheduler_path = tree_map_scheduler
     paynt.quotient.mdp.MdpQuotient.add_dont_care_action = add_dont_care_action
 
+    paynt.synthesizer.dtnest.DtNest.initial_tree_path = dtnest_initial_tree
+
     storm_control = None
     if storm_pomdp:
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
@@ -191,7 +199,7 @@ def paynt_run(
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
     quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, exact)
-    synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
+    synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control, dtnest)
     synthesizer.run(optimum_threshold)
 
     if profiling:
