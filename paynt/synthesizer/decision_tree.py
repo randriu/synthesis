@@ -87,6 +87,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             return
         self.harmonize_inconsistent_scheduler(family)
 
+    def compute_normalized_value(self, value, opt, random):
+        return (value-random)/(opt-random) if opt-random != 0 else 1.0
 
     def counters_reset(self):
         self.num_families_considered = 0
@@ -118,6 +120,11 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         tree_visualization_filename = export_filename_base + ".png"
         tree.render(export_filename_base, format="png", cleanup=True) # using export_filename_base since graphviz appends .png by default
         logger.info(f"exported decision tree visualization to {tree_visualization_filename}")
+
+        tree_string_filename = export_filename_base + ".txt"
+        with open(tree_string_filename, 'w') as file:
+            file.write(decision_tree.to_string())
+        logger.info(f"exported decision tree string to {tree_string_filename}")
 
 
     def synthesize_tree(self, depth:int):
@@ -271,7 +278,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.quotient.specification.has_optimality:
                 logger.info(f"the synthesized tree has value {self.best_tree_value}")
             if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
-                logger.info(f"the synthesized tree has relative value: {(self.best_tree_value-random_result_value)/(opt_result_value-random_result_value)}")
+                logger.info(f"the synthesized tree has relative value: {self.compute_normalized_value(self.best_tree_value, opt_result_value, random_result_value)}")
             logger.info(f"printing the synthesized tree below:")
             print(self.best_tree.to_string())
             # logger.info(f"printing the PRISM module below:")
@@ -282,10 +289,5 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
         time_total = round(paynt.utils.timer.GlobalTimer.read(),2)
         logger.info(f"synthesis finished after {time_total} seconds")
-
-        print()
-        for name,time in self.quotient.coloring.getProfilingInfo():
-            time_percent = round(time/time_total*100,1)
-            print(f"{name} = {time} s ({time_percent} %)")
 
         return self.best_tree

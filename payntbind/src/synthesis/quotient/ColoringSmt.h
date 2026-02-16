@@ -5,7 +5,7 @@
 
 #include <storm/models/sparse/NondeterministicModel.h>
 #include <storm/storage/BitVector.h>
-#include <storm/utility/Stopwatch.h>
+// #include <storm/utility/Stopwatch.h>
 
 #include <cstdint>
 #include <queue>
@@ -78,14 +78,14 @@ public:
         BitVector const& choices, Family const& subfamily
     );
 
-    static std::map<std::string,storm::utility::Stopwatch> timers;
-    std::vector<std::pair<std::string,double>> getProfilingInfo() {
-        std::vector<std::pair<std::string,double>> profiling;
-        for(auto const& [method,timer]: timers) {
-            profiling.emplace_back(method, (double)(timer.getTimeInMilliseconds())/1000);
-        }
-        return profiling;
-    }
+    // static std::map<std::string,storm::utility::Stopwatch> timers;
+    // std::vector<std::pair<std::string,double>> getProfilingInfo() {
+    //     std::vector<std::pair<std::string,double>> profiling;
+    //     for(auto const& [method,timer]: timers) {
+    //         profiling.emplace_back(method, (double)(timer.getTimeInMilliseconds())/1000);
+    //     }
+    //     return profiling;
+    // }
 
     /** A list of choice-path indices appeared in the last UNSAT core. */
     std::vector<std::pair<uint64_t,uint64_t>> unsat_core;

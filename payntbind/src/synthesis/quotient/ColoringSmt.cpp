@@ -27,8 +27,8 @@ ColoringSmt<ValueType>::ColoringSmt(
     variable_name(variable_name), variable_domain(variable_domain),
     solver(ctx), harmonizing_variable(ctx), enable_harmonization(enable_harmonization) {
 
-    timers[__FUNCTION__].start();
-    timers["ColoringSmt::0"].start();
+    // timers[__FUNCTION__].start();
+    // timers["ColoringSmt::0"].start();
 
     for(uint64_t state = 0; state < numStates(); ++state) {
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
@@ -107,10 +107,10 @@ ColoringSmt<ValueType>::ColoringSmt(
             STORM_LOG_THROW(domain_option_found, storm::exceptions::UnexpectedException, "Hole option not found.");
         }
     }
-    timers["ColoringSmt::0"].stop();
+    // timers["ColoringSmt::0"].stop();
 
     // create choice colors
-    timers["ColoringSmt::1 create choice colors"].start();
+    // timers["ColoringSmt::1 create choice colors"].start();
     // std::cout << "ColoringSmt::1 create choice colors" << std::endl << std::flush;
 
     for(std::vector<bool> const& path: getRoot()->paths) {
@@ -149,18 +149,18 @@ ColoringSmt<ValueType>::ColoringSmt(
         for(uint64_t value: state_valuation[state]) {
             state_valuation_int.push_back(ctx.int_val(value));
         }
-        timers["ColoringSmt::1-2 createPrefixSubstitutions"].start();
+        // timers["ColoringSmt::1-2 createPrefixSubstitutions"].start();
         getRoot()->createPrefixSubstitutions(state_valuation[state], state_valuation_int);
-        timers["ColoringSmt::1-2 createPrefixSubstitutions"].stop();
+        // timers["ColoringSmt::1-2 createPrefixSubstitutions"].stop();
         state_valuation_int.resize(0);
 
-        timers["ColoringSmt::1-3"].start();
+        // timers["ColoringSmt::1-3"].start();
         for(uint64_t path = 0; path < numPaths(); ++path) {
-            timers["ColoringSmt::1-3-1"].start();
+            // timers["ColoringSmt::1-3-1"].start();
             getRoot()->substitutePrefixExpression(getRoot()->paths[path], clause_array);
-            timers["ColoringSmt::1-3-1"].stop();
+            // timers["ColoringSmt::1-3-1"].stop();
 
-            timers["ColoringSmt::1-3-2"].start();
+            // timers["ColoringSmt::1-3-2"].start();
             for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
                 uint64_t num_clauses = getRoot()->paths[path].size()-1;
                 uint64_t action = choice_to_action[choice];
@@ -173,18 +173,18 @@ ColoringSmt<ValueType>::ColoringSmt(
                 choice_path_expresssion[choice].push_back(z3::expr(ctx, Z3_mk_or(ctx, num_clauses, clause_array.ptr())));
                 // choice_path_expresssion[choice].push_back(Z3_mk_or(ctx, num_clauses, clause_array.ptr()));
             }
-            timers["ColoringSmt::1-3-2"].stop();
+            // timers["ColoringSmt::1-3-2"].stop();
         }
-        timers["ColoringSmt::1-3"].stop();
+        // timers["ColoringSmt::1-3"].stop();
     }
-    timers["ColoringSmt::1 create choice colors"].stop();
+    // timers["ColoringSmt::1 create choice colors"].stop();
 
     if(not this->enable_harmonization) {
-        timers[__FUNCTION__].stop();
+        // timers[__FUNCTION__].stop();
         return;
     }
 
-    timers["ColoringSmt::2 create harmonizing variants"].start();
+    // timers["ColoringSmt::2 create harmonizing variants"].start();
     // std::cout << "ColoringSmt::2 create harmonizing variants" << std::endl << std::flush;
 
     getRoot()->substituteActionExpressionsHarmonizing(harmonizing_variable);
@@ -197,18 +197,18 @@ ColoringSmt<ValueType>::ColoringSmt(
         for(uint64_t value: state_valuation[state]) {
             state_valuation_int.push_back(ctx.int_val(value));
         }
-        timers["ColoringSmt::2-2 createPrefixSubstitutionsHarmonizing"].start();
+        // timers["ColoringSmt::2-2 createPrefixSubstitutionsHarmonizing"].start();
         getRoot()->createPrefixSubstitutionsHarmonizing(state_valuation[state], state_valuation_int, harmonizing_variable);
-        timers["ColoringSmt::2-2 createPrefixSubstitutionsHarmonizing"].stop();
+        // timers["ColoringSmt::2-2 createPrefixSubstitutionsHarmonizing"].stop();
         state_valuation_int.resize(0);
 
-        timers["ColoringSmt::2-3"].start();
+        // timers["ColoringSmt::2-3"].start();
         for(uint64_t path = 0; path < numPaths(); ++path) {
-            timers["ColoringSmt::2-3-1"].start();
+            // timers["ColoringSmt::2-3-1"].start();
             getRoot()->substitutePrefixExpressionHarmonizing(getRoot()->paths[path], clause_array);
-            timers["ColoringSmt::2-3-1"].stop();
+            // timers["ColoringSmt::2-3-1"].stop();
 
-            timers["ColoringSmt::2-3-2"].start();
+            // timers["ColoringSmt::2-3-2"].start();
             for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
                 uint64_t action = choice_to_action[choice];
                 uint64_t num_clauses = getRoot()->paths[path].size()-1;
@@ -221,15 +221,15 @@ ColoringSmt<ValueType>::ColoringSmt(
                 choice_path_expresssion_harm[choice].push_back(z3::expr(ctx, Z3_mk_or(ctx, num_clauses, clause_array.ptr())));
                 // choice_path_expresssion_harm[choice].push_back(Z3_mk_or(ctx, num_clauses, clause_array.ptr()));
             }
-            timers["ColoringSmt::2-3-2"].stop();
+            // timers["ColoringSmt::2-3-2"].stop();
         }
-        timers["ColoringSmt::2-3"].stop();
+        // timers["ColoringSmt::2-3"].stop();
     }
-    timers["ColoringSmt::2 create harmonizing variants"].stop();
+    // timers["ColoringSmt::2 create harmonizing variants"].stop();
 
     getRoot()->clearCache();
 
-    timers[__FUNCTION__].stop();
+    // timers[__FUNCTION__].stop();
 }
 
 template<typename ValueType>
@@ -281,9 +281,9 @@ uint64_t ColoringSmt<ValueType>::numPaths() {
 
 template<typename ValueType>
 bool ColoringSmt<ValueType>::check() {
-    timers[__FUNCTION__].start();
+    // timers[__FUNCTION__].start();
     bool sat = solver.check() == z3::sat;
-    timers[__FUNCTION__].stop();
+    // timers[__FUNCTION__].stop();
     return sat;
 }
 
@@ -313,16 +313,16 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
 
 template<typename ValueType>
 BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamily, BitVector const& base_choices) {
-    timers[__FUNCTION__].start();
+    // timers[__FUNCTION__].start();
 
     if(CHECK_FAMILY_CONSISTENCE) {
         // check if the subfamily itself satisfies hole restrictions
-        timers["selectCompatibleChoices::1 is family sat"].start();
+        // timers["selectCompatibleChoices::1 is family sat"].start();
         solver.push();
         getRoot()->addFamilyEncoding(subfamily,solver);
         bool subfamily_sat = check();
         solver.pop();
-        timers["selectCompatibleChoices::1 is family sat"].stop();
+        // timers["selectCompatibleChoices::1 is family sat"].stop();
         STORM_LOG_THROW(
             subfamily_sat, storm::exceptions::UnexpectedException,
             "family is UNSAT (?)"
@@ -330,7 +330,7 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
     }
 
     // check individual choices
-    timers["selectCompatibleChoices::2 state exploration"].start();
+    // timers["selectCompatibleChoices::2 state exploration"].start();
 
     BitVector choice_selection(numChoices(),false);
     std::queue<uint64_t> unexplored_states;
@@ -398,7 +398,7 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
         STORM_LOG_THROW(any_choice_enabled, storm::exceptions::UnexpectedException, "no choice is available in the sub-MDP");
     }
 
-    timers["selectCompatibleChoices::2 state exploration"].stop();
+    // timers["selectCompatibleChoices::2 state exploration"].stop();
 
     /*if(CHECK_CONSISTENT_SCHEDULER_EXISTENCE) {
         // check selected choices simultaneously
@@ -420,13 +420,13 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
         solver.pop();
     }*/
 
-    timers[__FUNCTION__].stop();
+    // timers[__FUNCTION__].stop();
     return choice_selection;
 }
 
 template<typename ValueType>
 void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_expr, Family const& subfamily) {
-    timers[__FUNCTION__].start();
+    // timers[__FUNCTION__].start();
     this->unsat_core.clear();
     for(z3::expr expr: unsat_core_expr) {
         std::istringstream iss(expr.decl().name().str());
@@ -444,7 +444,7 @@ void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_exp
             std::cout << choice_path_expresssion[choice][path] << std::endl;
         }
     }
-    timers[__FUNCTION__].stop();
+    // timers[__FUNCTION__].stop();
     return;
 
     /*for(uint64_t index = 0; index < this->unsat_core.size()-1; ++index) {
@@ -463,12 +463,12 @@ void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_exp
         this->unsat_core.pop_back();
         solver.pop();
     }
-    timers[__FUNCTION__].stop();*/
+    // timers[__FUNCTION__].stop();*/
 }
 
 template<typename ValueType>
 void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_expr, Family const& subfamily, BitVector const& choices) {
-    timers[__FUNCTION__].start();
+    // timers[__FUNCTION__].start();
     this->unsat_core.clear();
     std::set<uint64_t> critical_states;
     for(z3::expr expr: unsat_core_expr) {
@@ -494,16 +494,16 @@ void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_exp
         }
     }
 
-    timers[__FUNCTION__].stop();
+    // timers[__FUNCTION__].stop();
     return;
 }
 
 template<typename ValueType>
 std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areChoicesConsistent(BitVector const& choices, Family const& subfamily) {
-    timers[__FUNCTION__].start();
+    // timers[__FUNCTION__].start();
     std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
 
-    timers["areChoicesConsistent::1 is scheduler consistent?"].start();
+    // timers["areChoicesConsistent::1 is scheduler consistent?"].start();
     solver.push();
     getRoot()->addFamilyEncoding(subfamily,solver);
     solver.push();
@@ -518,30 +518,30 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
             // Z3_solver_assert_and_track(ctx, solver.operator Z3_solver(), choice_path_expresssion[choice][path], choice_path_label_expr[choice][path]);
         }
     }
-    timers["areChoicesConsistent::1 (check)"].start();
+    // timers["areChoicesConsistent::1 (check)"].start();
     bool consistent = check();
-    timers["areChoicesConsistent::1 (check)"].stop();
-    timers["areChoicesConsistent::1 is scheduler consistent?"].stop();
+    // timers["areChoicesConsistent::1 (check)"].stop();
+    // timers["areChoicesConsistent::1 is scheduler consistent?"].stop();
 
     if(consistent) {
         z3::model model = solver.get_model();
         solver.pop();
         solver.pop();
         getRoot()->loadHoleAssignmentFromModel(model,hole_options_vector);
-        timers[__FUNCTION__].stop();
+        // timers[__FUNCTION__].stop();
         return std::make_pair(true,hole_options_vector);
     }
 
     if(not this->enable_harmonization) {
         solver.pop();
         solver.pop();
-        timers[__FUNCTION__].stop();
+        // timers[__FUNCTION__].stop();
         return std::make_pair(false,hole_options_vector);
     }
 
     solver.pop();
 
-    timers["areChoicesConsistent::2 better unsat core"].start();
+    // timers["areChoicesConsistent::2 better unsat core"].start();
     solver.push();
     std::queue<uint64_t> unexplored_states;
     unexplored_states.push(initial_state);
@@ -560,9 +560,9 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
                     const char *label = choice_path_label[choice][path].c_str();
                     solver.add(choice_path_expresssion[choice][path], label);
                 }
-                timers["areChoicesConsistent::2 (check)"].start();
+                // timers["areChoicesConsistent::2 (check)"].start();
                 consistent = check();
-                timers["areChoicesConsistent::2 (check)"].stop();
+                // timers["areChoicesConsistent::2 (check)"].stop();
             }
             visitChoice(choice,state_reached,unexplored_states);
             break;
@@ -572,11 +572,11 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     solver.pop();
     // loadUnsatCore(unsat_core_expr,subfamily);
     loadUnsatCore(unsat_core_expr,subfamily,choices);
-    timers["areChoicesConsistent::2 better unsat core"].stop();
+    // timers["areChoicesConsistent::2 better unsat core"].stop();
 
     if(PRINT_UNSAT_CORE)
         std::cout << "-- unsat core start --" << std::endl;
-    timers["areChoicesConsistent::3 unsat core analysis"].start();
+    // timers["areChoicesConsistent::3 unsat core analysis"].start();
     for(auto [choice,path]: this->unsat_core) {
         const char *label = choice_path_label[choice][path].c_str();
         solver.add(choice_path_expresssion_harm[choice][path], label);
@@ -605,9 +605,9 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     STORM_LOG_THROW(harmonizing_hole_found, storm::exceptions::UnexpectedException, "harmonized UNSAT core is not SAT");*/
 
     solver.add(0 <= harmonizing_variable and harmonizing_variable < (int)(family.numHoles()), "harmonizing_domain");
-    timers["areChoicesConsistent::3 (check)"].start();
+    // timers["areChoicesConsistent::3 (check)"].start();
     consistent = check();
-    timers["areChoicesConsistent::3 (check)"].stop();
+    // timers["areChoicesConsistent::3 (check)"].stop();
     if(consistent) {
         model = solver.get_model();
         uint64_t harmonizing_hole = model.eval(harmonizing_variable).get_numeral_uint64();
@@ -626,14 +626,14 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     if(PRINT_UNSAT_CORE)
         std::cout << "-- unsat core end --" << std::endl;
 
-    timers["areChoicesConsistent::3 unsat core analysis"].stop();
+    // timers["areChoicesConsistent::3 unsat core analysis"].stop();
 
-    timers[__FUNCTION__].stop();
+    // timers[__FUNCTION__].stop();
     return std::make_pair(false,hole_options_vector);
 }
 
-template<typename ValueType>
-std::map<std::string,storm::utility::Stopwatch> ColoringSmt<ValueType>::timers;
+// template<typename ValueType>
+// std::map<std::string,storm::utility::Stopwatch> ColoringSmt<ValueType>::timers;
 
 template class ColoringSmt<>;
 
