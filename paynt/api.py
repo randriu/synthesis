@@ -69,3 +69,8 @@ def dt_map_scheduler(colored_mdp, scheduler, tree_depth):
     return dt_synthesizer.best_tree is not None, dt_synthesizer.best_tree
 
 
+def dtpaynt(colored_mdp, tree_depth):
+    dt_synthesizer = synthesizer.decision_tree.SynthesizerDecisionTree(colored_mdp)
+    dt_synthesizer.synthesize_tree(tree_depth)
+
+    return dt_synthesizer.best_tree
