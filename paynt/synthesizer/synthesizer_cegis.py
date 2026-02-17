@@ -12,6 +12,9 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
     # CLI argument selecting conflict generator
     conflict_generator_type = None
 
+    # CLI argument for setting initial constraint on the design space
+    constraint = None
+
     def __init__(self, quotient):
         super().__init__(quotient)
 
@@ -25,15 +28,19 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
     def choose_conflict_generator(self, quotient):
         if SynthesizerCEGIS.conflict_generator_type == "mdp":
             conflict_generator = paynt.synthesizer.conflict_generator.mdp.ConflictGeneratorMdp(quotient)
-        else:
+        elif SynthesizerCEGIS.conflict_generator_type == "dtmc":
             # default conflict generator
             conflict_generator = paynt.synthesizer.conflict_generator.dtmc.ConflictGeneratorDtmc(quotient)
+        elif SynthesizerCEGIS.conflict_generator_type == "none":
+            conflict_generator = None
+        else:
+            raise ValueError(f"Unknown conflict generator type: {SynthesizerCEGIS.conflict_generator_type}")
         return conflict_generator
 
     
     @property
     def method_name(self):
-        return "CEGIS " + self.conflict_generator.name
+        return "CEGIS " + (self.conflict_generator.name if self.conflict_generator else "no CEs")
 
     
     def collect_conflict_requests(self, family, mc_result):
@@ -79,8 +86,11 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         if accepting and not self.quotient.specification.can_be_improved():
             return [], accepting_assignment
 
-        conflict_requests = self.collect_conflict_requests(family, result)
-        conflicts = self.conflict_generator.construct_conflicts(family, assignment, dtmc, conflict_requests)
+        if self.conflict_generator is not None:
+            conflict_requests = self.collect_conflict_requests(family, result)
+            conflicts = self.conflict_generator.construct_conflicts(family, assignment, dtmc, conflict_requests)
+        else:
+            conflicts = [[hole for hole in range(family.num_holes)]]
 
         return conflicts, accepting_assignment
 
@@ -89,10 +99,11 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
 
         # build the quotient, map mdp states to hole indices
         self.quotient.build(family)
-        self.conflict_generator.initialize()
+        if self.conflict_generator is not None:
+            self.conflict_generator.initialize()
 
         # use sketch design space as a SAT baseline (TODO why?)
-        smt_solver = paynt.family.smt.SmtSolver(self.quotient.family)
+        smt_solver = paynt.family.smt.SmtSolver(self.quotient, self.constraint)
         
         # CEGIS loop
         assignment = smt_solver.pick_assignment(family)
