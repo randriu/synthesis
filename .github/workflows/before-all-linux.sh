@@ -9,7 +9,7 @@ dnf install -y boost-devel cln-devel gmp-devel glpk-devel hwloc-devel z3-devel x
 cd /tmp
 
 # Install ginac
-ginac_version=1.8.9
+ginac_version=1.8.10
 curl -fsSLO https://www.ginac.de/ginac-${ginac_version}.tar.bz2
 tar -jxf ginac-${ginac_version}.tar.bz2
 cd ginac-${ginac_version}
