@@ -161,13 +161,6 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {name: "XCode 15.4, ARM, Debug",
-             distro: "macos-14",
-             xcode: "15.4",
-             build_type: "Debug",
-             setup_args: "--config-settings=cmake.define.ALLOW_STORM_SYSTEM=OFF",
-             optional_libs: "[test]"
-          }
           - {name: "XCode Latest, ARM, Debug",
              distro: "macos-15",
              xcode: "latest-stable",
