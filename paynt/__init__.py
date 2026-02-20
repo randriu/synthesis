@@ -11,3 +11,5 @@ def version():
 
 # Expose API functions at package level
 from .api import *
+
+from . import dt
