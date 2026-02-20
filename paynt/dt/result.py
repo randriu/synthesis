@@ -3,7 +3,7 @@
 # TODO this will inherit from general result class eventually
 
 
-class ResultDT:
+class DtResult:
 
     def __init__(self, success, value, tree):
         

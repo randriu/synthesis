@@ -1,12 +1,17 @@
 
+import paynt.verification.property
 
 # TODO this will eventually inherit from general paynt_task Class
 
 
-class TaskDT:
+class DtTask:
 
-    def __init__(self, specification, tree_depth):
+    def __init__(self, properties, tree_depth):
 
+        paynt.verification.property.Property.initialize(False)
+        properties = [paynt.verification.property.construct_property(p, 0) for p in properties]
+        specification = paynt.verification.property.Specification(properties)
+    
         self.pctl_task = specification
         self.tree_depth = tree_depth
         self.scheduler_to_map = None

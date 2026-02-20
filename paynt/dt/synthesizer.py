@@ -1,8 +1,8 @@
 import paynt.synthesizer.synthesizer_ar
-import paynt.dt.cmdp_factory_dt
+import paynt.dt.factory
 import paynt.utils.timer
 
-import paynt.dt.result_dt
+import paynt.dt.result
 
 import stormpy
 import payntbind
@@ -27,10 +27,10 @@ def _run_dt_map_scheduler(cmdp_factory_dt, scheduler, tree_depth):
     state_to_choice = cmdp_factory_dt.discard_unreachable_choices(state_to_choice)
     choices = cmdp_factory_dt.state_to_choice_to_choices(state_to_choice)
 
-    dt_synthesizer = SolversDT(cmdp_factory_dt)
+    dt_synthesizer = DtSynthesizer(cmdp_factory_dt)
     dt_synthesizer.map_scheduler(choices, tree_depth=tree_depth)
 
-    return paynt.dt.result_dt.ResultDT(
+    return paynt.dt.result.DtResult(
         success = dt_synthesizer.best_tree is not None,
         value = dt_synthesizer.best_tree_value,
         tree = dt_synthesizer.best_tree
@@ -38,10 +38,10 @@ def _run_dt_map_scheduler(cmdp_factory_dt, scheduler, tree_depth):
 
 
 def _run_dtpaynt(cmdp_factory_dt, tree_depth):
-    dt_synthesizer = SolversDT(cmdp_factory_dt)
+    dt_synthesizer = DtSynthesizer(cmdp_factory_dt)
     dt_synthesizer.synthesize_tree(tree_depth)
 
-    return paynt.dt.result_dt.ResultDT(
+    return paynt.dt.result.DtResult(
         success = dt_synthesizer.best_tree is not None,
         value = dt_synthesizer.best_tree_value,
         tree = dt_synthesizer.best_tree
@@ -49,7 +49,7 @@ def _run_dtpaynt(cmdp_factory_dt, tree_depth):
 
 
 
-class SolversDT(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
+class DtSynthesizer(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     # tree depth
     tree_depth = 0
@@ -182,8 +182,8 @@ class SolversDT(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
         global_timeout = paynt.utils.timer.GlobalTimer.global_timer.time_limit_seconds
         if global_timeout is None: global_timeout = 900
-        depth_timeout = global_timeout / 2 / SolversDT.tree_depth
-        for depth in range(SolversDT.tree_depth+1):
+        depth_timeout = global_timeout / 2 / DtSynthesizer.tree_depth
+        for depth in range(DtSynthesizer.tree_depth+1):
             print()
             self.quotient.reset_tree(depth)
             best_assignment_old = self.best_assignment
@@ -193,7 +193,7 @@ class SolversDT(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             self.counters_reset()
             self.stat = paynt.synthesizer.statistic.Statistic(self)
             self.stat.start(family)
-            timeout = depth_timeout if depth < SolversDT.tree_depth else None
+            timeout = depth_timeout if depth < DtSynthesizer.tree_depth else None
             self.synthesis_timer = paynt.utils.timer.Timer(timeout)
             self.synthesis_timer.start()
             families = [family]
@@ -233,7 +233,7 @@ class SolversDT(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def map_scheduler(self, scheduler_choices, tree_depth=None):
         self.counters_reset()
         if tree_depth is None:
-            tree_depth = SolversDT.tree_depth
+            tree_depth = DtSynthesizer.tree_depth
         for depth in range(tree_depth+1):
             self.quotient.reset_tree(depth,enable_harmonization=False)
             family = self.quotient.family.copy()
@@ -252,20 +252,20 @@ class SolversDT(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 break
 
     def run(self, optimum_threshold=None):
-        # self.quotient.reset_tree(SolversDT.tree_depth,enable_harmonization=True)
+        # self.quotient.reset_tree(DtSynthesizer.tree_depth,enable_harmonization=True)
         scheduler_choices = None
-        if SolversDT.scheduler_path is None:
+        if DtSynthesizer.scheduler_path is None:
             paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
             mc_result = paynt_mdp.model_check_property(self.quotient.get_property())
         else:
             opt_result_value = None
-            with open(SolversDT.scheduler_path, 'r') as f:
+            with open(DtSynthesizer.scheduler_path, 'r') as f:
                 scheduler_json = json.load(f)
             scheduler_choices,scheduler_json_relevant = self.quotient.scheduler_json_to_choices(scheduler_json, discard_unreachable_states=True)
 
             # export transformed scheduler
             # import os
-            # directory = os.path.dirname(SolversDT.scheduler_path)
+            # directory = os.path.dirname(DtSynthesizer.scheduler_path)
             # transformed_name = f"scheduler-reachable.storm.json"
             # scheduler_relevant_path = os.path.join(directory, transformed_name)
             # with open(scheduler_relevant_path, 'w') as f:
@@ -299,8 +299,8 @@ class SolversDT(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 # optimum_threshold = opt_result_value * (1 + epsilon)
             self.set_optimality_threshold(optimum_threshold)
 
-            if not SolversDT.tree_enumeration:
-                self.synthesize_tree(SolversDT.tree_depth)
+            if not DtSynthesizer.tree_enumeration:
+                self.synthesize_tree(DtSynthesizer.tree_depth)
             else:
                 self.synthesize_tree_sequence(opt_result_value)
 

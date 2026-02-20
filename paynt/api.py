@@ -5,12 +5,8 @@ This module exposes high-level functions for programmatic use of
 """
 
 from . import version
-from . import cli
-from . import utils
-from . import synthesizer
 from . import quotient
 from . import parser
-from . import models
 from . import verification
 
 import payntbind
@@ -54,23 +50,3 @@ def model_checking(colored_mdp, property, extract_scheduler=True):
 
     return stormpy.model_checking(colored_mdp.quotient_mdp, property, extract_scheduler=extract_scheduler)
 
-
-def dt_map_scheduler(colored_mdp, scheduler, tree_depth):
-    """Helper function to map a scheduler to a decision tree using the DTMap algorithm. Returns a tuple (success, decision_tree)."""
-
-    state_to_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, colored_mdp.quotient_mdp, [x for x in range(colored_mdp.quotient_mdp.nr_choices)])
-    state_to_choice = colored_mdp.discard_unreachable_choices(state_to_choice)
-    choices = colored_mdp.state_to_choice_to_choices(state_to_choice)
-
-    dt_synthesizer = synthesizer.decision_tree.SynthesizerDecisionTree(colored_mdp)
-    synthesizer.decision_tree.SynthesizerDecisionTree.tree_depth = tree_depth
-    dt_synthesizer.map_scheduler(choices)
-
-    return dt_synthesizer.best_tree is not None, dt_synthesizer.best_tree
-
-
-def dtpaynt(colored_mdp, tree_depth):
-    dt_synthesizer = synthesizer.decision_tree.SynthesizerDecisionTree(colored_mdp)
-    dt_synthesizer.synthesize_tree(tree_depth)
-
-    return dt_synthesizer.best_tree

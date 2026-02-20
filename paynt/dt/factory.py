@@ -1,4 +1,5 @@
 import paynt.quotient.quotient
+import paynt.parser.sketch
 
 import stormpy
 import payntbind
@@ -271,12 +272,12 @@ class DecisionTree:
         return graphviz_tree
 
 
-class ColoredMdpFactoryDT(paynt.quotient.quotient.Quotient):
+class DtColoredMdpFactory(paynt.quotient.quotient.Quotient):
 
     # label for action executing a random action selection
     DONT_CARE_ACTION_LABEL = "__random__"
     # if true, an explicit action executing a random choice of an available action will be added to each state
-    add_dont_care_action = False
+    add_dont_care_action = True
     # if true, irrelevant states will not be considered for tree mapping
     filter_deterministic_states = True
 
@@ -299,6 +300,8 @@ class ColoredMdpFactoryDT(paynt.quotient.quotient.Quotient):
     def __init__(self, mdp, specification=None, use_exact=False):
         super().__init__(specification=specification, use_exact=use_exact)
 
+        paynt.parser.sketch.make_rewards_action_based(mdp) # needed for quotient MDP initialization
+
         # mask of relevant states: non-absorbing states with more than one action
         self.state_is_relevant = None
         # bitvector of relevant states
@@ -320,7 +323,7 @@ class ColoredMdpFactoryDT(paynt.quotient.quotient.Quotient):
         state_is_absorbing = self.identify_absorbing_states(mdp)
         self.state_is_relevant = [relevant and not state_is_absorbing[state] for state,relevant in enumerate(self.state_is_relevant)]
 
-        if ColoredMdpFactoryDT.filter_deterministic_states:
+        if DtColoredMdpFactory.filter_deterministic_states:
             state_has_actions = self.identify_states_with_actions(mdp)
             self.state_is_relevant = [relevant and state_has_actions[state] for state,relevant in enumerate(self.state_is_relevant)]
         self.state_is_relevant_bv = stormpy.BitVector(mdp.nr_states)
@@ -328,7 +331,7 @@ class ColoredMdpFactoryDT(paynt.quotient.quotient.Quotient):
         logger.debug(f"MDP has {self.state_is_relevant_bv.number_of_set_bits()}/{self.state_is_relevant_bv.size()} relevant states")
 
         action_labels,_ = payntbind.synthesis.extractActionLabels(mdp)
-        if ColoredMdpFactoryDT.DONT_CARE_ACTION_LABEL not in action_labels and ColoredMdpFactoryDT.add_dont_care_action:
+        if DtColoredMdpFactory.DONT_CARE_ACTION_LABEL not in action_labels and DtColoredMdpFactory.add_dont_care_action:
             logger.debug("adding explicit don't-care action to relevant states...")
             mdp = payntbind.synthesis.addDontCareAction(mdp,self.state_is_relevant_bv)
 
@@ -419,7 +422,7 @@ class ColoredMdpFactoryDT(paynt.quotient.quotient.Quotient):
     def get_random_choices(self):
         nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
         state_to_choice = self.empty_scheduler()
-        random_action = self.action_labels.index(ColoredMdpFactoryDT.DONT_CARE_ACTION_LABEL)
+        random_action = self.action_labels.index(DtColoredMdpFactory.DONT_CARE_ACTION_LABEL)
         for state in range(self.quotient_mdp.nr_states):
             # find a choice that executes this action
             for choice in range(nci[state],nci[state+1]):
@@ -443,8 +446,8 @@ class ColoredMdpFactoryDT(paynt.quotient.quotient.Quotient):
 
         num_actions = len(self.action_labels)
         dont_care_action = num_actions
-        if ColoredMdpFactoryDT.DONT_CARE_ACTION_LABEL in self.action_labels:
-            dont_care_action = self.action_labels.index(ColoredMdpFactoryDT.DONT_CARE_ACTION_LABEL)
+        if DtColoredMdpFactory.DONT_CARE_ACTION_LABEL in self.action_labels:
+            dont_care_action = self.action_labels.index(DtColoredMdpFactory.DONT_CARE_ACTION_LABEL)
 
         self.decision_tree = DecisionTree(self,self.variables)
         self.decision_tree.set_depth(depth)
