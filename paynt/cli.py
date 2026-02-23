@@ -10,12 +10,12 @@ import paynt.quotient.pomdp
 import paynt.quotient.decpomdp
 import paynt.quotient.posmg
 import paynt.quotient.storm_pomdp_control
-import paynt.quotient.mdp
 
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
-import paynt.synthesizer.decision_tree
+
+import paynt.dt
 
 import click
 import sys
@@ -175,10 +175,10 @@ def paynt_run(
 
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
 
-    paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_depth = tree_depth
-    paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_enumeration = tree_enumeration
-    paynt.synthesizer.decision_tree.SynthesizerDecisionTree.scheduler_path = tree_map_scheduler
-    paynt.quotient.mdp.MdpQuotient.add_dont_care_action = add_dont_care_action
+    paynt.dt.DtSynthesizer.tree_depth = tree_depth
+    paynt.dt.DtSynthesizer.tree_enumeration = tree_enumeration
+    paynt.dt.DtSynthesizer.scheduler_path = tree_map_scheduler
+    paynt.dt.DtColoredMdpFactory.add_dont_care_action = add_dont_care_action
 
     storm_control = None
     if storm_pomdp:
