@@ -165,7 +165,7 @@ class DtSynthesizer(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         logger.info(f"exported decision tree string to {tree_string_filename}")
 
 
-    def synthesize_tree(self, depth:int):
+    def synthesize_tree(self, depth : int):
         self.counters_reset()
         self.quotient.reset_tree(depth)
         self.best_assignment = self.best_assignment_value = None
@@ -321,8 +321,6 @@ class DtSynthesizer(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 logger.info(f"the synthesized tree has relative value: {self.compute_normalized_value(self.best_tree_value, opt_result_value, random_result_value)}")
             logger.info(f"printing the synthesized tree below:")
             print(self.best_tree.to_string())
-            # logger.info(f"printing the PRISM module below:")
-            # print(self.best_tree.to_prism())
 
             if self.export_synthesis_filename_base is not None:
                 self.export_decision_tree(self.best_tree, self.export_synthesis_filename_base)
