@@ -1,6 +1,5 @@
 import paynt.parser.sketch as sketch
-import paynt.quotient.mdp
-import paynt.quotient.quotient
+from paynt.dt import DtColoredMdpFactory
 
 from helpers.helper import get_stormpy_example_path, get_sketch_paths
 
@@ -14,7 +13,7 @@ class TestSketch:
         quotient = sketch.Sketch.load_sketch(sketch_path, props_path)
 
         # assert
-        assert isinstance(quotient, paynt.quotient.mdp.MdpQuotient)
+        assert isinstance(quotient, DtColoredMdpFactory)
         assert quotient.quotient_mdp.nr_states == 15
         # TODO add more asserts
 
