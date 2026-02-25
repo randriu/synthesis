@@ -6,7 +6,7 @@ import stormpy
 import payntbind
 
 from .decision_tree import DecisionTree, DtVariable
-from ._util import get_state_valuations
+from ._utils import get_state_valuations
 
 import logging
 logger = logging.getLogger(__name__)
