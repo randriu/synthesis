@@ -22,7 +22,7 @@ jobs:
     # Only upload if using test.pypi and using original repo
     if: ${{ github.repository_owner == 'randriu' }}
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           # unpacks all paynt artifacts into dist/
           pattern: paynt-*
