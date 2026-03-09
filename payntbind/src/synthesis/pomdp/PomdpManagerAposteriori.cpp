@@ -242,7 +242,7 @@ namespace synthesis {
 
         storm::storage::sparse::ModelComponents<ValueType> components;
         components.transitionMatrix = this->constructTransitionMatrix();
-        assert(components.transitionMatrix.isProbabilistic());
+        assert(components.transitionMatrix.isProbabilistic(storm::utility::zero<ValueType>()));
         components.stateLabeling = this->constructStateLabeling();
         for (auto const& reward_model : this->pomdp.getRewardModels()) {
             auto constructed = this->constructRewardModel(reward_model.second);
