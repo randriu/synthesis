@@ -317,8 +317,8 @@ class DtSynthesizer(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             logger.info(f"synthesized tree of depth {depth} with {num_nodes} decision nodes")
             if self.quotient.specification.has_optimality:
                 logger.info(f"the synthesized tree has value {self.best_tree_value}")
-            if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
-                logger.info(f"the synthesized tree has relative value: {self.compute_normalized_value(self.best_tree_value, opt_result_value, random_result_value)}")
+                if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
+                    logger.info(f"the synthesized tree has relative value: {self.compute_normalized_value(self.best_tree_value, opt_result_value, random_result_value)}")
             logger.info(f"printing the synthesized tree below:")
             print(self.best_tree.to_string())
 
