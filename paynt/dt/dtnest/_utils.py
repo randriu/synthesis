@@ -11,6 +11,8 @@ import shutil
 import subprocess
 from datetime import datetime
 
+from sklearn import tree
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -34,6 +36,20 @@ def dt_to_scheduler_json(decision_tree, quotient, reachable_states=None):
 
     json_str = json.dumps(json_scheduler_full, indent=4)
     return json_str
+
+def dt_to_state_to_actions(decision_tree, quotient, reachable_states=None):
+    if reachable_states is None:
+        reachable_states = stormpy.BitVector(quotient.quotient_mdp.nr_states, True)
+    state_to_action = []
+    nci = quotient.quotient_mdp.nondeterministic_choice_indices.copy()
+    for state in range(quotient.quotient_mdp.nr_states):
+        if quotient.state_is_relevant_bv.get(state) and reachable_states.get(state):
+            action_index = get_action_for_state(decision_tree.root, quotient, state, quotient.relevant_state_valuations[state], nci)
+            state_to_action.append(quotient.choice_to_action[nci[state] + action_index])
+        else:
+            state_to_action.append(-1)
+
+    return state_to_action
 
 
 def get_action_for_state(node, quotient, state, state_valuation, nci):
@@ -147,13 +163,13 @@ def create_uniform_random_tree(dt_colored_mdp_factory):
     return decision_tree
 
 
-def build_tree_helper(tree_node_json, helper=[], parent=None):
+def build_tree_helper(tree_node_json, helper=[]):
     current_index = len(helper)
     if tree_node_json['split'] is None:
         # TODO this is a temp fix that only works for some models...
-        helper.append({'id': current_index, 'leaf': True, 'chosen': tree_node_json['actual_label'], 'parent': parent})
+        helper.append({'id': current_index, 'leaf': True, 'chosen': tree_node_json['actual_label']})
         return helper
-    helper.append({'id': current_index, 'leaf': False, 'chosen': (tree_node_json['split']['lhs']['var'], floor(tree_node_json['split']['rhs'])), 'children': [], 'evaluations': {(x['split']['lhs']['var'], floor(x['split']['rhs'])): x['impurity'] for x in tree_node_json['additional_splits']}, 'parent': parent})
+    helper.append({'id': current_index, 'leaf': False, 'chosen': (tree_node_json['split']['lhs']['var'], floor(tree_node_json['split']['rhs'])), 'children': [], 'evaluations': {(x['split']['lhs']['var'], floor(x['split']['rhs'])): x['impurity'] for x in tree_node_json['additional_splits']}})
     # sort the evaluations by impurity value
     helper[current_index]['evaluations'] = {k: v for k, v in sorted(helper[current_index]['evaluations'].items(), key=lambda item: item[1])}
 
@@ -161,15 +177,15 @@ def build_tree_helper(tree_node_json, helper=[], parent=None):
     # left child
     assert tree_node_json['children'][0]['edge_label'] == "true", "expected left child edge label to be True"
     helper[current_index]['children'].append(len(helper))
-    helper = build_tree_helper(tree_node_json['children'][0], helper, current_index)
+    helper = build_tree_helper(tree_node_json['children'][0], helper)
     # right child
     assert tree_node_json['children'][1]['edge_label'] == "false", "expected right child edge label to be False"
     helper[current_index]['children'].append(len(helper))
-    helper = build_tree_helper(tree_node_json['children'][1], helper, current_index)
+    helper = build_tree_helper(tree_node_json['children'][1], helper)
 
     return helper
 
-def parse_tree_helper(tree_helper_path):
+def parse_tree_helper_json(tree_helper_path):
     with open(tree_helper_path, 'r') as file:
         tree_helper = json.load(file)
     tree_helper =  build_tree_helper(tree_helper, [])
@@ -193,7 +209,7 @@ def run_dtcontrol(scheduler_represenation, representation_file_type, metadata=No
             subprocess.run(command, cwd=f"{temp_file_name}", stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         logger.info(f"parsing new dtcontrol tree for setting {preset}")
-        dtcontrol_tree_helper = parse_tree_helper(f"{temp_file_name}/decision_trees/{preset}/scheduler/{preset}.json")
+        dtcontrol_tree_helper = parse_tree_helper_json(f"{temp_file_name}/decision_trees/{preset}/scheduler/{preset}.json")
 
         shutil.rmtree(f"{temp_file_name}")
     except:
@@ -201,3 +217,55 @@ def run_dtcontrol(scheduler_represenation, representation_file_type, metadata=No
         raise Exception("error when calling dtcontrol. Possible KeyboardInterrupt?")
     
     return dtcontrol_tree_helper
+
+
+def scheduler_to_state_to_action(scheduler, quotient):
+    state_to_action = []
+    nci = quotient.quotient_mdp.nondeterministic_choice_indices.copy()
+    for state in range(quotient.quotient_mdp.nr_states):
+        choice_index = scheduler.get_choice(state).get_deterministic_choice()
+        if choice_index is None or not quotient.state_is_relevant_bv.get(state):
+            state_to_action.append(-1)
+        else:
+            state_to_action.append(quotient.choice_to_action[nci[state] + choice_index])
+
+    return state_to_action
+
+def scikit_tree_to_tree_helper(clf, variables, action_labels):
+    helper = []
+    num_nodes = clf.tree_.node_count
+
+    for i in range(num_nodes):
+        if clf.tree_.children_left[i] == -1: # leaf node
+            chosen_idx = clf.tree_.value[i].argmax()
+            # Assert that value is 1 for the chosen action and 0 for all others
+            values = clf.tree_.value[i][0]
+            assert (values == 1).sum() == 1 and (values == 0).sum() == (len(values) - 1), (
+                f"Expected one value to be 1 and the rest 0, got {values}")
+            helper.append({'id': i, 'leaf': True, 'chosen': [action_labels[chosen_idx]]})
+            continue
+
+        variable = variables[clf.tree_.feature[i]].name
+        threshold = floor(clf.tree_.threshold[i])
+
+        helper.append({'id': i, 'leaf': False, 'chosen': (variable, threshold), 'children': [int(clf.tree_.children_left[i]), int(clf.tree_.children_right[i])]})
+
+    return helper
+
+def run_scikit_learn_tree(state_valuations, state_to_action, variables, action_labels, filter_unreachable=True, max_depth=None, min_samples_leaf=1):
+
+    X = state_valuations
+    Y = state_to_action
+
+    if filter_unreachable:
+        X = [x for j, x in enumerate(state_valuations) if state_to_action[j] != -1]
+        Y = [y for j, y in enumerate(state_to_action) if state_to_action[j] != -1]
+
+    adjusted_action_labels = [x for i, x in enumerate(action_labels) if i in Y]
+
+    clf = tree.DecisionTreeClassifier(max_depth=max_depth, min_samples_leaf=min_samples_leaf)
+    clf = clf.fit(X, Y)
+
+    scikit_tree_helper = scikit_tree_to_tree_helper(clf, variables, adjusted_action_labels)
+    
+    return scikit_tree_helper

@@ -2,7 +2,7 @@ from ..decision_tree import DecisionTree
 from ..factory import DtColoredMdpFactory
 from ..synthesizer import DtSynthesizer
 import paynt.utils.timer
-from ._utils import create_uniform_random_tree, get_submdp_from_unfixed_states, build_tree_helper_tree, get_state_space_for_tree_helper_node, dt_to_scheduler_json, run_dtcontrol, parse_tree_helper
+from ._utils import create_uniform_random_tree, get_submdp_from_unfixed_states, build_tree_helper_tree, get_state_space_for_tree_helper_node, dt_to_scheduler_json, run_dtcontrol, parse_tree_helper_json, run_scikit_learn_tree, scheduler_to_state_to_action, dt_to_state_to_actions
 
 import stormpy
 import payntbind
@@ -31,7 +31,8 @@ class DtNest(DtSynthesizer):
         self.timeout = 900
         self.depth_fine_tuning = True # decreases sub-tree depth once all subtrees of the current depth have been explored
         self.break_on_small_tree = True # dtPAYNT synthesis ends when an implementable tree with good enough value is found
-        self.use_dtcontrol = True
+        self.use_dtcontrol = False # If set to False, scikit-learn is used instead of dtcontrol
+        self.allow_perturbations = True # If False all perturbations are disabled, meaning we are only using dtPAYNT to make the initial tree smaller
         self.recompute_scheduler = True # recomputes scheduler for the subtree outside of the replaced subtree
         # dtcontrol_settings = ["default"] # this defines the different settings we run dtcontrol with # TODO this is currently not nicely supported in dtcontrol
         # dtcontrol_settings = ["default", "gini", "entropy", "maxminority"] # other possible settings: gini, entropy, maxminority
@@ -43,23 +44,23 @@ class DtNest(DtSynthesizer):
 
     def counters_reset(self):
         # integration stats
-        self.dtcontrol_calls = 0
-        self.dtcontrol_successes = 0
-        self.dtcontrol_recomputed_calls = 0
-        self.dtcontrol_recomputed_successes = 0
+        self.dt_learning_calls = 0
+        self.dt_learning_successes = 0
+        self.dt_learning_recomputed_calls = 0
+        self.dt_learning_recomputed_successes = 0
         self.dtpaynt_calls = 0
         self.dtpaynt_successes_smaller = 0
         self.dtpaynt_tree_found = 0
         self.all_larger = 0
 
-    def choose_tree_to_use(self, current_tree, dtpaynt_tree, dtcontrol_trees, recomputed_scheduler_trees):
-        # this also defines the priority in case of a tie, therefore: current > dtpaynt > dtcontrol > recomputed
+    def choose_tree_to_use(self, current_tree, dtpaynt_tree, dtlearn_trees, recomputed_scheduler_trees):
+        # this also defines the priority in case of a tie, therefore: current > dtpaynt > dtlearn > recomputed
         current_nodes = len(current_tree.collect_nonterminals())
         nodes = {"current": [current_nodes, current_tree.get_depth(), 1]}
-        for setting, dtcontrol_tree in recomputed_scheduler_trees.items():
-            nodes["recomputed-"+setting] = [len(dtcontrol_tree[1].collect_nonterminals()), dtcontrol_tree[1].get_depth(), 1]
-        for setting, dtcontrol_tree in dtcontrol_trees.items():
-            nodes["dtcontrol-"+setting] = [len(dtcontrol_tree[1].collect_nonterminals()), dtcontrol_tree[1].get_depth(), 1]
+        for setting, dtlearn_tree in recomputed_scheduler_trees.items():
+            nodes["recomputed-"+setting] = [len(dtlearn_tree[1].collect_nonterminals()), dtlearn_tree[1].get_depth(), 1]
+        for setting, dtlearn_tree in dtlearn_trees.items():
+            nodes["dtlearn-"+setting] = [len(dtlearn_tree[1].collect_nonterminals()), dtlearn_tree[1].get_depth(), 1]
         nodes["dtpaynt"] = [len(dtpaynt_tree.collect_nonterminals()), dtpaynt_tree.get_depth(), 1]
         nodes = {k: v for k, v in nodes.items() if v is not None}
         sorted_nodes = sorted(nodes.items(), key=lambda item: item[1][1])
@@ -181,63 +182,81 @@ class DtNest(DtSynthesizer):
 
                     self.quotient.tree_helper_tree = dtpaynt_subtree_helper_tree_copy
 
-                    new_dtcontrol_tree_helper_tree = None
+                    new_tree_helper_tree = None
                     recomputed_scheduler_tree_helper_tree = None
-                    dtcontrol_trees = {}
-                    recomputed_dtcontrol_trees = {}
+                    dtlearn_trees = {}
+                    recomputed_dtlearn_trees = {}
 
-                    if self.use_dtcontrol:
+                    # exit()
+
+                    if self.allow_perturbations:
+
                         submdp_for_tree = get_submdp_from_unfixed_states(self.quotient, node_states)
                         reachable_states = stormpy.BitVector(self.quotient.quotient_mdp.nr_states, False)
                         for state in range(submdp_for_tree.model.nr_states):
                             reachable_states.set(submdp_for_tree.quotient_state_map[state], True)
 
-                    if self.use_dtcontrol and self.recompute_scheduler:
-                        submpd_outside_of_subtree = get_submdp_from_unfixed_states(self.quotient, ~node_states)
-                        oos_result = submpd_outside_of_subtree.check_specification(self.quotient.specification)
+                        if self.recompute_scheduler:
+                            submpd_dtlearn_of_subtree = get_submdp_from_unfixed_states(self.quotient, ~node_states)
+                            oos_result = submpd_dtlearn_of_subtree.check_specification(self.quotient.specification)
+                            new_scheduler = oos_result.optimality_result.result.scheduler
 
-                        recomputed_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
-                        quotient_mdp_nci = self.quotient.quotient_mdp.nondeterministic_choice_indices.copy()
-                        new_scheduler = oos_result.optimality_result.result.scheduler
-                        state_to_choice = self.quotient.scheduler_to_state_to_choice(submpd_outside_of_subtree, new_scheduler)
-                        for state in range(self.quotient.quotient_mdp.nr_states):
-                            quotient_choice = state_to_choice[state]
-                            if quotient_choice is None or not self.quotient.state_is_relevant_bv.get(state):
-                                payntbind.synthesis.set_dont_care_state_for_scheduler(recomputed_scheduler, state, 0, False)
-                                index = 0
-                            else:
-                                index = quotient_choice - quotient_mdp_nci[state]
-                            scheduler_choice = stormpy.storage.SchedulerChoice(index)
-                            recomputed_scheduler.set_choice(scheduler_choice, state)
+                            if self.use_dtcontrol:
+                                recomputed_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
+                                quotient_mdp_nci = self.quotient.quotient_mdp.nondeterministic_choice_indices.copy()
+                                state_to_choice = self.quotient.scheduler_to_state_to_choice(submpd_dtlearn_of_subtree, new_scheduler)
+                                for state in range(self.quotient.quotient_mdp.nr_states):
+                                    quotient_choice = state_to_choice[state]
+                                    if quotient_choice is None or not self.quotient.state_is_relevant_bv.get(state):
+                                        payntbind.synthesis.set_dont_care_state_for_scheduler(recomputed_scheduler, state, 0, False)
+                                        index = 0
+                                    else:
+                                        index = quotient_choice - quotient_mdp_nci[state]
+                                    scheduler_choice = stormpy.storage.SchedulerChoice(index)
+                                    recomputed_scheduler.set_choice(scheduler_choice, state)
 
-                        recomputed_json_scheduler_full = json.loads(recomputed_scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
-                        recomputed_json_str = json.dumps(recomputed_json_scheduler_full, indent=4)
+                                recomputed_json_scheduler_full = json.loads(recomputed_scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
+                                recomputed_json_str = json.dumps(recomputed_json_scheduler_full, indent=4)
 
-                    # calling dtcontrol
-                    # TODO I removed the option to call multiple dtcontrol settings, because they are not nicely implemented in dtcontrol, if they fix that I will reintroduce it
-                    if self.use_dtcontrol:
-                        scheduler_json = dt_to_scheduler_json(dtpaynt_subtree_helper_tree_copy, self.quotient, reachable_states)
+                        # calling dtcontrol
+                        # TODO I removed the option to call multiple dtcontrol settings, because they are not nicely implemented in dtcontrol, if they fix that I will reintroduce it
+                        if self.use_dtcontrol:
+                            scheduler_json = dt_to_scheduler_json(dtpaynt_subtree_helper_tree_copy, self.quotient, reachable_states)
 
-                        new_dtcontrol_tree_helper = run_dtcontrol(scheduler_json, "storm.json")
-                        self.dtcontrol_calls += 1
+                            new_learned_tree_helper = run_dtcontrol(scheduler_json, "storm.json")
+                            self.dt_learning_calls += 1
 
-                        new_dtcontrol_tree_helper_tree = build_tree_helper_tree(self.quotient, new_dtcontrol_tree_helper)
-                        logger.info(f'new dtcontrol tree (default) has depth {new_dtcontrol_tree_helper_tree.get_depth()} and {len(new_dtcontrol_tree_helper_tree.collect_nonterminals())} nodes')
+                            if self.recompute_scheduler:
 
-                        dtcontrol_trees["default"] = (new_dtcontrol_tree_helper, new_dtcontrol_tree_helper_tree)
+                                recomputed_scheduler_tree_helper = run_dtcontrol(recomputed_json_str, "storm.json")
+                                self.dt_learning_recomputed_calls += 1
+
+                        else:
+
+                            state_to_action = dt_to_state_to_actions(dtpaynt_subtree_helper_tree_copy, self.quotient, reachable_states)
+                            new_learned_tree_helper = run_scikit_learn_tree(self.quotient.relevant_state_valuations, state_to_action, self.quotient.variables, self.quotient.action_labels)
+                            self.dt_learning_calls += 1
+
+                            if self.recompute_scheduler:
+
+                                recomputed_state_to_action = scheduler_to_state_to_action(new_scheduler, self.quotient)
+                                recomputed_scheduler_tree_helper = run_scikit_learn_tree(self.quotient.relevant_state_valuations, recomputed_state_to_action, self.quotient.variables, self.quotient.action_labels)
+                                self.dt_learning_recomputed_calls += 1
+
+
+                        new_tree_helper_tree = build_tree_helper_tree(self.quotient, new_learned_tree_helper)
+                        logger.info(f'new learned tree (default) has depth {new_tree_helper_tree.get_depth()} and {len(new_tree_helper_tree.collect_nonterminals())} nodes')
+                        dtlearn_trees["default"] = (new_learned_tree_helper, new_tree_helper_tree)
 
                         if self.recompute_scheduler:
-
-                            recomputed_scheduler_tree_helper = run_dtcontrol(recomputed_json_str, "storm.json")
-                            self.dtcontrol_recomputed_calls += 1
-
                             recomputed_scheduler_tree_helper_tree = build_tree_helper_tree(self.quotient, recomputed_scheduler_tree_helper)
-                            logger.info(f'new dtcontrol tree (default) based on recomputed scheduler has depth {recomputed_scheduler_tree_helper_tree.get_depth()} and {len(recomputed_scheduler_tree_helper_tree.collect_nonterminals())} nodes')
+                            logger.info(f'new learned tree (default) based on recomputed scheduler has depth {recomputed_scheduler_tree_helper_tree.get_depth()} and {len(recomputed_scheduler_tree_helper_tree.collect_nonterminals())} nodes')
 
-                            recomputed_dtcontrol_trees["default"] = (recomputed_scheduler_tree_helper, recomputed_scheduler_tree_helper_tree)
+                            recomputed_dtlearn_trees["default"] = (recomputed_scheduler_tree_helper, recomputed_scheduler_tree_helper_tree)
 
 
-                    chosen_tree = self.choose_tree_to_use(tree_helper_tree, dtpaynt_subtree_helper_tree_copy, dtcontrol_trees, recomputed_dtcontrol_trees)
+
+                    chosen_tree = self.choose_tree_to_use(tree_helper_tree, dtpaynt_subtree_helper_tree_copy, dtlearn_trees, recomputed_dtlearn_trees)
 
                     if chosen_tree == "current":
                         logger.info(f"None of the new trees are smaller, continuing with current tree")
@@ -257,23 +276,23 @@ class DtNest(DtSynthesizer):
                         new_nodes = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth, nodes_to_skip=[node["id"] for node in node_queue], use_states_for_node_priority=self.use_states_for_node_priority)
                         node_queue += new_nodes
 
-                    elif self.use_dtcontrol and chosen_tree.startswith("dtcontrol"):
-                        logger.info(f"New DtControl tree ({chosen_tree}) is smallest")
-                        dtcontrol_setting = chosen_tree.split("-")[1]
-                        new_dtcontrol_tree_helper = dtcontrol_trees[dtcontrol_setting][0]
-                        new_dtcontrol_tree_helper_tree = dtcontrol_trees[dtcontrol_setting][1]
-                        self.dtcontrol_successes += 1
-                        self.quotient.tree_helper = new_dtcontrol_tree_helper
-                        self.quotient.tree_helper_tree = new_dtcontrol_tree_helper_tree
-                        tree_helper_tree = new_dtcontrol_tree_helper_tree
+                    elif chosen_tree.startswith("dtlearn"):
+                        logger.info(f"New learned tree ({chosen_tree}) is smallest")
+                        dtlearn_setting = chosen_tree.split("-")[1]
+                        new_dtlearn_tree_helper = dtlearn_trees[dtlearn_setting][0]
+                        new_dtlearn_tree_helper_tree = dtlearn_trees[dtlearn_setting][1]
+                        self.dt_learning_successes += 1
+                        self.quotient.tree_helper = new_dtlearn_tree_helper
+                        self.quotient.tree_helper_tree = new_dtlearn_tree_helper_tree
+                        tree_helper_tree = new_dtlearn_tree_helper_tree
                         node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, use_states_for_node_priority=self.use_states_for_node_priority)
 
-                    elif self.use_dtcontrol and self.recompute_scheduler and chosen_tree.startswith("recomputed"):
-                        logger.info(f"New DtControl tree ({chosen_tree}) for recomputed scheduler is smallest")
-                        dtcontrol_setting = chosen_tree.split("-")[1]
-                        recomputed_scheduler_tree_helper = recomputed_dtcontrol_trees[dtcontrol_setting][0]
-                        recomputed_scheduler_tree_helper_tree = recomputed_dtcontrol_trees[dtcontrol_setting][1]
-                        self.dtcontrol_recomputed_successes += 1
+                    elif chosen_tree.startswith("recomputed"):
+                        logger.info(f"New learned tree ({chosen_tree}) for recomputed scheduler is smallest")
+                        dtlearn_setting = chosen_tree.split("-")[1]
+                        recomputed_scheduler_tree_helper = recomputed_dtlearn_trees[dtlearn_setting][0]
+                        recomputed_scheduler_tree_helper_tree = recomputed_dtlearn_trees[dtlearn_setting][1]
+                        self.dt_learning_recomputed_successes += 1
                         self.quotient.tree_helper = recomputed_scheduler_tree_helper
                         self.quotient.tree_helper_tree = recomputed_scheduler_tree_helper_tree
                         tree_helper_tree = recomputed_scheduler_tree_helper_tree
@@ -316,28 +335,36 @@ class DtNest(DtSynthesizer):
         opt_scheduler = mc_result.result.scheduler
 
         if self.initial_tree_path is None:
+
+            if self.use_dtcontrol:
         
-            # creating the initial scheduler for dtcontrol
-            relevant_opt_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
-            for state in range(self.quotient.quotient_mdp.nr_states):
-                quotient_choice = opt_scheduler.get_choice(state).get_deterministic_choice()
-                if quotient_choice is None or not self.quotient.state_is_relevant_bv.get(state):
-                    payntbind.synthesis.set_dont_care_state_for_scheduler(relevant_opt_scheduler, state, 0, False)
-                    index = 0
-                else:
-                    index = quotient_choice
-                scheduler_choice = stormpy.storage.SchedulerChoice(index)
-                relevant_opt_scheduler.set_choice(scheduler_choice, state)
+                # creating the initial scheduler for dtcontrol
+                relevant_opt_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
+                for state in range(self.quotient.quotient_mdp.nr_states):
+                    quotient_choice = opt_scheduler.get_choice(state).get_deterministic_choice()
+                    if quotient_choice is None or not self.quotient.state_is_relevant_bv.get(state):
+                        payntbind.synthesis.set_dont_care_state_for_scheduler(relevant_opt_scheduler, state, 0, False)
+                        index = 0
+                    else:
+                        index = quotient_choice
+                    scheduler_choice = stormpy.storage.SchedulerChoice(index)
+                    relevant_opt_scheduler.set_choice(scheduler_choice, state)
 
-            relevant_opt_scheduler_full = json.loads(relevant_opt_scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
-            relevant_opt_scheduler_str = json.dumps(relevant_opt_scheduler_full, indent=4)
+                relevant_opt_scheduler_full = json.loads(relevant_opt_scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
+                relevant_opt_scheduler_str = json.dumps(relevant_opt_scheduler_full, indent=4)
 
-            initial_tree_helper = run_dtcontrol(relevant_opt_scheduler_str, "storm.json")
+                initial_tree_helper = run_dtcontrol(relevant_opt_scheduler_str, "storm.json")
+
+            else: # using scikit-learn to obtain the initial tree helper
+
+                state_to_action = scheduler_to_state_to_action(opt_scheduler, self.quotient)
+                initial_tree_helper = run_scikit_learn_tree(self.quotient.relevant_state_valuations, state_to_action, self.quotient.variables, self.quotient.action_labels)
+
             
         else:
 
             logger.info(f"parsing initial tree from {self.initial_tree_path}")
-            initial_tree_helper = parse_tree_helper(self.initial_tree_path)
+            initial_tree_helper = parse_tree_helper_json(self.initial_tree_path)
 
         self.quotient.tree_helper = initial_tree_helper
 
@@ -378,10 +405,10 @@ class DtNest(DtSynthesizer):
 
             # integration logs
             if self.quotient.tree_helper is not None:
-                logger.info(f"dtcontrol calls: {self.dtcontrol_calls}")
-                logger.info(f"dtcontrol successes: {self.dtcontrol_successes}")
-                logger.info(f"dtcontrol recomputed calls: {self.dtcontrol_recomputed_calls}")
-                logger.info(f"dtcontrol recomputed successes: {self.dtcontrol_recomputed_successes}")
+                logger.info(f"dt learning calls: {self.dt_learning_calls}")
+                logger.info(f"dt learning successes: {self.dt_learning_successes}")
+                logger.info(f"dt learning recomputed calls: {self.dt_learning_recomputed_calls}")
+                logger.info(f"dt learning recomputed successes: {self.dt_learning_recomputed_successes}")
                 logger.info(f"dtpaynt calls: {self.dtpaynt_calls}")
                 logger.info(f"dtpaynt successes smaller: {self.dtpaynt_successes_smaller}")
                 logger.info(f"dtpaynt tree found: {self.dtpaynt_tree_found}")
