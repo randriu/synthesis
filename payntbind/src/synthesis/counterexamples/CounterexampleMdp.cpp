@@ -436,7 +436,7 @@ std::pair<bool,bool> CounterexampleGeneratorMdp<ValueType,StateType>::expandAndC
     }
     storm::storage::SparseMatrix<ValueType> sub_matrix = transitionMatrixBuilder.build();
     // std::cout << sub_matrix << std::endl;
-    assert(sub_matrix.isProbabilistic());
+    assert(sub_matrix.isProbabilistic(storm::utility::zero<ValueType>()));
     storm::storage::sparse::ModelComponents<ValueType> components(sub_matrix, labeling_submdp, reward_models_submdp);
     std::shared_ptr<storm::models::sparse::Model<ValueType>> submdp = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Mdp, std::move(components));
     // std::cout << "[storm] sub-mdp has " << submdp->getNumberOfStates() << " states" << std::endl;

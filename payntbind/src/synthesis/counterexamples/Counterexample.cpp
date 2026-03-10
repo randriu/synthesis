@@ -388,7 +388,7 @@ namespace synthesis {
             }
         }
         storm::storage::SparseMatrix<ValueType> sub_matrix = transitionMatrixBuilder.build();
-        assert(sub_matrix.isProbabilistic());
+        assert(sub_matrix.isProbabilistic(storm::utility::zero<ValueType>()));
         storm::storage::sparse::ModelComponents<ValueType> components(sub_matrix, labeling_subdtmc, reward_models_subdtmc);
         std::shared_ptr<storm::models::sparse::Model<ValueType>> subdtmc = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, std::move(components));
         // std::cout << "[storm] sub-dtmc has " << subdtmc->getNumberOfStates() << " states" << std::endl;
