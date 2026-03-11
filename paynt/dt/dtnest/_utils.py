@@ -219,15 +219,13 @@ def run_dtcontrol(scheduler_represenation, representation_file_type, metadata=No
     return dtcontrol_tree_helper
 
 
-def scheduler_to_state_to_action(scheduler, quotient):
+def state_to_choice_to_state_to_action(state_to_choice, quotient):
     state_to_action = []
-    nci = quotient.quotient_mdp.nondeterministic_choice_indices.copy()
     for state in range(quotient.quotient_mdp.nr_states):
-        choice_index = scheduler.get_choice(state).get_deterministic_choice()
-        if choice_index is None or not quotient.state_is_relevant_bv.get(state):
+        if state_to_choice[state] is None or not quotient.state_is_relevant_bv.get(state):
             state_to_action.append(-1)
         else:
-            state_to_action.append(quotient.choice_to_action[nci[state] + choice_index])
+            state_to_action.append(quotient.choice_to_action[state_to_choice[state]])
 
     return state_to_action
 

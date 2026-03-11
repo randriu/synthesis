@@ -2,7 +2,7 @@ from ..decision_tree import DecisionTree
 from ..factory import DtColoredMdpFactory
 from ..synthesizer import DtSynthesizer
 import paynt.utils.timer
-from ._utils import create_uniform_random_tree, get_submdp_from_unfixed_states, build_tree_helper_tree, get_state_space_for_tree_helper_node, dt_to_scheduler_json, run_dtcontrol, parse_tree_helper_json, run_scikit_learn_tree, scheduler_to_state_to_action, dt_to_state_to_actions
+from ._utils import create_uniform_random_tree, get_submdp_from_unfixed_states, build_tree_helper_tree, get_state_space_for_tree_helper_node, dt_to_scheduler_json, run_dtcontrol, parse_tree_helper_json, run_scikit_learn_tree, state_to_choice_to_state_to_action, dt_to_state_to_actions
 
 import stormpy
 import payntbind
@@ -28,7 +28,7 @@ class DtNest(DtSynthesizer):
         self.subtree_depth = 7
         self.max_iter = 100000 # max number of subtrees to be investigated
         self.epsilon = 0.05
-        self.timeout = 900
+        self.timeout = 600
         self.depth_fine_tuning = True # decreases sub-tree depth once all subtrees of the current depth have been explored
         self.break_on_small_tree = True # dtPAYNT synthesis ends when an implementable tree with good enough value is found
         self.use_dtcontrol = False # If set to False, scikit-learn is used instead of dtcontrol
@@ -146,7 +146,7 @@ class DtNest(DtSynthesizer):
 
                 logger.info(f"starting iteration {current_iter} with {len(node_queue)} nodes in node queue")
                 logger.info(f"current tree size: {len(tree_helper_tree.collect_nonterminals())} decision nodes")
-            
+
                 current_iter += 1
                 node = node_queue.pop(0)
 
@@ -200,11 +200,11 @@ class DtNest(DtSynthesizer):
                             submpd_dtlearn_of_subtree = get_submdp_from_unfixed_states(self.quotient, ~node_states)
                             oos_result = submpd_dtlearn_of_subtree.check_specification(self.quotient.specification)
                             new_scheduler = oos_result.optimality_result.result.scheduler
+                            state_to_choice = self.quotient.scheduler_to_state_to_choice(submpd_dtlearn_of_subtree, new_scheduler)
 
                             if self.use_dtcontrol:
                                 recomputed_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
                                 quotient_mdp_nci = self.quotient.quotient_mdp.nondeterministic_choice_indices.copy()
-                                state_to_choice = self.quotient.scheduler_to_state_to_choice(submpd_dtlearn_of_subtree, new_scheduler)
                                 for state in range(self.quotient.quotient_mdp.nr_states):
                                     quotient_choice = state_to_choice[state]
                                     if quotient_choice is None or not self.quotient.state_is_relevant_bv.get(state):
@@ -239,8 +239,9 @@ class DtNest(DtSynthesizer):
 
                             if self.recompute_scheduler:
 
-                                recomputed_state_to_action = scheduler_to_state_to_action(new_scheduler, self.quotient)
-                                recomputed_scheduler_tree_helper = run_scikit_learn_tree(self.quotient.relevant_state_valuations, recomputed_state_to_action, self.quotient.variables, self.quotient.action_labels)
+                                recomputed_state_to_action = state_to_choice_to_state_to_action(state_to_choice, self.quotient)
+                                recomputed_scheduler_tree_helper = run_scikit_learn_tree(self.quotient.relevant_state_valuations, 
+                                recomputed_state_to_action, self.quotient.variables, self.quotient.action_labels)
                                 self.dt_learning_recomputed_calls += 1
 
 
@@ -329,10 +330,14 @@ class DtNest(DtSynthesizer):
 
     def run(self, optimum_threshold=None):
 
-        scheduler_choices = None
-        paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
+        paynt_mdp = paynt.models.models.SubMdp(self.quotient.quotient_mdp, [x for x in range(self.quotient.quotient_mdp.nr_states)], [x for x in range(self.quotient.quotient_mdp.nr_choices)])
+        if len(self.quotient.specification.constraints) > 0:
+            from ._utils import get_optimality_specification
+            self.quotient.specification = get_optimality_specification(self.quotient.specification)
         mc_result = paynt_mdp.model_check_property(self.quotient.get_property())
         opt_scheduler = mc_result.result.scheduler
+
+        state_to_choice = self.quotient.scheduler_to_state_to_choice(paynt_mdp, opt_scheduler)
 
         if self.initial_tree_path is None:
 
@@ -340,13 +345,14 @@ class DtNest(DtSynthesizer):
         
                 # creating the initial scheduler for dtcontrol
                 relevant_opt_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
+                nci = self.quotient.quotient_mdp.nondeterministic_choice_indices.copy()
                 for state in range(self.quotient.quotient_mdp.nr_states):
-                    quotient_choice = opt_scheduler.get_choice(state).get_deterministic_choice()
+                    quotient_choice = state_to_choice[state]
                     if quotient_choice is None or not self.quotient.state_is_relevant_bv.get(state):
                         payntbind.synthesis.set_dont_care_state_for_scheduler(relevant_opt_scheduler, state, 0, False)
                         index = 0
                     else:
-                        index = quotient_choice
+                        index = quotient_choice - nci[state]
                     scheduler_choice = stormpy.storage.SchedulerChoice(index)
                     relevant_opt_scheduler.set_choice(scheduler_choice, state)
 
@@ -357,7 +363,7 @@ class DtNest(DtSynthesizer):
 
             else: # using scikit-learn to obtain the initial tree helper
 
-                state_to_action = scheduler_to_state_to_action(opt_scheduler, self.quotient)
+                state_to_action = state_to_choice_to_state_to_action(state_to_choice, self.quotient)
                 initial_tree_helper = run_scikit_learn_tree(self.quotient.relevant_state_valuations, state_to_action, self.quotient.variables, self.quotient.action_labels)
 
             
