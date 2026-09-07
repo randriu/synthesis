@@ -12,6 +12,7 @@ def version():
 from .api import *
 from .task import DtTask
 from .result import DtResult
+from .colored_mdp import DtColoredMdp
 from .factory import DtColoredMdpFactory
-from .synthesizer import DtSynthesizer
+from .synthesizer import SynthesizerARDt, DtSynthesizer
 from . import dtnest

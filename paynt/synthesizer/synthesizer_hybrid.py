@@ -2,7 +2,7 @@ import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_ar
 import paynt.synthesizer.synthesizer_cegis
 
-import paynt.family.smt
+import paynt.parameter_space.smt
 import paynt.utils.timer
 
 import logging
@@ -22,12 +22,12 @@ class StageControl:
     # whether adaptive hybrid is enabled
     adaptive_hybrid = True
 
-    def __init__(self, family_size):
+    def __init__(self, parameter_space_size):
         # timings
         self.timer_ar = paynt.utils.timer.Timer()
         self.timer_cegis = paynt.utils.timer.Timer()
 
-        self.family_size = family_size
+        self.parameter_space_size = parameter_space_size
         self.pruned_ar = 0
         self.pruned_cegis = 0
         
@@ -45,10 +45,10 @@ class StageControl:
         self.timer_cegis.start()
 
     def prune_ar(self, pruned):
-        self.pruned_ar += pruned / self.family_size
+        self.pruned_ar += pruned / self.parameter_space_size
 
     def prune_cegis(self, pruned):
-        self.pruned_cegis += pruned / self.family_size
+        self.pruned_cegis += pruned / self.parameter_space_size
 
     def cegis_has_time(self):
         """
@@ -91,73 +91,73 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
     def method_name(self):
         return "hybrid"
 
-    def synthesize_one(self, family):
+    def synthesize_one(self, parameter_space):
 
         self.conflict_generator.initialize()
-        smt_solver = paynt.family.smt.SmtSolver(self.quotient.family)
+        smt_solver = paynt.parameter_space.smt.SmtSolver(self.colored_mdp.parameter_space)
 
         # AR-CEGIS loop
-        families = [family]
-        self.stage_control = StageControl(family.size)
-        while families:
+        parameter_spaces = [parameter_space]
+        self.stage_control = StageControl(parameter_space.size)
+        while parameter_spaces:
 
             # initiate AR analysis
             self.stage_control.start_ar()
-            
-            # choose family
-            family = families.pop(-1)
+
+            # choose parameter space
+            parameter_space = parameter_spaces.pop(-1)
 
             # reset SMT solver level
-            smt_solver.level(family.refinement_depth)
+            smt_solver.level(parameter_space.refinement_depth)
 
-            # analyze the family
-            self.verify_family(family)
-            self.update_optimum(family)
-            if family.analysis_result.can_improve == False:
-                self.explore(family)
-                self.stage_control.prune_ar(family.size)
+            # analyze the parameter space
+            self.verify_parameter_space(parameter_space)
+            self.update_optimum(parameter_space)
+            if parameter_space.analysis_result.can_improve == False:
+                self.explore(parameter_space)
+                self.stage_control.prune_ar(parameter_space.size)
                 continue
 
             # undecided: initiate CEGIS analysis
             self.stage_control.start_cegis()
 
-            # construct priority subfamily that corresponds to primary scheduler
-            if family.analysis_result.optimality_result is not None:
-                result = family.analysis_result.optimality_result
+            # construct priority parameter subspace that corresponds to primary scheduler
+            if parameter_space.analysis_result.optimality_result is not None:
+                result = parameter_space.analysis_result.optimality_result
             else:
-                result = family.analysis_result.constraints_result.results[0]
-            priority_subfamily = family.assume_options_copy(result.primary_selection)
+                result = parameter_space.analysis_result.constraints_result.results[0]
+            priority_parameter_subspace = parameter_space.assume_options_copy(result.primary_selection)
 
-            # explore family assignments
-            family_explored = False
+            # explore parameter space assignments
+            parameter_space_explored = False
             while True:
 
                 if not self.stage_control.cegis_has_time():
                     break   # CEGIS timeout
 
-                family.encode(smt_solver)
-                # assignment = smt_solver.pick_assignment(family)
-                assignment = smt_solver.pick_assignment_priority(family, priority_subfamily)
+                parameter_space.encode(smt_solver)
+                # assignment = smt_solver.pick_assignment(parameter_space)
+                assignment = smt_solver.pick_assignment_priority(parameter_space, priority_parameter_subspace)
                 if assignment is None:
-                    family_explored = True
-                    break   # explored whole family
-                
-                conflicts, accepting_assignment = self.analyze_family_assignment_cegis(family, assignment)
-                pruned = smt_solver.exclude_conflicts(family, assignment, conflicts)
+                    parameter_space_explored = True
+                    break   # explored whole parameter space
+
+                conflicts, accepting_assignment = self.analyze_parameter_space_assignment_cegis(parameter_space, assignment)
+                pruned = smt_solver.exclude_conflicts(parameter_space, assignment, conflicts)
                 self.explored += pruned
                 self.stage_control.prune_cegis(pruned)
 
                 if accepting_assignment is not None:
                     self.best_assignment = accepting_assignment
-                    if not self.quotient.specification.can_be_improved:
+                    if not self.task.specification.can_be_improved:
                         return self.best_assignment
 
                 # assignment is UNSAT: move on to the next assignment
 
-            if family_explored:
+            if parameter_space_explored:
                 continue
-        
-            subfamilies = self.quotient.split(family)
-            families = families + subfamilies
+
+            parameter_subspaces = self.split_undecided_space(parameter_space)
+            parameter_spaces = parameter_spaces + parameter_subspaces
 
         return self.best_assignment

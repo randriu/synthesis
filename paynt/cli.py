@@ -1,29 +1,34 @@
-import paynt.quotient.mdp_family
 from . import version
 
+import paynt.api
 import paynt.utils.timer
 import paynt.utils.version_check
 import paynt.parser.sketch
 
-import paynt.quotient.quotient
-import paynt.quotient.pomdp
-import paynt.quotient.decpomdp
-import paynt.quotient.posmg
-import paynt.quotient.storm_pomdp_control
+import paynt.pomdp
+import paynt.dt._cli
+import paynt.dt.dtnest._cli
+import paynt.pomdp._cli
+import paynt.pomdp.saynt._cli
+import paynt.family._cli
 
-import paynt.synthesizer.synthesizer
-import paynt.synthesizer.synthesizer_cegis
-import paynt.synthesizer.policy_tree
-
-import paynt.dt
-
-import click
+import rich_click as click
 import sys
 import os
 import cProfile, pstats
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+def add_options(options):
+    ''' Standard click idiom for composing a decorator list built elsewhere (here, a feature's own _cli.py)
+    onto a command function, applied in the same order as if the decorators had been written inline. '''
+    def _add_options(func):
+        for option in reversed(options):
+            func = option(func)
+        return func
+    return _add_options
 
 
 def setup_logger(log_path = None):
@@ -53,95 +58,57 @@ def setup_logger(log_path = None):
 
 @click.command()
 @click.argument('project', type=click.Path(exists=True))
-@click.option("--sketch", default="sketch.templ", show_default=True,
+@click.option("--sketch", default="sketch.templ", show_default=True, panel="Model & specification loading",
     help="name of the sketch file in the project")
-@click.option("--props", default="sketch.props", show_default=True,
+@click.option("--props", default="sketch.props", show_default=True, panel="Model & specification loading",
     help="name of the properties file in the project")
-@click.option("--relative-error", type=click.FLOAT, default="0", show_default=True,
+@click.option(
+    "--constraint-bound", type=click.FLOAT, panel="Model & specification loading",
+    help="bound for creating constrained POMDP for Cassandra models",
+)
+
+@click.option("--relative-error", type=click.FLOAT, default="0", show_default=True, panel="Synthesis",
     help="relative error for optimal synthesis")
-@click.option("--optimum-threshold", type=click.FLOAT,
+@click.option("--optimum-threshold", type=click.FLOAT, panel="Synthesis",
     help="known optimum bound")
-@click.option("--precision", type=click.FLOAT, default=1e-4,
+@click.option("--precision", type=click.FLOAT, default=1e-4, panel="Synthesis",
     help="model checking precision")
-@click.option("--exact", is_flag=True, default=False,
+@click.option("--exact", is_flag=True, default=False, panel="Synthesis",
     help="use exact synthesis (very limited at the moment)")
-@click.option("--timeout", type=int,
+@click.option("--timeout", type=int, panel="Synthesis",
     help="timeout (s)")
-
-@click.option("--export",
-    type=click.Choice(['jani', 'drn', 'pomdp']),
-    help="export the model to specified format and abort")
-
 @click.option("--method",
-    type=click.Choice(['onebyone', 'ar', 'cegis', 'hybrid', 'ar_multicore']),
-    default="ar", show_default=True,
+    type=click.Choice(['onebyone', 'ar', 'cegis', 'hybrid']),
+    default="ar", show_default=True, panel="Synthesis",
     help="synthesis method"
     )
-
-@click.option("--disable-expected-visits", is_flag=True, default=False,
+@click.option("--disable-expected-visits", is_flag=True, default=False, panel="Synthesis",
     help="do not compute expected visits for the splitting heuristic")
-
-@click.option("--fsc-synthesis", is_flag=True, default=False,
-    help="enable incremental synthesis of FSCs for a (Dec-)POMDP")
-@click.option("--fsc-memory-size", default=1, show_default=True,
-    help="implicit memory size for (Dec-)POMDP FSCs")
-@click.option("--posterior-aware", is_flag=True, default=False,
-    help="unfold MDP taking posterior observation of into account")
-
-@click.option("--storm-pomdp", is_flag=True, default=False,
-    help="enable running belief analysis in STorm to enhance FSC synthesis for POMDPs (AR only)")
 @click.option(
-    "--storm-options",
-    default="cutoff",
-    type=click.Choice(["cutoff", "clip2", "clip4", "small", "refine", "overapp", "2mil", "5mil", "10mil", "20mil", "30mil", "50mil"]),
-    show_default=True,
-    help="run Storm using pre-defined settings and use the result to enhance PAYNT. Can only be used together with --storm-pomdp flag")
-@click.option("--iterative-storm", nargs=3, type=int, show_default=True, default=None,
-    help="runs the iterative PAYNT/Storm integration. Arguments timeout, paynt_timeout, storm_timeout. Can only be used together with --storm-pomdp flag")
-@click.option("--get-storm-result", default=None, type=int,
-    help="runs PAYNT for given amount of seconds and returns Storm result using FSC at cutoff. If time is 0 returns pure Storm result. Can only be used together with --storm-pomdp flag")
-@click.option("--prune-storm", is_flag=True, default=False,
-    help="only explore the main family suggested by Storm in each iteration. Can only be used together with --storm-pomdp flag. Can only be used together with --storm-pomdp flag")
-@click.option("--use-storm-cutoffs", is_flag=True, default=False,
-    help="use storm randomized scheduler cutoffs are used during the prioritization of families. Can only be used together with --storm-pomdp flag. Can only be used together with --storm-pomdp flag")
-@click.option(
-    "--unfold-strategy-storm",
-    default="storm",
-    type=click.Choice(["storm", "paynt", "cutoff"]),
-    show_default=True,
-    help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
-
-@click.option("--export-synthesis", type=click.Path(), default=None,
-    help="base filename to output synthesis result")
-
-@click.option("--mdp-discard-unreachable-choices", is_flag=True, default=False,
-    help="if set, unreachable choices will be discarded from the splitting scheduler")
-
-@click.option("--tree-depth", default=0, type=int,
-    help="decision tree synthesis: tree depth")
-@click.option("--tree-enumeration", is_flag=True, default=False,
-    help="decision tree synthesis: if set, all trees of size at most tree_depth will be enumerated")
-@click.option("--tree-map-scheduler", type=click.Path(), default=None,
-    help="decision tree synthesis: path to a scheduler to be mapped to a decision tree")
-@click.option("--add-dont-care-action", is_flag=True, default=True,
-    help="decision tree synthesis: # if set, an explicit action executing a random choice of an available action will be added to each state")
-
-@click.option(
-    "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for Cassandra models",
-)
-
-@click.option("--dtnest", is_flag=True, default=False,
-    help="use dtnest synthesizer for decision tree synthesis")
-@click.option("--dtnest-subtree-depth", default=7, type=int,
-    help="dtnest max subtree depth")
-@click.option("--dtnest-error-threshold", default=0.05, type=float,
-    help="dtnest error epsilon threshold")
-
-@click.option(
-    "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
+    "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True, panel="Synthesis",
     help="counterexample generator",
 )
-@click.option("--profiling", is_flag=True, default=False,
+
+@click.option("--fsc-synthesis", is_flag=True, default=False, panel="FSC synthesis (POMDP / Dec-POMDP / POSMG / family)",
+    help="enable incremental synthesis of FSCs for a (Dec-)POMDP")
+@click.option("--fsc-memory-size", default=1, show_default=True, panel="FSC synthesis (POMDP / Dec-POMDP / POSMG / family)",
+    help="implicit memory size for (Dec-)POMDP FSCs")
+@add_options(paynt.pomdp._cli.options)
+
+@add_options(paynt.pomdp.saynt._cli.options)
+
+@add_options(paynt.family._cli.options)
+
+@add_options(paynt.dt._cli.options)
+
+@add_options(paynt.dt.dtnest._cli.options)
+
+@click.option("--export",
+    type=click.Choice(['jani', 'drn', 'pomdp']), panel="Output",
+    help="export the model to specified format and abort")
+@click.option("--export-synthesis", type=click.Path(), default=None, panel="Output",
+    help="base filename to output synthesis result")
+@click.option("--profiling", is_flag=True, default=False, panel="Output",
     help="run profiling")
 
 def paynt_run(
@@ -170,30 +137,28 @@ def paynt_run(
     logger.info("This is Paynt version {}.".format(version()))
     paynt.utils.version_check.check_stormpy_compatibility()
 
-    # set CLI parameters
-    paynt.quotient.quotient.Quotient.disable_expected_visits = disable_expected_visits
-    paynt.synthesizer.synthesizer.Synthesizer.export_synthesis_filename_base = export_synthesis
-    paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
-    paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = fsc_memory_size
-    paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
-    paynt.quotient.decpomdp.DecPomdpQuotient.initial_memory_size = fsc_memory_size
-    paynt.quotient.posmg.PosmgQuotient.initial_memory_size = fsc_memory_size
-
-    paynt.quotient.mdp_family.MdpFamilyQuotient.initial_memory_size = fsc_memory_size
-
-    paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
-
-    paynt.dt.DtSynthesizer.tree_depth = tree_depth
-    paynt.dt.DtSynthesizer.tree_enumeration = tree_enumeration
-    paynt.dt.DtSynthesizer.scheduler_path = tree_map_scheduler
-    paynt.dt.DtColoredMdpFactory.add_dont_care_action = add_dont_care_action
-
-    paynt.dt.dtnest.DtNest.max_subtree_depth = dtnest_subtree_depth
-    paynt.dt.dtnest.DtNest.error_threshold = dtnest_error_threshold
+    # Every option below that affects synthesis behavior (as opposed to model loading/parsing) is threaded through as a Task field. 
+    # Sketch.load_sketch doesn't know the sketch's feature until it has parsed it, so task_kwargs
+    # carries every feature's options at once; whichever Task subclass ends up being constructed picks out
+    # only the keys it recognizes (see paynt.task.Task.from_specification).
+    task_kwargs = dict(
+        export_synthesis_filename_base=export_synthesis,
+        conflict_generator_type=ce_generator,
+        disable_expected_visits=disable_expected_visits,
+        memory_size=fsc_memory_size,
+        posterior_aware=posterior_aware,
+        discard_unreachable_choices=mdp_discard_unreachable_choices,
+        tree_depth=tree_depth,
+        tree_enumeration=tree_enumeration,
+        scheduler_path=tree_map_scheduler,
+        add_dont_care_action=add_dont_care_action,
+        max_subtree_depth=dtnest_subtree_depth,
+        error_threshold=dtnest_error_threshold,
+    )
 
     storm_control = None
     if storm_pomdp:
-        storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
+        storm_control = paynt.pomdp.saynt.StormPOMDPControl()
         storm_control.set_options(
             storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
             unfold_strategy_storm, prune_storm
@@ -201,8 +166,9 @@ def paynt_run(
 
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, exact)
-    synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control, dtnest)
+    colored_mdp_factory, task = paynt.parser.sketch.Sketch.load_sketch(
+        sketch_path, properties_path, export, relative_error, precision, constraint_bound, exact, task_kwargs=task_kwargs)
+    synthesizer = paynt.api.get_synthesizer(colored_mdp_factory, method, fsc_synthesis, storm_control, dtnest)
     synthesizer.run(optimum_threshold)
 
     if profiling:

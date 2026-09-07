@@ -2,7 +2,7 @@ import stormpy.storage
 
 import paynt.utils.timer
 import paynt.synthesizer.synthesizer
-import paynt.models.models
+import paynt.underlying_model.underlying_model
 
 import math
 
@@ -29,11 +29,12 @@ class Statistic:
     # parameters
     status_period_seconds = 3
     synthesis_timer_total = paynt.utils.timer.Timer()
-    
+
     def __init__(self, synthesizer):
-        
+
         self.synthesizer = synthesizer
-        self.quotient = self.synthesizer.quotient
+        self.colored_mdp = self.synthesizer.colored_mdp
+        self.task = self.synthesizer.task
 
         self.iterations_dtmc = None
         self.acc_size_dtmc = 0
@@ -58,21 +59,21 @@ class Statistic:
         self.num_policies = None
         self.num_policies_merged = None
 
-        self.family_size = None
+        self.parameter_space_size = None
         self.synthesis_timer = paynt.utils.timer.Timer()
         self.status_horizon = Statistic.status_period_seconds
 
 
-    def start(self, family):
-        logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
-        self.family_size = family.size
+    def start(self, parameter_space):
+        logger.info("synthesis initiated, design space: {}".format(parameter_space.size_or_order))
+        self.parameter_space_size = parameter_space.size
         self.synthesis_timer.start()
         if not self.synthesis_timer_total.running:
             self.synthesis_timer_total.start()
-    
+
     def iteration(self, model):
         ''' Identify the type of the model and count corresponding iteration. '''
-        if isinstance(model, paynt.models.models.Mdp):
+        if isinstance(model, paynt.underlying_model.underlying_model.Mdp):
             model = model.model
         if type(model) in [stormpy.storage.SparseDtmc, stormpy.storage.SparseExactDtmc]:
             self.iteration_dtmc(model.nr_states)
@@ -109,14 +110,14 @@ class Statistic:
         # print(f'-----------PAYNT----------- \
               # \nValue = {value} | Time elapsed = {time_elapsed}s | FSC size = {size}\nFSC = {assignment}\n', flush=True)
 
-    
+
     def status(self):
         ret_str = "> "
-        fraction_explored = self.synthesizer.explored / self.family_size
+        fraction_explored = self.synthesizer.explored / self.parameter_space_size
         time_estimate = safe_division(self.synthesis_timer.read(), fraction_explored)
         percentage_explored = int(fraction_explored * 100000) / 1000.0
         ret_str += f"progress {percentage_explored}%"
-        
+
         time_elapsed = int(self.synthesis_timer.read())
         ret_str += f", elapsed {time_elapsed} s"
         time_estimate = int(time_estimate)
@@ -143,8 +144,8 @@ class Statistic:
             iters += [f"DTMC: {self.iterations_dtmc}"]
         ret_str += ", iters = {" + ", ".join(iters) + "}"
         # ret_str += f", pres = {self.synthesizer.num_preserved}"
-        
-        spec = self.quotient.specification
+
+        spec = self.task.specification
         if spec.has_optimality:
             opt = self.synthesizer.best_assignment_value
             if opt is None:
@@ -172,10 +173,10 @@ class Statistic:
         self.job_type = "evaluation"
         self.synthesis_timer.stop()
         self.evaluations = evaluations
-        
+
 
     def get_summary_specification(self):
-        spec = self.quotient.specification
+        spec = self.task.specification
         specification = ""
         if len(spec.constraints) > 0:
             specification += "\n".join([f"constraint {i + 1}: {str(f)}" for i,f in enumerate(spec.constraints)]) + "\n"
@@ -187,7 +188,7 @@ class Statistic:
         iterations = ""
         if self.iterations_game is not None:
             avg_size = round(safe_division(self.acc_size_game, self.iterations_game))
-            type_stats = f"Game stats: avg game size: {avg_size}, iterations: {self.iterations_game}" 
+            type_stats = f"Game stats: avg game size: {avg_size}, iterations: {self.iterations_game}"
             iterations += f"{type_stats}\n"
 
         if self.iterations_mdp is not None:
@@ -202,7 +203,7 @@ class Statistic:
         return iterations
 
     def get_summary_synthesis(self):
-        spec = self.quotient.specification
+        spec = self.task.specification
         if spec.has_optimality and spec.optimality.optimum is not None:
             if isinstance(spec.optimality.optimum, stormpy.Rational):
                 optimum = spec.optimality.optimum
@@ -214,27 +215,27 @@ class Statistic:
             return f"feasible: {feasible}"
 
     def get_summary_evaluation(self):
-        if not self.evaluations or not isinstance(self.evaluations[0], paynt.synthesizer.synthesizer.FamilyEvaluation):
+        if not self.evaluations or not isinstance(self.evaluations[0], paynt.synthesizer.synthesizer.ParameterSpaceEvaluation):
             return ""
-        members_sat = sum( [evaluation.family.size for evaluation in self.evaluations if evaluation.sat ])
-        members_total = self.quotient.family.size
+        members_sat = sum( [evaluation.parameter_space.size for evaluation in self.evaluations if evaluation.sat ])
+        members_total = self.colored_mdp.parameter_space.size
         members_sat_percentage = int(round(members_sat/members_total*100,0))
         return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
 
-    
+
     def get_summary(self):
         specification = self.get_summary_specification()
 
-        fraction_explored = int((self.synthesizer.explored / self.family_size) * 100)
+        fraction_explored = int((self.synthesizer.explored / self.parameter_space_size) * 100)
         explored = f"explored: {fraction_explored} %"
 
-        quotient_states = self.quotient.quotient_mdp.nr_states
-        quotient_actions = self.quotient.quotient_mdp.nr_choices
-        design_space = f"number of holes: {self.quotient.family.num_holes}, family size: {self.quotient.family.size_or_order}, quotient: {quotient_states} states / {quotient_actions} actions"
+        underlying_mdp_states = self.colored_mdp.underlying_mdp.nr_states
+        underlying_mdp_actions = self.colored_mdp.underlying_mdp.nr_choices
+        design_space = f"number of holes: {self.colored_mdp.parameter_space.num_parameters}, parameter space size: {self.colored_mdp.parameter_space.size_or_order}, underlying MDP: {underlying_mdp_states} states / {underlying_mdp_actions} actions"
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_timer.time, 2)} s"
 
         iterations = self.get_summary_iterations()
-        
+
         if self.job_type == "synthesis":
             result = self.get_summary_synthesis()
         else:
@@ -247,8 +248,8 @@ class Statistic:
                 f"{iterations}\n{result}\n"\
                 f"{sep}"
         return summary
-    
-    def print(self):    
+
+    def print(self):
         logger.info(f'\n{self.get_summary()}')
 
 
@@ -257,10 +258,10 @@ class Statistic:
         model_info += "\t".join(["states","choices","MDPs","states*MDPs","SAT MDPs","SAT %",])
         print(model_info)
         # print("\t\t",end="")
-        print(self.quotient.quotient_mdp.nr_states,end=" ")
-        print(self.quotient.quotient_mdp.nr_choices,end=" ")
+        print(self.colored_mdp.underlying_mdp.nr_states,end=" ")
+        print(self.colored_mdp.underlying_mdp.nr_choices,end=" ")
         print(self.num_mdps_total,end=" ")
-        print(self.quotient.quotient_mdp.nr_states*self.num_mdps_total,end=" ")
+        print(self.colored_mdp.underlying_mdp.nr_states*self.num_mdps_total,end=" ")
         print(self.num_mdps_sat,end=" ")
         sat_by_total_percentage = round(self.num_mdps_sat/self.num_mdps_total*100,2)
         print(sat_by_total_percentage)
@@ -277,7 +278,7 @@ class Statistic:
         print(synthesis_time,end=" ")
         print(self.num_nodes,end=" ")
         print(self.num_nodes_merged,end=" ")
-        
+
         print(self.num_leaves,end=" ")
         print(self.num_leaves_merged,end=" ")
         leaves_by_mdps = round(self.num_leaves_merged/self.num_mdps_total*100,2)

@@ -1,4 +1,4 @@
-import paynt.verification.property
+import paynt.specification.property
 import payntbind
 import stormpy
 
@@ -16,13 +16,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states
@@ -42,13 +42,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states
@@ -68,13 +68,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._qualitative
         assert result.result_for_all_states
@@ -89,13 +89,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._qualitative
         assert result.result_for_all_states
@@ -110,13 +110,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._qualitative
         assert result.result_for_all_states
@@ -131,13 +131,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._qualitative
         assert result.result_for_all_states
@@ -152,13 +152,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states
@@ -177,13 +177,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states
@@ -202,13 +202,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
 
         # assert
         assert result._quantitative
@@ -230,13 +230,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
 
         # assert
         assert result._quantitative
@@ -258,13 +258,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
 
         # assert
         assert result.get_values() == pytest.approx([2, 1, 1, 0])
@@ -281,13 +281,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
 
         # assert
         assert result.get_values() == pytest.approx([inf, inf, inf, 0])
@@ -304,13 +304,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
 
         # assert
         assert result.get_values() == pytest.approx([inf, inf, 0])
@@ -326,13 +326,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
 
         # assert
         assert result.get_values() == pytest.approx([2, 1, 0])
@@ -348,13 +348,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=False,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
 
         # assert
         assert result.get_values() == pytest.approx([21, 20, 0])
@@ -369,13 +369,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states
@@ -395,13 +395,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=True,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states # other states will be filled anyway
@@ -423,13 +423,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states
@@ -451,13 +451,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states
@@ -476,13 +476,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states
@@ -503,13 +503,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._quantitative
         assert result.result_for_all_states
@@ -533,13 +533,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._qualitative
         assert result.result_for_all_states
@@ -554,13 +554,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._qualitative
         assert result.result_for_all_states
@@ -575,13 +575,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._qualitative
         assert result.result_for_all_states
@@ -596,13 +596,13 @@ class TestSmgModelchecker:
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
         model = stormpy.build_model(program, properties)
-        paynt.verification.property.Property.initialize()
+        paynt.specification.property.Property.initialize()
 
         # test
         result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
                                                     only_initial_states=False,
                                                     set_produce_schedulers=True,
-                                                    env=paynt.verification.property.Property.environment)
+                                                    env=paynt.specification.property.Property.environment)
         # assert
         assert result._qualitative
         assert result.result_for_all_states

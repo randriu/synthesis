@@ -11,27 +11,27 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def dt_to_state_to_actions(decision_tree, quotient, reachable_states=None):
+def dt_to_state_to_actions(decision_tree, colored_mdp, reachable_states=None):
     if reachable_states is None:
-        reachable_states = stormpy.BitVector(quotient.quotient_mdp.nr_states, True)
+        reachable_states = stormpy.BitVector(colored_mdp.underlying_mdp.nr_states, True)
     state_to_action = []
-    nci = quotient.quotient_mdp.nondeterministic_choice_indices.copy()
-    for state in range(quotient.quotient_mdp.nr_states):
-        if quotient.state_is_relevant_bv.get(state) and reachable_states.get(state):
-            action_index = get_action_for_state(decision_tree.root, quotient, state, quotient.relevant_state_valuations[state], nci)
-            state_to_action.append(quotient.choice_to_action[nci[state] + action_index])
+    nci = colored_mdp.underlying_mdp.nondeterministic_choice_indices.copy()
+    for state in range(colored_mdp.underlying_mdp.nr_states):
+        if colored_mdp.state_is_relevant_bv.get(state) and reachable_states.get(state):
+            action_index = get_action_for_state(decision_tree.root, colored_mdp, state, colored_mdp.relevant_state_valuations[state], nci)
+            state_to_action.append(colored_mdp.choice_to_action[nci[state] + action_index])
         else:
             state_to_action.append(-1)
 
     return state_to_action
 
 
-def get_action_for_state(node, quotient, state, state_valuation, nci):
+def get_action_for_state(node, colored_mdp, state, state_valuation, nci):
     if node.is_terminal:
         action_index = node.action
         index = 0
         for choice in range(nci[state],nci[state+1]):
-            if quotient.choice_to_action[choice] == action_index:
+            if colored_mdp.choice_to_action[choice] == action_index:
                 return index
             index += 1
         else:
@@ -39,16 +39,16 @@ def get_action_for_state(node, quotient, state, state_valuation, nci):
             # for now we will treat this by using the __random__ action but it can lead to strange behaviour
             index = 0
             for choice in range(nci[state],nci[state+1]):
-                if quotient.action_labels[quotient.choice_to_action[choice]] == "__random__":
+                if colored_mdp.action_labels[colored_mdp.choice_to_action[choice]] == "__random__":
                     return index
                 index += 1
             assert False
-    var = quotient.variables[node.variable]
+    var = colored_mdp.variables[node.variable]
     bound = var.domain[node.variable_bound]
     if state_valuation[node.variable] <= bound:
-        return get_action_for_state(node.child_true, quotient, state, state_valuation, nci)
+        return get_action_for_state(node.child_true, colored_mdp, state, state_valuation, nci)
     else:
-        return get_action_for_state(node.child_false, quotient, state, state_valuation, nci)
+        return get_action_for_state(node.child_false, colored_mdp, state, state_valuation, nci)
 
 
 def get_states_satisfying_predicate(dt_colored_mdp_factory, node, current_states, leq=True):
@@ -65,7 +65,7 @@ def get_states_satisfying_predicate(dt_colored_mdp_factory, node, current_states
 def get_state_space_for_tree_helper_node(dt_colored_mdp_factory, node_id):
     node = dt_colored_mdp_factory.tree_helper_tree.collect_nodes(lambda node : node.identifier == node_id)[0]
     current_node = node
-    states = stormpy.storage.BitVector(dt_colored_mdp_factory.quotient_mdp.nr_states, True)
+    states = stormpy.storage.BitVector(dt_colored_mdp_factory.underlying_mdp.nr_states, True)
     while current_node.parent is not None:
         parent_node = current_node.parent
         if parent_node.child_true.identifier == current_node.identifier:
@@ -89,9 +89,9 @@ def get_chosen_action_for_state_from_tree_helper(dt_colored_mdp_factory, state, 
 def get_selected_choices_from_tree_helper(dt_colored_mdp_factory, state_to_exclude, tree=None):
     if tree is None:
         tree = dt_colored_mdp_factory.tree_helper_tree
-    selected_choices = stormpy.storage.BitVector(dt_colored_mdp_factory.quotient_mdp.nr_choices, False)
-    mdp_nci = dt_colored_mdp_factory.quotient_mdp.nondeterministic_choice_indices.copy()
-    for state in range(dt_colored_mdp_factory.quotient_mdp.nr_states):
+    selected_choices = stormpy.storage.BitVector(dt_colored_mdp_factory.underlying_mdp.nr_choices, False)
+    mdp_nci = dt_colored_mdp_factory.underlying_mdp.nondeterministic_choice_indices.copy()
+    for state in range(dt_colored_mdp_factory.underlying_mdp.nr_states):
         if state_to_exclude.get(state) or dt_colored_mdp_factory.state_is_relevant_bv.get(state) == False:
             for choice in range(mdp_nci[state],mdp_nci[state+1]):
                 selected_choices.set(choice, True)
@@ -125,7 +125,7 @@ def build_tree_helper_tree(dt_colored_mdp_factory, tree_helper=None):
 # unfixed_states is a bitvector of states that should be left unfixed in the submdp
 def get_submdp_from_unfixed_states(dt_colored_mdp_factory, unfixed_states=None):
     if unfixed_states is None:
-        unfixed_states = stormpy.storage.BitVector(dt_colored_mdp_factory.quotient_mdp.nr_states, False)
+        unfixed_states = stormpy.storage.BitVector(dt_colored_mdp_factory.underlying_mdp.nr_states, False)
     selected_choices = get_selected_choices_from_tree_helper(dt_colored_mdp_factory, unfixed_states)
     submdp = dt_colored_mdp_factory.build_from_choice_mask(selected_choices)
     return submdp
@@ -137,13 +137,13 @@ def create_uniform_random_tree(dt_colored_mdp_factory):
     return decision_tree
 
 
-def state_to_choice_to_state_to_action(state_to_choice, quotient):
+def state_to_choice_to_state_to_action(state_to_choice, colored_mdp):
     state_to_action = []
-    for state in range(quotient.quotient_mdp.nr_states):
-        if state_to_choice[state] is None or not quotient.state_is_relevant_bv.get(state):
+    for state in range(colored_mdp.underlying_mdp.nr_states):
+        if state_to_choice[state] is None or not colored_mdp.state_is_relevant_bv.get(state):
             state_to_action.append(-1)
         else:
-            state_to_action.append(quotient.choice_to_action[state_to_choice[state]])
+            state_to_action.append(colored_mdp.choice_to_action[state_to_choice[state]])
 
     return state_to_action
 

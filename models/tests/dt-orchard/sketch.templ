@@ -1,0 +1,54 @@
+mdp
+
+// simple orchard rules
+// AMOUNT_PER_FRUIT = 4, RAVEN_PATH_LENGTH = 5, PICK_AMOUNT = 1
+
+// classic orchard rules
+// AMOUNT_PER_FRUIT = 10, RAVEN_PATH_LENGTH = 9, PICK_AMOUNT = 2
+
+const int AMOUNT_PER_FRUIT = 4;
+const int RAVEN_PATH_LENGTH = 5;
+const int PICK_AMOUNT = 1;
+
+formula fail = raven=RAVEN_PATH_LENGTH;
+formula goal = green=0 & red=0 & yellow=0 & blue=0;
+
+label "goal" = goal;
+
+formula green_minus = max(green-1,0);
+formula red_minus = max(red-1,0);
+formula yellow_minus = max(yellow-1,0);
+formula blue_minus = max(blue-1,0);
+
+formula pick_modulo = mod(pick+1, PICK_AMOUNT+1);
+
+formula most_greens = (green >= red) & (green >= yellow) & (green >= blue);
+label "SV_most_greens" = most_greens;
+
+formula most_reds = (red >= green) & (red >= yellow) & (red >= blue);
+label "SV_most_reds" = most_reds;
+
+formula most_yellows = (yellow >= green) & (yellow >= red) & (yellow >= blue);
+label "SV_most_yellows" = most_yellows;
+
+formula most_blues = (blue >= green) & (blue >= yellow) & (blue >= red);
+label "SV_most_blues" = most_blues;
+
+module orchard
+
+    green : [0..AMOUNT_PER_FRUIT] init AMOUNT_PER_FRUIT;
+    red : [0..AMOUNT_PER_FRUIT] init AMOUNT_PER_FRUIT;
+    yellow : [0..AMOUNT_PER_FRUIT] init AMOUNT_PER_FRUIT;
+    blue : [0..AMOUNT_PER_FRUIT] init AMOUNT_PER_FRUIT;
+    raven : [0..RAVEN_PATH_LENGTH] init 0;
+    
+    pick : [0..PICK_AMOUNT] init 0;
+
+    [roll] !fail & pick=0 -> 1/6:(green'=green_minus) + 1/6:(red'=red_minus) + 1/6:(yellow'=yellow_minus) + 1/6:(blue'=blue_minus) + 1/6:(pick'=1) + 1/6:(raven'=raven+1);
+
+    [pick_green] !fail & pick>0 -> (green'=green_minus)&(pick'=pick_modulo);
+    [pick_red] !fail & pick>0 -> (red'=red_minus)&(pick'=pick_modulo);
+    [pick_yellow] !fail & pick>0 -> (yellow'=yellow_minus)&(pick'=pick_modulo);
+    [pick_blue] !fail & pick>0 -> (blue'=blue_minus)&(pick'=pick_modulo);
+
+endmodule

@@ -9,7 +9,8 @@ from .factory import DtColoredMdpFactory
 def synthesize(cmdp_factory_dt : DtColoredMdpFactory, paynt_task_dt : DtTask, use_solver : str | None = None) -> DtResult:
     """API function to solve a given DtTask and DtColoredMdpFactory. Optional use_solver parameter can force a specific solver to be used. Returns paynt_result."""
 
-    cmdp_factory_dt.specification = paynt_task_dt.pctl_task # TODO this is a bit hacky, should be refactored eventually so that the specification is passed in a cleaner way
+    # TODO this is a bit hacky, should be refactored eventually so that the specification is passed in a cleaner way
+    cmdp_factory_dt.task = paynt_task_dt
 
     if use_solver is None:
         use_solver = _choose_solver_for_dt_task(paynt_task_dt)

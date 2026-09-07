@@ -1,0 +1,55 @@
+// Exported by prism
+// Original model type: POSMG
+@type: POSMG
+@parameters
+
+@reward_models
+
+@nr_states
+8
+@nr_choices
+14
+@model
+state 0 {0} <1> init
+	action odd []
+		1 : 0.5
+		3 : 0.5
+	action even []
+		2 : 0.5
+		4 : 0.5
+state 1 {1} <0>
+	action dbl []
+		2 : 1
+	action add []
+		2 : 0.75
+		7 : 0.25
+state 2 {2} <0>
+	action dbl []
+		4 : 1
+	action add []
+		3 : 0.75
+		7 : 0.25
+state 3 {1} <0>
+	action dbl []
+		6 : 1
+	action add []
+		4 : 0.75
+		7 : 0.25
+state 4 {2} <0>
+	action dbl []
+		7 : 1
+	action add []
+		5 : 0.75
+		7 : 0.25
+state 5 {1} <0>
+	action dbl []
+		7 : 1
+	action add []
+		6 : 0.75
+		7 : 0.25
+state 6 {3} <1> goal
+	action done []
+		6 : 1
+state 7 {3} <1>
+	action done []
+		7 : 1

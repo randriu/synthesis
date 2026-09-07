@@ -128,7 +128,7 @@ class DecisionTreeNode:
         self.child_false.associate_parameters(node_parameter_info)
 
     def associate_assignment(self, assignment): # TODO type of assignment
-        parameter_assignment = [assignment.hole_options(parameter)[0] for parameter in self.parameters]
+        parameter_assignment = [assignment.parameter_options(parameter)[0] for parameter in self.parameters]
         if self.is_terminal:
             self.action = parameter_assignment[0]
             return
@@ -139,15 +139,15 @@ class DecisionTreeNode:
         self.child_true.associate_assignment(assignment)
         self.child_false.associate_assignment(assignment)
 
-    def apply_hint(self, subfamily, tree_hint):
+    def apply_hint(self, parameter_subspace, tree_hint):
         if self.is_terminal or tree_hint.is_terminal:
             return
 
         variable_hint = tree_hint.variable
-        subfamily.hole_set_options(self.parameters[0],[variable_hint]) # TODO refactor, rename holes to parameters
-        subfamily.hole_set_options(self.parameters[variable_hint+1],[tree_hint.variable_bound])
-        self.child_true.apply_hint(subfamily,tree_hint.child_true)
-        self.child_false.apply_hint(subfamily,tree_hint.child_false)
+        parameter_subspace.parameter_set_options(self.parameters[0],[variable_hint])
+        parameter_subspace.parameter_set_options(self.parameters[variable_hint+1],[tree_hint.variable_bound])
+        self.child_true.apply_hint(parameter_subspace,tree_hint.child_true)
+        self.child_false.apply_hint(parameter_subspace,tree_hint.child_false)
 
     def simplify(self, variables : list["DtVariable"], state_valuations : list[list[int]]):
         '''
@@ -249,9 +249,9 @@ class DecisionTreeNode:
             graphviz_tree.edge(self.graphviz_id,self.child_false.graphviz_id,label="F")
         
     
-    # in dtNest the tree nodes contain reference indeces to objects from subtree_quotient
-    # this needs to be fixed to match the references in the original quotient
-    def fix_with_respect_to_quotient(self, action_labels, new_action_labels, variables, new_variables):
+    # in dtNest the tree nodes contain reference indeces to objects from subtree_colored_mdp
+    # this needs to be fixed to match the references in the original colored MDP
+    def fix_with_respect_to_colored_mdp(self, action_labels, new_action_labels, variables, new_variables):
         if self.is_terminal:
             old_index = self.action
             self.action = new_action_labels.index(action_labels[old_index])
@@ -267,8 +267,8 @@ class DecisionTreeNode:
         self.variable = var_id
         self.variable_bound = bound_id
 
-        self.child_true.fix_with_respect_to_quotient(action_labels, new_action_labels, variables, new_variables)
-        self.child_false.fix_with_respect_to_quotient(action_labels, new_action_labels, variables, new_variables)
+        self.child_true.fix_with_respect_to_colored_mdp(action_labels, new_action_labels, variables, new_variables)
+        self.child_false.fix_with_respect_to_colored_mdp(action_labels, new_action_labels, variables, new_variables)
 
     def normalize_boolean_variable_nodes_for_output(self, variables : list["DtVariable"]):
         if self.is_terminal:
@@ -407,14 +407,14 @@ class DecisionTree:
         output_tree.root.to_graphviz(graphviz_tree,output_tree.variables,output_tree.action_labels, highlight_nodes)
         return graphviz_tree
     
-    def append_tree_as_subtree(self, new_subtree, subtree_root_node_id, subtree_quotient):
+    def append_tree_as_subtree(self, new_subtree, subtree_root_node_id, subtree_colored_mdp):
         subtree_root_node = self.collect_nodes(lambda node : node.identifier == subtree_root_node_id)
         assert len(subtree_root_node) == 1, f"subtree root node id {subtree_root_node_id} not found in decision tree"
         subtree_root_node = subtree_root_node[0]
 
         all_current_nodes = self.collect_nodes()
         new_subtree.root.assign_identifiers(identifier=len(all_current_nodes)+1)
-        new_subtree.root.fix_with_respect_to_quotient(subtree_quotient.action_labels, self.action_labels, subtree_quotient.variables, self.variables)
+        new_subtree.root.fix_with_respect_to_colored_mdp(subtree_colored_mdp.action_labels, self.action_labels, subtree_colored_mdp.variables, self.variables)
 
         parent = subtree_root_node.parent
         if parent.child_true.identifier == subtree_root_node.identifier:
