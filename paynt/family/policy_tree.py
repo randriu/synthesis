@@ -609,9 +609,8 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
     def compute_scores(self, prop, scheduler_choices, state_values, inconsistent_assignments):
         mdp = self.colored_mdp.underlying_mdp
         choice_values = paynt.underlying_model.underlying_model.ModelIndex.choice_values(mdp, prop, state_values)
-        expected_visits = None
-        if not self.task.disable_expected_visits:
-            expected_visits = paynt.underlying_model.underlying_model.ModelIndex.compute_expected_visits(mdp, prop, scheduler_choices)
+        expected_visits = paynt.underlying_model.underlying_model.ModelIndex.compute_expected_visits(
+            mdp, prop, scheduler_choices, disable_expected_visits=self.task.disable_expected_visits)
         underlying_mdp_choice_map = [choice for choice in range(self.colored_mdp.underlying_mdp.nr_choices)]
         scores = paynt.utils.scoring.estimate_scheduler_difference(
             self.colored_mdp, self.colored_mdp.underlying_mdp, underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits)
