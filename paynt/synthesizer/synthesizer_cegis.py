@@ -33,39 +33,39 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         return "CEGIS " + self.conflict_generator.name
 
 
-    def collect_conflict_requests(self, parameter_space, mc_result):
+    def collect_conflict_requests(self, node, mc_result):
         '''
         Construct conflict request wrt each unsatisfiable property,
             pack such properties as well as their MDP results (if available)
         '''
         conflict_requests = []
-        for index in parameter_space.constraint_indices:
+        for index in node.constraint_indices:
             member_result = mc_result.constraints_result.results[index]
             if member_result.sat:
                 continue
             prop = self.task.specification.constraints[index]
-            parameter_space_result = parameter_space.analysis_result.constraints_result.results[index] if parameter_space.analysis_result is not None else None
+            parameter_space_result = node.analysis_result.constraints_result.results[index] if node.analysis_result is not None else None
             conflict_requests.append( (index,prop,parameter_space_result) )
         if self.task.specification.has_optimality:
             member_result = mc_result.optimality_result
             index = len(self.task.specification.constraints)
             prop = self.task.specification.optimality
-            parameter_space_result = parameter_space.analysis_result.optimality_result if parameter_space.analysis_result is not None else None
+            parameter_space_result = node.analysis_result.optimality_result if node.analysis_result is not None else None
             conflict_requests.append( (index,prop,parameter_space_result) )
 
         return conflict_requests
 
 
-    def analyze_parameter_space_assignment_cegis(self, parameter_space, assignment):
+    def analyze_parameter_space_assignment_cegis(self, node, assignment):
         """
         :return (1) list of conflicts to exclude from design space (might be empty)
         :return (2) accepting assignment (or None)
         """
-        assert parameter_space.mdp is not None, "analyzed parameter space does not have an associated underlying MDP"
+        assert node.mdp is not None, "analyzed parameter space does not have an associated underlying MDP"
 
         dtmc = self.colored_mdp.build_assignment(assignment)
         self.stat.iteration(dtmc)
-        result = dtmc.check_specification(self.task.specification, parameter_space.constraint_indices, short_evaluation=True)
+        result = dtmc.check_specification(self.task.specification, node.constraint_indices, short_evaluation=True)
         # analyze model checking results
         accepting_assignment = None
         accepting,improving_value = result.accepting_dtmc(self.task.specification)
@@ -76,34 +76,34 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         if accepting and not self.task.specification.can_be_improved():
             return [], accepting_assignment
 
-        conflict_requests = self.collect_conflict_requests(parameter_space, result)
-        conflicts = self.conflict_generator.construct_conflicts(parameter_space, assignment, dtmc, conflict_requests)
+        conflict_requests = self.collect_conflict_requests(node, result)
+        conflicts = self.conflict_generator.construct_conflicts(node, assignment, dtmc, conflict_requests)
 
         return conflicts, accepting_assignment
 
 
-    def synthesize_one(self, parameter_space):
+    def synthesize_one(self, node):
 
         # build the induced sub-MDP, mapping mdp states to parameter indices
-        self.colored_mdp.build(parameter_space)
+        node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space)
         self.conflict_generator.initialize()
 
         # use sketch design space as a SAT baseline (TODO why?)
         smt_solver = paynt.parameter_space.smt.SmtSolver(self.colored_mdp.parameter_space)
 
         # CEGIS loop
-        assignment = smt_solver.pick_assignment(parameter_space)
+        assignment = smt_solver.pick_assignment(node)
         while assignment is not None:
 
-            conflicts, accepting_assignment = self.analyze_parameter_space_assignment_cegis(parameter_space, assignment)
+            conflicts, accepting_assignment = self.analyze_parameter_space_assignment_cegis(node, assignment)
             if accepting_assignment is not None:
                 self.best_assignment = accepting_assignment
                 if not self.task.specification.can_be_improved():
                     return self.best_assignment
 
-            pruned = smt_solver.exclude_conflicts(parameter_space, assignment, conflicts)
+            pruned = smt_solver.exclude_conflicts(node, assignment, conflicts)
             self.explored += pruned
 
             # construct next assignment
-            assignment = smt_solver.pick_assignment(parameter_space)
+            assignment = smt_solver.pick_assignment(node)
         return self.best_assignment

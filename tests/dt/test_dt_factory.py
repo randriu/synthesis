@@ -1,4 +1,5 @@
 import paynt.dt
+import paynt.synthesizer.search_node
 
 
 class TestDtColoredMdpFactory:
@@ -25,9 +26,9 @@ class TestDtColoredMdpFactory:
         assert reset.action_labels is dt_colored_mdp.action_labels
 
     def test_build_produces_an_mdp(self, dt_colored_mdp):
-        parameter_space = dt_colored_mdp.parameter_space.copy()
-        dt_colored_mdp.build(parameter_space)
-        assert parameter_space.mdp.states > 0
+        node = paynt.synthesizer.search_node.SearchNode(dt_colored_mdp.parameter_space.copy())
+        node.mdp, node.selected_choices = dt_colored_mdp.build(node.parameter_space)
+        assert node.mdp.states > 0
 
     def test_factory_without_a_task_matches_the_get_dt_with_api_pattern(self, dt_colored_mdp):
         ''' paynt.dt.api.synthesize's real callers (see get_dt_with_api.py) construct a

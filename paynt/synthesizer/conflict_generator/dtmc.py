@@ -31,7 +31,7 @@ class ConflictGeneratorDtmc():
     def prepare_model(self, model):
         self.counterexample_generator.prepare_dtmc(model.model, model.underlying_mdp_state_map)
 
-    def construct_conflicts(self, parameter_space, assignment, dtmc, conflict_requests):
+    def construct_conflicts(self, node, assignment, dtmc, conflict_requests):
 
         self.prepare_model(dtmc)
 
@@ -46,7 +46,7 @@ class ConflictGeneratorDtmc():
             if parameter_space_result is not None:
                 bounds = parameter_space_result.primary.result
 
-            conflict = self.counterexample_generator.construct_conflict(index, threshold, bounds, parameter_space.mdp.underlying_mdp_state_map)
+            conflict = self.counterexample_generator.construct_conflict(index, threshold, bounds, node.mdp.underlying_mdp_state_map)
             conflicts.append(conflict)
 
         return conflicts

@@ -1,4 +1,5 @@
 import paynt.synthesizer.statistic
+import paynt.synthesizer.search_node
 import paynt.utils.timer
 
 import logging
@@ -7,11 +8,16 @@ logger = logging.getLogger(__name__)
 
 class ParameterSpaceEvaluation:
     '''Result associated with a parameter space (subspace) after its evaluation. '''
-    def __init__(self, parameter_space, value, sat, policy):
+    def __init__(self, parameter_space, value, sat, policy, selected_choices=None):
         self.parameter_space = parameter_space
         self.value = value
         self.sat = sat
         self.policy = policy
+        # family/policy_tree.py only: the compatible-choices bitmask this evaluation's policy was verified
+        # against at decision time -- may be narrower than parameter_space's current bounds if postprocessing
+        # later merged this parameter_space with a sibling's, so re-verification (see PolicyTreeSynthesizer.
+        # verify_policy) uses this snapshot rather than recomputing from parameter_space.native
+        self.selected_choices = selected_choices
 
 
 class Synthesizer:
@@ -41,6 +47,11 @@ class Synthesizer:
             return paynt.synthesizer.synthesizer_hybrid.SynthesizerHybrid(colored_mdp, task)
         raise ValueError("invalid method name")
 
+
+    # search-node type constructed to wrap a root/subspace parameter_space for the AR/CEGIS/Hybrid worklist
+    # (see synthesize() below); overridden by SynthesizerARDt with DtSearchNode, which declares an extra
+    # scheduler_choices field these generic algorithms never need
+    search_node_type = paynt.synthesizer.search_node.SearchNode
 
     def __init__(self, colored_mdp, task):
         self.colored_mdp = colored_mdp
@@ -142,8 +153,9 @@ class Synthesizer:
         '''
         if parameter_space is None:
             parameter_space = self.colored_mdp.parameter_space
-        if parameter_space.constraint_indices is None:
-            parameter_space.constraint_indices = list(range(len(self.task.specification.constraints)))
+        node = self.search_node_type(parameter_space)
+        if node.constraint_indices is None:
+            node.constraint_indices = list(range(len(self.task.specification.constraints)))
 
         self.set_optimality_threshold(optimum_threshold)
         self.synthesis_timer = paynt.utils.timer.Timer(timeout)
@@ -151,7 +163,7 @@ class Synthesizer:
         self.stat = paynt.synthesizer.statistic.Statistic(self)
         self.explored = 0
         self.stat.start(parameter_space)
-        self.synthesize_one(parameter_space)
+        self.synthesize_one(node)
         if self.best_assignment is not None and self.best_assignment.size > 1 and not return_all:
             self.best_assignment = self.best_assignment.pick_any()
         self.stat.finished_synthesis()

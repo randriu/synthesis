@@ -47,13 +47,19 @@ class ColoredMdp:
         ''' to be overridden '''
         pass
 
-    def build(self, parameter_space):
-        ''' Compute the induced sub-MDP C[eta] for the given parameter (sub)space, storing it on parameter_space.mdp. '''
+    def build(self, parameter_space, parent_selected_choices=None):
+        '''
+        Compute the induced sub-MDP C[eta] for the given parameter (sub)space.
+        :param parent_selected_choices unused by this base implementation; DtColoredMdp's override uses it
+            as a reuse hint from the parent search node. Part of the shared signature since callers dispatch
+            polymorphically without knowing which override they're calling.
+        :returns (mdp, selected_choices)
+        '''
         choices = self.coloring.selectCompatibleChoices(parameter_space.native)
-        parameter_space.mdp = paynt.underlying_model.underlying_model.SubmodelBuilder.build_submdp(
+        mdp = paynt.underlying_model.underlying_model.SubmodelBuilder.build_submdp(
             self.underlying_mdp, choices, self.subsystem_builder_options)
-        parameter_space.selected_choices = choices
-        parameter_space.mdp.parameter_space = parameter_space
+        mdp.parameter_space = parameter_space
+        return mdp, choices
 
     def build_assignment(self, parameter_space):
         ''' Compute the induced DTMC C[theta] for a full parameter assignment. '''
@@ -74,10 +80,13 @@ class ColoredMdp:
         parameter_selection = self.coloring.collectHoleOptions(choices)
         return parameter_selection
 
-    def scheduler_is_consistent(self, mdp, result, specification):
+    def scheduler_is_consistent(self, mdp, node, result, specification):
         '''
         Get the parameter assignment induced by this scheduler and fill undefined
         parameters by some option from the parameter space of this mdp.
+        :param node the search node currently being verified -- unused by this base implementation, but part
+            of the signature since DtColoredMdp's override needs it (to record scheduler_choices) and callers
+            dispatch polymorphically without knowing which one they're calling
         :param specification the specification currently being solved for -- unused by this base
             implementation, but part of the signature since DtColoredMdp's override needs it and callers
             dispatch polymorphically without knowing which one they're calling

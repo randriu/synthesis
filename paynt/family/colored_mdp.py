@@ -120,10 +120,13 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return json_whole
 
-    def fix_and_apply_policy_to_parameter_space(self, parameter_space, policy):
+    def fix_and_apply_policy_to_parameter_space(self, selected_choices, policy):
         '''
-        Apply policy to the underlying MDP for the given parameter space. Every undefined action in a policy is set to an
-        arbitrary one. Upon constructing the MDP, reset unused actions in a policy to None.
+        Apply policy to the underlying MDP restricted to selected_choices. Every undefined action in a policy
+        is set to an arbitrary one. Upon constructing the MDP, reset unused actions in a policy to None.
+        :param selected_choices the compatible-choices bitmask to restrict the policy to -- passed explicitly
+            (not a parameter_space) since callers may want to verify against a snapshot taken at an earlier
+            point (e.g. before postprocessing widened a node's parameter_space via parameter_set_options)
         :returns fixed policy
         :returns the resulting MDP
         '''
@@ -131,7 +134,7 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
         policy_choices = []
         for state,action in enumerate(policy):
             policy_choices += self.state_action_choices[state][action]
-        choices = payntbind.synthesis.policyToChoicesForFamily(policy_choices, parameter_space.selected_choices)
+        choices = payntbind.synthesis.policyToChoicesForFamily(policy_choices, selected_choices)
 
         # build MDP and keep only reachable states in policy
         mdp = paynt.underlying_model.underlying_model.SubmodelBuilder.build_submdp(
@@ -144,7 +147,7 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
         policy_fixed = (policy_fixed,mask)
         return policy_fixed,mdp
 
-    def apply_policy_to_parameter_space(self, parameter_space, policy):
+    def apply_policy_to_parameter_space(self, selected_choices, policy):
         policy_choices = []
         for state,action in enumerate(policy):
             if action is None:
@@ -152,7 +155,7 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
                     policy_choices += choice
             else:
                 policy_choices += self.state_action_choices[state][action]
-        choices = payntbind.synthesis.policyToChoicesForFamily(policy_choices, parameter_space.selected_choices)
+        choices = payntbind.synthesis.policyToChoicesForFamily(policy_choices, selected_choices)
 
         mdp = paynt.underlying_model.underlying_model.SubmodelBuilder.build_submdp(
             self.underlying_mdp, choices, self.subsystem_builder_options)
@@ -168,9 +171,9 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
 
             choices = mdp.model.transition_matrix.get_rows_for_group(state)
             if len(choices)>1:
-                underlying_state = mdp.underlying_mdp_state_map[state]
+                underlying_mdp_state = mdp.underlying_mdp_state_map[state]
                 underlying_mdp_choices = [mdp.underlying_mdp_choice_map[choice] for choice in choices]
-                state_str = self.underlying_mdp.state_valuations.get_string(underlying_state)
+                state_str = self.underlying_mdp.state_valuations.get_string(underlying_mdp_state)
                 state_str = state_str.replace(" ","")
                 state_str = state_str.replace("\t","")
                 actions_str = [self.action_labels[self.choice_to_action[choice]] for choice in underlying_mdp_choices]

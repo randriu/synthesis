@@ -1,5 +1,6 @@
 import paynt.family
 import paynt.family.colored_mdp
+import paynt.synthesizer.search_node
 
 
 class TestFamilyColoredMdpFactory:
@@ -9,9 +10,9 @@ class TestFamilyColoredMdpFactory:
         assert family_colored_mdp.feature_kind == "family"
 
     def test_build_produces_an_mdp_not_necessarily_deterministic(self, family_colored_mdp):
-        parameter_space = family_colored_mdp.parameter_space.copy()
-        family_colored_mdp.build(parameter_space)
-        assert parameter_space.mdp.states > 0
+        node = paynt.synthesizer.search_node.SearchNode(family_colored_mdp.parameter_space.copy())
+        node.mdp, node.selected_choices = family_colored_mdp.build(node.parameter_space)
+        assert node.mdp.states > 0
 
     def test_build_assignment_does_not_force_a_dtmc(self, family_colored_mdp):
         '''

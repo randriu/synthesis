@@ -1,7 +1,5 @@
 import payntbind.synthesis
 
-import paynt.parameter_space.smt
-
 import math
 import random
 import itertools
@@ -10,22 +8,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class ParentInfo():
-    '''
-    Container for stuff to be remembered when splitting an undecided parameter space into subspaces. Generally
-    used to speed-up work with the subspaces.
-    :note it is better to store these things in a separate container instead
-        of having a reference to the parent parameter space (that will never be considered again) for memory
-        efficiency.
-    '''
-    def __init__(self):
-        pass
-        self.selected_choices = None
-        self.constraint_indices = None
-        self.refinement_depth = None
-
-
 class ParameterSpace:
+    '''
+    A pure value: the parameter-domain data (V of the colored MDP C = (M, V, kappa)) -- which parameters
+    exist, their names/option labels, and (via native) which options are currently assumed for each. Carries
+    no notion of search progress or lifetime -- that lives on paynt.synthesizer.search_node.SearchNode, which
+    wraps a ParameterSpace alongside a built MDP, model-checking results, and other search-time bookkeeping.
+    '''
 
     def __init__(self, other=None):
         if other is None:
@@ -36,20 +25,6 @@ class ParameterSpace:
             self.native = payntbind.synthesis.Family(other.native)
             self.parameter_to_name = other.parameter_to_name
             self.parameter_to_option_labels = other.parameter_to_option_labels
-
-        self.parent_info = None
-        self.refinement_depth = 0
-        self.constraint_indices = None
-
-        self.selected_choices = None
-        self.mdp = None
-        self.analysis_result = None
-        self.encoding = None
-
-    def add_parent_info(self, parent_info):
-        self.parent_info = parent_info
-        self.refinement_depth = parent_info.refinement_depth + 1
-        self.constraint_indices = parent_info.constraint_indices
 
     @property
     def num_parameters(self):
@@ -178,15 +153,3 @@ class ParameterSpace:
         suboptions = [[option] for option in combination]
         assignment = self.assume_options_copy(suboptions)
         return assignment
-
-    def collect_parent_info(self, specification):
-        pi = ParentInfo()
-        pi.selected_choices = self.selected_choices
-        pi.refinement_depth = self.refinement_depth
-        cr = self.analysis_result.constraints_result
-        pi.constraint_indices = cr.undecided_constraints if cr is not None else []
-        return pi
-
-    def encode(self, smt_solver):
-        if self.encoding is None:
-            self.encoding = paynt.parameter_space.smt.ParameterSpaceEncoding(smt_solver, self)

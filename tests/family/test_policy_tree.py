@@ -21,7 +21,7 @@ class TestPolicyTreeSynthesis:
         assert all(evaluation.sat for evaluation in evaluations), "expected every family member to be satisfiable"
         for evaluation in evaluations:
             policy = evaluation.policy[0]
-            assert synthesizer.verify_policy(evaluation.parameter_space, prop, policy)
+            assert synthesizer.verify_policy(evaluation.selected_choices, prop, policy)
 
     def test_synthesize_via_ar_works_with_expected_visits_disabled(
         self, family_colored_mdp, family_colored_mdp_factory
@@ -45,4 +45,4 @@ class TestPolicyTreeSynthesis:
         assert all(evaluation.sat for evaluation in evaluations), "expected every family member to be satisfiable"
         for evaluation in evaluations:
             policy = evaluation.policy[0]
-            assert synthesizer.verify_policy(evaluation.parameter_space, prop, policy)
+            assert synthesizer.verify_policy(evaluation.selected_choices, prop, policy)

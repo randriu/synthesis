@@ -1,4 +1,5 @@
 import paynt.pomdp
+import paynt.synthesizer.search_node
 
 
 class TestDecPomdpColoredMdpFactory:
@@ -12,9 +13,9 @@ class TestDecPomdpColoredMdpFactory:
         assert decpomdp_colored_mdp_factory.nr_agents == 2
 
     def test_build_produces_an_mdp(self, decpomdp_colored_mdp):
-        parameter_space = decpomdp_colored_mdp.parameter_space.copy()
-        decpomdp_colored_mdp.build(parameter_space)
-        assert parameter_space.mdp.states > 0
+        node = paynt.synthesizer.search_node.SearchNode(decpomdp_colored_mdp.parameter_space.copy())
+        node.mdp, node.selected_choices = decpomdp_colored_mdp.build(node.parameter_space)
+        assert node.mdp.states > 0
 
     def test_set_imperfect_memory_size_produces_a_fresh_colored_mdp(self, decpomdp_colored_mdp_factory):
         reunfolded = decpomdp_colored_mdp_factory.set_imperfect_memory_size(2)

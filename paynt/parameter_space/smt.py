@@ -148,51 +148,47 @@ class SmtSolver():
             return None
 
 
-    def pick_assignment(self, parameter_space):
+    def pick_assignment(self, node):
         '''
-        :return unexplored parameter assignment from the parameter_space
-            (or None if no instance remains)
+        :return unexplored parameter assignment from node's parameter space (or None if no instance remains)
         '''
-        parameter_space.encode(self)
-        return parameter_space.encoding.pick_assignment()
+        node.encode(self)
+        return node.encoding.pick_assignment()
 
-    def pick_assignment_priority(self, parameter_space, priority_parameter_subspace):
+    def pick_assignment_priority(self, node, priority_node):
 
-        if priority_parameter_subspace is None:
-            return self.pick_assignment(parameter_space)
+        if priority_node is None:
+            return self.pick_assignment(node)
 
         # explore priority parameter subspace first
-        assignment = self.pick_assignment(priority_parameter_subspace)
+        assignment = self.pick_assignment(priority_node)
         if assignment is not None:
             return assignment
 
         # explore remaining members
-        return self.pick_assignment(parameter_space)
+        return self.pick_assignment(node)
 
 
-    def exclude_conflicts(self, parameter_space, assignment, conflicts):
+    def exclude_conflicts(self, node, assignment, conflicts):
         '''
         :param conflicts a list of conflicts (may be empty)
         :return estimate of pruned assignments
         '''
         pruning_estimate = 0
         for conflict in conflicts:
-            pruning_estimate += self.exclude_conflict(parameter_space, assignment, conflict)
+            pruning_estimate += self.exclude_conflict(node, assignment, conflict)
         return pruning_estimate
 
 
-    def exclude_conflict(self, parameter_space, assignment, conflict):
+    def exclude_conflict(self, node, assignment, conflict):
         '''
-        Exclude assignment from the parameter_space encoding using provided conflict.
-        :param parameter_space base parameter_space
+        Exclude assignment from node's parameter space encoding using provided conflict.
+        :param node search node whose current encoding should be refined
         :param assignment parameter assignment that yielded unsatisfiable DTMC
         :param conflict indices of relevant parameters in the corresponding counterexample
         :return estimate of pruned assignments
         '''
-        assert parameter_space.encoding is not None
-
-        if parameter_space.encoding is None:
-            parameter_space.encoding = ParameterSpaceEncoding(self, parameter_space)
+        assert node.encoding is not None
 
         pruning_estimate = 1
         counterexample_clauses = []
@@ -201,9 +197,9 @@ class SmtSolver():
                 option = assignment.parameter_options(parameter)[0]
                 counterexample_clauses.append(self.solver_clauses[parameter][option])
             else:
-                if parameter_space.parameter_num_options(parameter) < parameter_space.parameter_num_options_total(parameter):
-                    counterexample_clauses.append(parameter_space.encoding.parameter_clauses[parameter])
-                pruning_estimate *= parameter_space.parameter_num_options(parameter)
+                if node.parameter_space.parameter_num_options(parameter) < node.parameter_space.parameter_num_options_total(parameter):
+                    counterexample_clauses.append(node.encoding.parameter_clauses[parameter])
+                pruning_estimate *= node.parameter_space.parameter_num_options(parameter)
 
         if self.use_python_z3:
             if len(counterexample_clauses) == 0:

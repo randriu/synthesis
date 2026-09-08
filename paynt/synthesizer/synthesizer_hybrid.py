@@ -91,42 +91,42 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
     def method_name(self):
         return "hybrid"
 
-    def synthesize_one(self, parameter_space):
+    def synthesize_one(self, node):
 
         self.conflict_generator.initialize()
         smt_solver = paynt.parameter_space.smt.SmtSolver(self.colored_mdp.parameter_space)
 
         # AR-CEGIS loop
-        parameter_spaces = [parameter_space]
-        self.stage_control = StageControl(parameter_space.size)
-        while parameter_spaces:
+        nodes = [node]
+        self.stage_control = StageControl(node.parameter_space.size)
+        while nodes:
 
             # initiate AR analysis
             self.stage_control.start_ar()
 
             # choose parameter space
-            parameter_space = parameter_spaces.pop(-1)
+            node = nodes.pop(-1)
 
             # reset SMT solver level
-            smt_solver.level(parameter_space.refinement_depth)
+            smt_solver.level(node.refinement_depth)
 
             # analyze the parameter space
-            self.verify_parameter_space(parameter_space)
-            self.update_optimum(parameter_space)
-            if parameter_space.analysis_result.can_improve == False:
-                self.explore(parameter_space)
-                self.stage_control.prune_ar(parameter_space.size)
+            self.verify_parameter_space(node)
+            self.update_optimum(node)
+            if node.analysis_result.can_improve == False:
+                self.explore(node.parameter_space)
+                self.stage_control.prune_ar(node.parameter_space.size)
                 continue
 
             # undecided: initiate CEGIS analysis
             self.stage_control.start_cegis()
 
             # construct priority parameter subspace that corresponds to primary scheduler
-            if parameter_space.analysis_result.optimality_result is not None:
-                result = parameter_space.analysis_result.optimality_result
+            if node.analysis_result.optimality_result is not None:
+                result = node.analysis_result.optimality_result
             else:
-                result = parameter_space.analysis_result.constraints_result.results[0]
-            priority_parameter_subspace = parameter_space.assume_options_copy(result.primary_selection)
+                result = node.analysis_result.constraints_result.results[0]
+            priority_node = self.search_node_type(node.parameter_space.assume_options_copy(result.primary_selection))
 
             # explore parameter space assignments
             parameter_space_explored = False
@@ -135,15 +135,15 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
                 if not self.stage_control.cegis_has_time():
                     break   # CEGIS timeout
 
-                parameter_space.encode(smt_solver)
-                # assignment = smt_solver.pick_assignment(parameter_space)
-                assignment = smt_solver.pick_assignment_priority(parameter_space, priority_parameter_subspace)
+                node.encode(smt_solver)
+                # assignment = smt_solver.pick_assignment(node)
+                assignment = smt_solver.pick_assignment_priority(node, priority_node)
                 if assignment is None:
                     parameter_space_explored = True
                     break   # explored whole parameter space
 
-                conflicts, accepting_assignment = self.analyze_parameter_space_assignment_cegis(parameter_space, assignment)
-                pruned = smt_solver.exclude_conflicts(parameter_space, assignment, conflicts)
+                conflicts, accepting_assignment = self.analyze_parameter_space_assignment_cegis(node, assignment)
+                pruned = smt_solver.exclude_conflicts(node, assignment, conflicts)
                 self.explored += pruned
                 self.stage_control.prune_cegis(pruned)
 
@@ -157,7 +157,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
             if parameter_space_explored:
                 continue
 
-            parameter_subspaces = self.split_undecided_space(parameter_space)
-            parameter_spaces = parameter_spaces + parameter_subspaces
+            child_nodes = self.split_undecided_space(node)
+            nodes = nodes + child_nodes
 
         return self.best_assignment

@@ -4,6 +4,7 @@ import pytest
 
 import paynt.parser.sketch
 import paynt.underlying_model.underlying_model
+import paynt.synthesizer.search_node
 
 from helpers.helper import get_sketch_paths
 
@@ -17,11 +18,11 @@ def colored_mdp_parameter_space_prop_result():
     sketch_path, props_path = get_sketch_paths("archive/jair24-synthesis/maze")
     colored_mdp_factory, task = paynt.parser.sketch.Sketch.load_sketch(sketch_path, props_path)
     colored_mdp = colored_mdp_factory.colored_mdp
-    parameter_space = colored_mdp.parameter_space.copy()
-    colored_mdp.build(parameter_space)
+    node = paynt.synthesizer.search_node.SearchNode(colored_mdp.parameter_space.copy())
+    node.mdp, node.selected_choices = colored_mdp.build(node.parameter_space)
     prop = task.get_property()
-    result = parameter_space.mdp.model_check_property(prop)
-    return colored_mdp, parameter_space, prop, result
+    result = node.mdp.model_check_property(prop)
+    return colored_mdp, node, prop, result
 
 
 class TestModelIndexScoring:
@@ -36,11 +37,11 @@ class TestModelIndexScoring:
         arguably the better test anyway, since a duplicate-implementation comparison can't catch a bug both
         sides share.
         '''
-        colored_mdp, parameter_space, prop, result = colored_mdp_parameter_space_prop_result
+        colored_mdp, node, prop, result = colored_mdp_parameter_space_prop_result
         state_values = result.result.get_values()
-        choice_values = paynt.underlying_model.underlying_model.ModelIndex.choice_values(parameter_space.mdp.model, prop, state_values)
+        choice_values = paynt.underlying_model.underlying_model.ModelIndex.choice_values(node.mdp.model, prop, state_values)
 
-        mdp = parameter_space.mdp.model
+        mdp = node.mdp.model
         tm = mdp.transition_matrix
         reward_model = mdp.reward_models.get(prop.formula.reward_name)
         choice_rewards = list(reward_model.state_action_rewards)
@@ -54,15 +55,15 @@ class TestModelIndexScoring:
             assert choice_values[choice] == pytest.approx(expected, abs=1e-6)
 
     def test_compute_expected_visits_is_nonnegative_and_visits_the_initial_state(self, colored_mdp_parameter_space_prop_result):
-        colored_mdp, parameter_space, prop, result = colored_mdp_parameter_space_prop_result
-        # choices must be local to parameter_space.mdp.model's own indexing, as scheduler_scores derives
+        colored_mdp, node, prop, result = colored_mdp_parameter_space_prop_result
+        # choices must be local to node.mdp.model's own indexing, as scheduler_scores derives
         # them via result.scheduler.compute_action_support(...) -- not the underlying-model-global selected_choices
-        local_choices = result.result.scheduler.compute_action_support(parameter_space.mdp.model.nondeterministic_choice_indices)
-        visits = paynt.underlying_model.underlying_model.ModelIndex.compute_expected_visits(parameter_space.mdp.model, prop, local_choices)
-        assert len(visits) == parameter_space.mdp.model.nr_states
+        local_choices = result.result.scheduler.compute_action_support(node.mdp.model.nondeterministic_choice_indices)
+        visits = paynt.underlying_model.underlying_model.ModelIndex.compute_expected_visits(node.mdp.model, prop, local_choices)
+        assert len(visits) == node.mdp.model.nr_states
         assert all(v >= 0 for v in visits)
         # the initial state is visited at least once by construction, before any transition happens
-        initial_state = parameter_space.mdp.model.initial_states[0]
+        initial_state = node.mdp.model.initial_states[0]
         assert visits[initial_state] >= 1
 
     def test_compute_expected_visits_respects_disable_flag(self, colored_mdp_parameter_space_prop_result):
@@ -71,11 +72,11 @@ class TestModelIndexScoring:
         restricted sub-MDP with fewer states. ModelIndex sizes the vector to `mdp` itself instead.
         disable_expected_visits is a plain parameter (not a class attribute) precisely so two syntheses in
         the same process can't leak this setting into each other -- see paynt.task.Task. '''
-        _, parameter_space, prop, result = colored_mdp_parameter_space_prop_result
-        local_choices = result.result.scheduler.compute_action_support(parameter_space.mdp.model.nondeterministic_choice_indices)
+        _, node, prop, result = colored_mdp_parameter_space_prop_result
+        local_choices = result.result.scheduler.compute_action_support(node.mdp.model.nondeterministic_choice_indices)
         visits = paynt.underlying_model.underlying_model.ModelIndex.compute_expected_visits(
-            parameter_space.mdp.model, prop, local_choices, disable_expected_visits=True)
-        assert visits == [1] * parameter_space.mdp.model.nr_states
+            node.mdp.model, prop, local_choices, disable_expected_visits=True)
+        assert visits == [1] * node.mdp.model.nr_states
 
     def test_make_vector_defined_replaces_infinities_with_average_of_finite_values(self):
         vector = [1.0, math.inf, 3.0]

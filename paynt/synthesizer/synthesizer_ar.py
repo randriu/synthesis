@@ -25,20 +25,22 @@ def scheduler_scores(colored_mdp, task, mdp, prop, result, selection):
     return scores
 
 
-def split_parameter_space(colored_mdp, task, parameter_space):
+def split_parameter_space(colored_mdp, task, node):
     '''
-    AR splitting step: pick the highest-scoring inconsistent parameter and split parameter_space's options
-    for it into subspaces. A free function rather than a ColoredMdp method, so it works uniformly across
-    every colored-MDP variant without any of them carrying search-decision logic themselves, and so it can
-    be passed around as a plain callable on a future multiprocessing path.
+    AR splitting step: pick the highest-scoring inconsistent parameter and split node's parameter_space
+    options for it into subspaces, wrapped as child search nodes. A free function rather than a ColoredMdp
+    method, so it works uniformly across every colored-MDP variant without any of them carrying
+    search-decision logic themselves, and so it can be passed around as a plain callable on a future
+    multiprocessing path.
     :param colored_mdp anything exposing .parameter_space/.coloring -- any ColoredMdp qualifies
     :param task the Task currently being solved (not read from colored_mdp -- it doesn't carry one)
+    :param node the SearchNode currently being split
     '''
-    mdp = parameter_space.mdp
+    mdp = node.mdp
     assert not mdp.is_deterministic
 
     # split wrt last undecided result
-    result = parameter_space.analysis_result.undecided_result()
+    result = node.analysis_result.undecided_result()
     parameter_assignments = result.primary_selection
     scores = scheduler_scores(colored_mdp, task, mdp, result.prop, result.primary.result, result.primary_selection)
     if scores is None:
@@ -58,12 +60,9 @@ def split_parameter_space(colored_mdp, task, parameter_space):
     else:
         suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
-    # construct corresponding parameter subspaces
-    parent_info = parameter_space.collect_parent_info(task.specification)
-    parameter_subspaces = parameter_space.split(splitter,suboptions)
-    for parameter_subspace in parameter_subspaces:
-        parameter_subspace.add_parent_info(parent_info)
-    return parameter_subspaces
+    # construct corresponding child search nodes (SearchNode.split snapshots node's ParentInfo-relevant
+    # state and hands it to each freshly-split child, same as add_parent_info used to do manually here)
+    return node.split(splitter, suboptions)
 
 
 class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
@@ -72,9 +71,9 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
     def method_name(self):
         return "AR"
 
-    def check_specification(self, parameter_space):
+    def check_specification(self, node):
         ''' Check specification for mdp or smg based on self.colored_mdp '''
-        mdp = parameter_space.mdp
+        mdp = node.mdp
 
         if self.colored_mdp.feature_kind == "posmg":
             model = self.colored_mdp.create_smg_from_mdp(mdp)
@@ -84,10 +83,10 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         # check constraints
         admissible_assignment = None
         spec = self.task.specification
-        if parameter_space.constraint_indices is None:
-            parameter_space.constraint_indices = spec.all_constraint_indices()
+        if node.constraint_indices is None:
+            node.constraint_indices = spec.all_constraint_indices()
         results = [None for _ in spec.constraints]
-        for index in parameter_space.constraint_indices:
+        for index in node.constraint_indices:
             constraint = spec.constraints[index]
             result = paynt.specification.property_result.MdpPropertyResult(constraint)
             results[index] = result
@@ -99,9 +98,9 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 break
 
             # check if the primary scheduler is consistent
-            result.primary_selection,consistent = self.colored_mdp.scheduler_is_consistent(mdp, result.primary.result, self.task.specification)
+            result.primary_selection,consistent = self.colored_mdp.scheduler_is_consistent(mdp, node, result.primary.result, self.task.specification)
             if consistent:
-                assignment = parameter_space.assume_options_copy(result.primary_selection)
+                assignment = node.parameter_space.assume_options_copy(result.primary_selection)
                 dtmc = self.colored_mdp.build_assignment(assignment)
                 res = dtmc.check_specification(self.task.specification)
                 if res.accepting_dtmc(self.task.specification):
@@ -131,12 +130,12 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 result.can_improve = False
             else:
                 # LB < OPT, check if LB is tight
-                result.primary_selection,consistent = self.colored_mdp.scheduler_is_consistent(mdp, result.primary.result, self.task.specification)
+                result.primary_selection,consistent = self.colored_mdp.scheduler_is_consistent(mdp, node, result.primary.result, self.task.specification)
                 result.can_improve = True
                 if consistent:
                     # LB < OPT and it's tight, double-check the constraints and the value on the DTMC
                     result.can_improve = False
-                    assignment = parameter_space.assume_options_copy(result.primary_selection)
+                    assignment = node.parameter_space.assume_options_copy(result.primary_selection)
                     dtmc = self.colored_mdp.build_assignment(assignment)
                     res = dtmc.check_specification(self.task.specification)
                     if res.constraints_result.sat and spec.optimality.improves_optimum(res.optimality_result.value):
@@ -144,28 +143,28 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                         result.improving_value = res.optimality_result.value
             spec_result.optimality_result = result
 
-        spec_result.evaluate(parameter_space, admissible_assignment)
-        parameter_space.analysis_result = spec_result
+        spec_result.evaluate(node.parameter_space, admissible_assignment)
+        node.analysis_result = spec_result
 
-    def verify_parameter_space(self, parameter_space):
-        self.colored_mdp.build(parameter_space)
+    def verify_parameter_space(self, node):
+        node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space)
 
         # TODO include iteration_game in iteration? is it necessary?
         if self.colored_mdp.feature_kind == "posmg":
-            self.stat.iteration_game(parameter_space.mdp.states)
+            self.stat.iteration_game(node.mdp.states)
         else:
-            self.stat.iteration(parameter_space.mdp)
+            self.stat.iteration(node.mdp)
 
-        self.check_specification(parameter_space)
+        self.check_specification(node)
 
-    def update_optimum(self, parameter_space):
-        ia = parameter_space.analysis_result.improving_assignment
+    def update_optimum(self, node):
+        ia = node.analysis_result.improving_assignment
         if ia is None:
             return
         if not self.task.specification.has_optimality:
             self.best_assignment = ia
             return
-        iv = parameter_space.analysis_result.improving_value
+        iv = node.analysis_result.improving_value
         if not self.task.specification.optimality.improves_optimum(iv):
             return
         self.task.specification.optimality.update_optimum(iv)
@@ -173,32 +172,32 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         self.best_assignment_value = iv
         # logger.info(f"value {round(iv,4)} achieved after {round(paynt.utils.timer.GlobalTimer.read(),2)} seconds")
         if self.colored_mdp.feature_kind == "pomdp":
-            self.stat.new_fsc_found(parameter_space.analysis_result.improving_value, ia, self.colored_mdp.policy_size(ia))
+            self.stat.new_fsc_found(node.analysis_result.improving_value, ia, self.colored_mdp.policy_size(ia))
 
-    def synthesize_one(self, parameter_space):
-        parameter_spaces = [parameter_space]
-        while parameter_spaces:
+    def synthesize_one(self, node):
+        nodes = [node]
+        while nodes:
             if self.resource_limit_reached():
                 break
-            parameter_space = parameter_spaces.pop(-1)
-            self.verify_parameter_space(parameter_space)
-            self.update_optimum(parameter_space)
+            node = nodes.pop(-1)
+            self.verify_parameter_space(node)
+            self.update_optimum(node)
             if not self.task.specification.has_optimality and self.best_assignment is not None:
                 break
             # break
-            if parameter_space.analysis_result.can_improve is False:
-                self.explore(parameter_space)
+            if node.analysis_result.can_improve is False:
+                self.explore(node.parameter_space)
                 continue
             # undecided
-            parameter_subspaces = self.split_undecided_space(parameter_space)
-            parameter_spaces = parameter_spaces + parameter_subspaces
+            child_nodes = self.split_undecided_space(node)
+            nodes = nodes + child_nodes
         return self.best_assignment
 
-    def split_undecided_space(self, parameter_space):
+    def split_undecided_space(self, node):
         '''
         Overridable hook: the default just delegates to the shared split_parameter_space free function.
         DtSynthesizer overrides this since decision-tree splitting classifies parameters by kind
         (action/decision/variable) rather than by scored inconsistency variance -- a genuinely different
         algorithm, not a performance variant of this one (unlike POMDP's scheduler_scores specialization).
         '''
-        return split_parameter_space(self.colored_mdp, self.task, parameter_space)
+        return split_parameter_space(self.colored_mdp, self.task, node)

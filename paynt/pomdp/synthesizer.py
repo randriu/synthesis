@@ -30,7 +30,6 @@ class PomdpSynthesizer:
         if parameter_space is None:
             parameter_space = self.colored_mdp.parameter_space
         synthesizer = self.synthesizer(self.colored_mdp, self.task)
-        parameter_space.constraint_indices = self.colored_mdp.parameter_space.constraint_indices
         assignment = synthesizer.synthesize(parameter_space, keep_optimum=True, print_stats=print_stats)
         iters_mdp = synthesizer.stat.iterations_mdp if synthesizer.stat.iterations_mdp is not None else 0
         self.total_iters += iters_mdp

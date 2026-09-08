@@ -1,4 +1,5 @@
 import paynt.synthesizer.synthesizer
+import paynt.synthesizer.search_node
 import paynt.underlying_model.underlying_model
 from paynt.specification.property import Property
 import paynt.utils.timer
@@ -50,10 +51,14 @@ def merge_policies_exclusively(policy1, policy2):
     return policy12,policy21
 
 
-class PolicyTreeNode:
+class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
 
-    def __init__(self, parameter_space):
-        self.parameter_space = parameter_space
+    def __init__(self, parameter_space, parent_info=None):
+        super().__init__(parameter_space, parent_info)
+
+        # a previously-computed game-abstraction policy supplied by the parent split, tried before solving a
+        # fresh game abstraction for this node (see PolicyTreeSynthesizer.verify_parameter_space)
+        self.candidate_policy = None
 
         self.splitter = None
         self.suboptions = []
@@ -78,22 +83,33 @@ class PolicyTreeNode:
             num += child.num_leaves()
         return num
 
-    def split(self, splitter, suboptions, parameter_subspaces):
+    def attach_children(self, splitter, suboptions, parameter_subspaces, candidate_policies=None):
+        '''
+        Wrap each of parameter_subspaces (already-split ParameterSpace values) as a child PolicyTreeNode.
+        Named distinctly from the inherited SearchNode.split (which computes the parameter_space split
+        itself and hands back nodes carrying ParentInfo) since this method has a different signature and
+        role: it just attaches pre-computed subspaces as tree children, matching this class's simple flat
+        parent/child_nodes bookkeeping rather than SearchNode's generic ParentInfo handoff, which policy-tree
+        synthesis doesn't use.
+        '''
         self.splitter = splitter
         self.suboptions = suboptions
         self.child_nodes = []
-        for parameter_subspace in parameter_subspaces:
+        if candidate_policies is None:
+            candidate_policies = [None for _ in parameter_subspaces]
+        for parameter_subspace,candidate_policy in zip(parameter_subspaces,candidate_policies):
             child_node = PolicyTreeNode(parameter_subspace)
+            child_node.candidate_policy = candidate_policy
             self.child_nodes.append(child_node)
 
     def double_check(self, colored_mdp, prop, policies):
         assert self.sat is not None
-        colored_mdp.build(self.parameter_space)
+        self.mdp, self.selected_choices = colored_mdp.build(self.parameter_space)
         if self.sat is False:
-            result = self.parameter_space.mdp.model_check_property(prop)
+            result = self.mdp.model_check_property(prop)
             assert not result.sat
         else:
-            PolicyTreeSynthesizer.double_check_policy(colored_mdp, self.parameter_space, prop, policies[self.policy_index][0])
+            PolicyTreeSynthesizer.double_check_policy(colored_mdp, self, prop, policies[self.policy_index][0])
 
 
     def merge_children_indices(self, indices):
@@ -155,14 +171,14 @@ class PolicyTreeNode:
         policy12,policy21 = merge_policies_exclusively(policy1,policy2)
 
         # try policy1 for node2's parameter space
-        policy,mdp = colored_mdp.fix_and_apply_policy_to_parameter_space(node2.parameter_space, policy12)
+        policy,mdp = colored_mdp.fix_and_apply_policy_to_parameter_space(node2.selected_choices, policy12)
         policy_result = mdp.model_check_property(prop, alt=True)
         PolicyTreeNode.mdps_model_checked += 1
         if policy_result.sat:
             return policy
 
         # try policy2 for node1's parameter space
-        policy,mdp = colored_mdp.fix_and_apply_policy_to_parameter_space(node1.parameter_space, policy21)
+        policy,mdp = colored_mdp.fix_and_apply_policy_to_parameter_space(node1.selected_choices, policy21)
         policy_result = mdp.model_check_property(prop, alt=True)
         PolicyTreeNode.mdps_model_checked += 2
         if policy_result.sat:
@@ -479,10 +495,10 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
         return "AR (policy tree)"
 
     @staticmethod
-    def double_check_policy(colored_mdp, parameter_space, prop, policy):
-        _,mdp = colored_mdp.fix_and_apply_policy_to_parameter_space(parameter_space, policy)
-        if parameter_space.size == 1:
-            colored_mdp.assert_mdp_is_deterministic(mdp, parameter_space)
+    def double_check_policy(colored_mdp, node, prop, policy):
+        _,mdp = colored_mdp.fix_and_apply_policy_to_parameter_space(node.selected_choices, policy)
+        if node.parameter_space.size == 1:
+            colored_mdp.assert_mdp_is_deterministic(mdp, node.parameter_space)
         DOUBLE_CHECK_PRECISION = 1e-6
         default_precision = Property.model_checking_precision
         Property.set_model_checking_precision(DOUBLE_CHECK_PRECISION)
@@ -493,34 +509,39 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
         return
 
 
-    def verify_policy(self, parameter_space, prop, policy):
-        _,mdp = self.colored_mdp.fix_and_apply_policy_to_parameter_space(parameter_space, policy)
+    def verify_policy(self, selected_choices, prop, policy):
+        '''
+        :param selected_choices the compatible-choices bitmask to verify against -- callers outside this
+            class have no PolicyTreeNode to read it from, so it must be supplied explicitly (see
+            ParameterSpaceEvaluation.selected_choices, captured at decision time)
+        '''
+        _,mdp = self.colored_mdp.fix_and_apply_policy_to_parameter_space(selected_choices, policy)
         policy_result = mdp.model_check_property(prop, alt=True)
         self.stat.iteration(mdp)
         return policy_result.sat
 
 
-    def solve_singleton(self, parameter_space, prop):
-        result = parameter_space.mdp.model_check_property(prop)
-        self.stat.iteration(parameter_space.mdp)
+    def solve_singleton(self, node, prop):
+        result = node.mdp.model_check_property(prop)
+        self.stat.iteration(node.mdp)
         if not result.sat:
             return False
-        policy = self.colored_mdp.scheduler_to_policy(result.result.scheduler, parameter_space.mdp)
+        policy = self.colored_mdp.scheduler_to_policy(result.result.scheduler, node.mdp)
 
         # uncomment below to preemptively double-check the policy
-        # PolicyTreeSynthesizer.double_check_policy(self.colored_mdp, parameter_space, prop, policy)
+        # PolicyTreeSynthesizer.double_check_policy(self.colored_mdp, node, prop, policy)
         return policy
 
 
-    def solve_game_abstraction(self, parameter_space, prop, game_solver):
+    def solve_game_abstraction(self, node, prop, game_solver):
         # construct and solve the game abstraction
         # logger.debug("solving game abstraction...")
 
-        game_solver.solve_sg(parameter_space.selected_choices)
-        # game_solver.solve_smg(parameter_space.selected_choices)
+        game_solver.solve_sg(node.selected_choices)
+        # game_solver.solve_smg(node.selected_choices)
 
         game_value = game_solver.solution_value
-        self.stat.iteration_game(parameter_space.mdp.states)
+        self.stat.iteration_game(node.mdp.states)
         game_sat = prop.satisfies_threshold_within_precision(game_value)
         # logger.debug("game solved, value is {}".format(game_value))
         game_policy = game_solver.solution_state_to_player1_action
@@ -547,19 +568,19 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
         state_values = game_solver.solution_state_values
         return scheduler_choices,parameter_selection,state_values
 
-    def verify_parameter_space(self, parameter_space, game_solver, prop):
-        # logger.info("investigating parameter space of size {}".format(parameter_space.size))
-        self.colored_mdp.build(parameter_space)
+    def verify_parameter_space(self, node, game_solver, prop):
+        # logger.info("investigating parameter space of size {}".format(node.parameter_space.size))
+        node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space)
         mdp_family_result = MdpFamilyResult()
 
-        if parameter_space.size == 1:
-            mdp_family_result.policy = self.solve_singleton(parameter_space,prop)
+        if node.parameter_space.size == 1:
+            mdp_family_result.policy = self.solve_singleton(node,prop)
             return mdp_family_result
 
-        if parameter_space.candidate_policy is None:
-            game_policy,game_sat = self.solve_game_abstraction(parameter_space,prop,game_solver)
+        if node.candidate_policy is None:
+            game_policy,game_sat = self.solve_game_abstraction(node,prop,game_solver)
         else:
-            game_policy = parameter_space.candidate_policy
+            game_policy = node.candidate_policy
             game_sat = False
 
         mdp_family_result.game_policy = game_policy
@@ -568,9 +589,9 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
             return mdp_family_result
 
         # solve primary direction for the MDP abstraction
-        mdp_result = parameter_space.mdp.model_check_property(prop)
+        mdp_result = node.mdp.model_check_property(prop)
         mdp_value = mdp_result.value
-        self.stat.iteration(parameter_space.mdp)
+        self.stat.iteration(node.mdp)
         # logger.debug("primary-primary direction solved, value is {}".format(mdp_value))
         if not mdp_result.sat:
             mdp_family_result.policy = False
@@ -579,7 +600,7 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
         # undecided: choose scheduler choices to be used for splitting
         scheduler_choices,parameter_selection,state_values = self.parse_game_scheduler(game_solver)
 
-        splitter = self.choose_splitter(parameter_space,prop,scheduler_choices,state_values,parameter_selection)
+        splitter = self.choose_splitter(node.parameter_space,prop,scheduler_choices,state_values,parameter_selection)
         mdp_family_result.splitter = splitter
         mdp_family_result.parameter_selection = parameter_selection
         return mdp_family_result
@@ -616,7 +637,11 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
             self.colored_mdp, self.colored_mdp.underlying_mdp, underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits)
         return scores
 
-    def assign_candidate_policy(self, parameter_subspaces, parameter_selection, splitter, policy):
+    def assign_candidate_policy(self, parameter_subspaces, candidate_policies, parameter_selection, splitter, policy):
+        ''' Fill in candidate_policies[i] = policy for whichever parameter_subspaces[i] contains the parameter
+        selection, in place -- parameter_subspaces are plain ParameterSpace values here (not yet wrapped as
+        PolicyTreeNode children), so the candidate policy can't be attached directly until attach_children
+        wraps them (see evaluate_all). '''
         policy_consistent = all([len(options) <= 1 for options in parameter_selection])
         if not policy_consistent:
             return
@@ -626,9 +651,9 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
             # not sure what to do in this case
             return
         option = used_options[0]
-        for parameter_subspace in parameter_subspaces:
+        for index,parameter_subspace in enumerate(parameter_subspaces):
             if option in parameter_subspace.parameter_options(splitter):
-                parameter_subspace.candidate_policy = policy
+                candidate_policies[index] = policy
                 return
 
     def split(self, parameter_space, prop, parameter_selection, splitter, policy):
@@ -650,19 +675,17 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
             suboptions = [options[:half], options[half:]]
 
         parameter_subspaces = parameter_space.split(splitter,suboptions)
-        for parameter_subspace in parameter_subspaces:
-            parameter_subspace.candidate_policy = None
+        candidate_policies = [None for _ in parameter_subspaces]
 
         if not self.task.discard_unreachable_choices:
-            self.assign_candidate_policy(parameter_subspaces, parameter_selection, splitter, policy)
+            self.assign_candidate_policy(parameter_subspaces, candidate_policies, parameter_selection, splitter, policy)
 
-        return suboptions,parameter_subspaces
+        return suboptions,parameter_subspaces,candidate_policies
 
 
     def evaluate_all(self, parameter_space, prop, keep_value_only=False):
         assert not prop.reward, "expecting reachability probability propery"
         game_solver = self.colored_mdp.build_game_abstraction_solver(prop)
-        parameter_space.candidate_policy = None
         policy_tree = PolicyTree(parameter_space)
 
         undecided_leaves = [policy_tree.root]
@@ -672,28 +695,27 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
             # if gi is not None and gi > 1000:
             #     return None
 
-            policy_tree_node = undecided_leaves.pop(-1)
-            parameter_space = policy_tree_node.parameter_space
-            result = self.verify_parameter_space(parameter_space,game_solver,prop)
-            parameter_space.candidate_policy = None
+            node = undecided_leaves.pop(-1)
+            result = self.verify_parameter_space(node,game_solver,prop)
+            node.candidate_policy = None
 
             if result.policy is not None:
-                self.explore(parameter_space)
-                if policy_tree_node != policy_tree.root:
-                    parameter_space.mdp = None
+                self.explore(node.parameter_space)
+                if node != policy_tree.root:
+                    node.mdp = None
                 if result.policy is False:
-                    policy_tree_node.sat = False
+                    node.sat = False
                 else:
-                    policy_tree_node.sat = True
-                    policy_tree_node.policy_index = policy_tree.new_policy(result.policy)
+                    node.sat = True
+                    node.policy_index = policy_tree.new_policy(result.policy)
                 continue
 
             # refine
-            suboptions,parameter_subspaces = self.split(parameter_space, prop, result.parameter_selection, result.splitter, result.game_policy)
-            if policy_tree_node != policy_tree.root:
-                parameter_space.mdp = None
-            policy_tree_node.split(result.splitter,suboptions,parameter_subspaces)
-            undecided_leaves += policy_tree_node.child_nodes
+            suboptions,parameter_subspaces,candidate_policies = self.split(node.parameter_space, prop, result.parameter_selection, result.splitter, result.game_policy)
+            if node != policy_tree.root:
+                node.mdp = None
+            node.attach_children(result.splitter,suboptions,parameter_subspaces,candidate_policies)
+            undecided_leaves += node.child_nodes
 
         if PolicyTreeSynthesizer.double_check_policy_tree_leaves:
             policy_tree.double_check(self.colored_mdp, prop)
@@ -716,7 +738,8 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
         evaluations = []
         for node in policy_tree.collect_leaves():
             policy = policy_tree.policies[node.policy_index] if node.sat else None
-            evaluation = paynt.synthesizer.synthesizer.ParameterSpaceEvaluation(node.parameter_space,None,node.sat,policy=policy)
+            evaluation = paynt.synthesizer.synthesizer.ParameterSpaceEvaluation(
+                node.parameter_space,None,node.sat,policy=policy,selected_choices=node.selected_choices)
             evaluations.append(evaluation)
         return evaluations
 

@@ -49,16 +49,16 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
             self.underlying_mdp, choices, self.subsystem_builder_options)
         return paynt.underlying_model.underlying_model.SubMdp(model, state_map, choice_map)
 
-    def build(self, parameter_space):
-        if parameter_space.parent_info is None:
+    def build(self, parameter_space, parent_selected_choices=None):
+        if parent_selected_choices is None:
             choices = self.coloring.selectCompatibleChoices(parameter_space.native)
         else:
-            choices = self.coloring.selectCompatibleChoices(parameter_space.native, parameter_space.parent_info.selected_choices)
+            choices = self.coloring.selectCompatibleChoices(parameter_space.native, parent_selected_choices)
         assert choices.number_of_set_bits() > 0
 
-        parameter_space.selected_choices = choices
-        parameter_space.mdp = self.build_from_choice_mask(choices)
-        parameter_space.mdp.parameter_space = parameter_space
+        mdp = self.build_from_choice_mask(choices)
+        mdp.parameter_space = parameter_space
+        return mdp, choices
 
     def are_choices_consistent(self, choices, parameter_space):
         ''' Separate method for profiling purposes. '''
@@ -70,7 +70,7 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
                 f"option {option} for parameter {parameter} ({parameter_space.parameter_name(parameter)}) is not in the parameter space"
         return consistent,parameter_selection
 
-    def scheduler_is_consistent(self, mdp, result, specification):
+    def scheduler_is_consistent(self, mdp, node, result, specification):
         ''' Get parameter options involved in the scheduler selection. '''
         scheduler = result.scheduler
         assert scheduler.memoryless and scheduler.deterministic
@@ -78,7 +78,7 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
             self.underlying_mdp, self.choice_destinations, mdp, scheduler)
         choices = paynt.underlying_model.underlying_model.ModelIndex.state_to_choice_to_choices(self.underlying_mdp, state_to_choice)
         if specification.is_single_property:
-            mdp.parameter_space.scheduler_choices = choices
+            node.scheduler_choices = choices
         consistent,parameter_selection = self.are_choices_consistent(choices, mdp.parameter_space)
         return parameter_selection, consistent
 

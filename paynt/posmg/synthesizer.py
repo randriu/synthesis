@@ -22,7 +22,6 @@ class PosmgSynthesizer:
 
     def synthesize(self, parameter_space, print_stats=True):
         synthesizer = self.synthesizer(self.colored_mdp, self.task)
-        parameter_space.constraint_indices = self.colored_mdp.parameter_space.constraint_indices
         assignment = synthesizer.synthesize(parameter_space, keep_optimum=True, print_stats=print_stats)
         if synthesizer.stat.iterations_game is not None:
             self.total_iters += synthesizer.stat.iterations_game

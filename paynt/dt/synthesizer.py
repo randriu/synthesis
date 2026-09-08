@@ -1,4 +1,5 @@
 import paynt.synthesizer.synthesizer_ar
+import paynt.synthesizer.search_node
 import paynt.synthesizer.statistic
 import paynt.utils.timer
 import paynt.utils.scoring
@@ -58,6 +59,14 @@ def _run_dtpaynt(cmdp_factory_dt, tree_depth, timeout=None):
     )
 
 
+class DtSearchNode(paynt.synthesizer.search_node.SearchNode):
+    def __init__(self, parameter_space, parent_info=None):
+        super().__init__(parameter_space, parent_info)
+        # set only by DtColoredMdp.scheduler_is_consistent, and only for a single-property specification --
+        # None otherwise, giving the "scheduler preserved across split" shortcut in verify_parameter_space a
+        self.scheduler_choices = None
+
+
 class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     '''
     AR specialized for decision-tree synthesis: splits by parameter kind (action/decision/variable) rather
@@ -68,6 +77,8 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     every tree depth it tries, mirroring the SynthesizerARStorm/SayntSynthesizer split.
     '''
 
+    search_node_type = DtSearchNode
+
     def __init__(self, colored_mdp, task):
         super().__init__(colored_mdp, task)
         self.counters_reset()
@@ -76,71 +87,72 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def method_name(self):
         return "AR (decision tree)"
 
-    def verify_parameter_selection(self, parameter_space, parameter_selection):
+    def verify_parameter_selection(self, node, parameter_selection):
         spec = self.task.specification
-        assignment = parameter_space.assume_options_copy(parameter_selection)
+        assignment = node.parameter_space.assume_options_copy(parameter_selection)
         dtmc = self.colored_mdp.build_assignment(assignment)
         res = dtmc.check_specification(spec)
         if not res.constraints_result.sat:
             return
         if not spec.has_optimality:
-            parameter_space.analysis_result.improving_assignment = assignment
-            parameter_space.analysis_result.can_improve = False
+            node.analysis_result.improving_assignment = assignment
+            node.analysis_result.can_improve = False
             return
         assignment_value = res.optimality_result.value
         if spec.optimality.improves_optimum(assignment_value):
             # logger.info(f"harmonization achieved value {res.optimality_result.value}")
             self.num_harmonization_succeeded += 1
-            parameter_space.analysis_result.improving_assignment = assignment
-            parameter_space.analysis_result.improving_value = assignment_value
-            parameter_space.analysis_result.can_improve = True
-            self.update_optimum(parameter_space)
+            node.analysis_result.improving_assignment = assignment
+            node.analysis_result.improving_value = assignment_value
+            node.analysis_result.can_improve = True
+            self.update_optimum(node)
 
 
-    def harmonize_inconsistent_scheduler(self, parameter_space):
+    def harmonize_inconsistent_scheduler(self, node):
         self.num_harmonizations += 1
-        mdp = parameter_space.mdp
-        result = parameter_space.analysis_result.undecided_result()
+        mdp = node.mdp
+        result = node.analysis_result.undecided_result()
         parameter_selection = result.primary_selection
         harmonizing_parameter = [parameter for parameter,options in enumerate(parameter_selection) if len(options)>1][0]
         selection_1 = parameter_selection.copy(); selection_1[harmonizing_parameter] = [selection_1[harmonizing_parameter][0]]
         selection_2 = parameter_selection.copy(); selection_2[harmonizing_parameter] = [selection_2[harmonizing_parameter][1]]
         for selection in [selection_1,selection_2]:
-            self.verify_parameter_selection(parameter_space,selection)
+            self.verify_parameter_selection(node,selection)
 
 
-    def verify_parameter_space(self, parameter_space):
+    def verify_parameter_space(self, node):
         self.num_parameter_spaces_considered += 1
-        self.colored_mdp.build(parameter_space)
+        parent_selected_choices = node.parent_info.selected_choices if node.parent_info is not None else None
+        node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space, parent_selected_choices)
 
-        self.stat.iteration(parameter_space.mdp)
+        self.stat.iteration(node.mdp)
         # scheduler_choices is only ever populated by DtColoredMdp.scheduler_is_consistent when the
         # specification is single-property (see split_undecided_space below) -- for a multi-property specification
-        # it stays None on every parameter space, so the "scheduler preserved" shortcut must be skipped rather than
+        # it stays None on every node, so the "scheduler preserved" shortcut must be skipped rather than
         # assumed available, falling through to a real (slower, but correct) model-check instead.
-        if parameter_space.parent_info is not None and parameter_space.parent_info.scheduler_choices is not None:
-            for choice in parameter_space.parent_info.scheduler_choices:
-                if not parameter_space.selected_choices[choice]:
+        if node.parent_info is not None and node.parent_info.scheduler_choices is not None:
+            for choice in node.parent_info.scheduler_choices:
+                if not node.selected_choices[choice]:
                     break
             else:
                 # scheduler preserved in the sub-parameter-space
                 self.num_schedulers_preserved += 1
-                parameter_space.analysis_result = parameter_space.parent_info.analysis_result
-                parameter_space.scheduler_choices = parameter_space.parent_info.scheduler_choices
-                consistent,parameter_selection = self.colored_mdp.are_choices_consistent(parameter_space.scheduler_choices, parameter_space)
+                node.analysis_result = node.parent_info.analysis_result
+                node.scheduler_choices = node.parent_info.scheduler_choices
+                consistent,parameter_selection = self.colored_mdp.are_choices_consistent(node.scheduler_choices, node.parameter_space)
                 assert not consistent
-                if parameter_space.analysis_result.optimality_result is None:
-                    for constraint_res in parameter_space.analysis_result.constraints_result.results:
+                if node.analysis_result.optimality_result is None:
+                    for constraint_res in node.analysis_result.constraints_result.results:
                         constraint_res.primary_selection = parameter_selection
                 else:
-                    parameter_space.analysis_result.optimality_result.primary_selection = parameter_selection
+                    node.analysis_result.optimality_result.primary_selection = parameter_selection
                 return
 
         self.num_parameter_spaces_model_checked += 1
-        self.check_specification(parameter_space)
-        if not parameter_space.analysis_result.can_improve:
+        self.check_specification(node)
+        if not node.analysis_result.can_improve:
             return
-        self.harmonize_inconsistent_scheduler(parameter_space)
+        self.harmonize_inconsistent_scheduler(node)
 
     def build_unsat_result(self):
         spec_result = paynt.specification.property_result.MdpSpecificationResult()
@@ -173,12 +185,12 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         # force the score of the selected splitter
         return {splitter:10}
 
-    def split_undecided_space(self, parameter_space):
-        mdp = parameter_space.mdp
+    def split_undecided_space(self, node):
+        mdp = node.mdp
         assert not mdp.is_deterministic
 
         # split wrt last undecided result
-        result = parameter_space.analysis_result.undecided_result()
+        result = node.analysis_result.undecided_result()
         parameter_assignments = result.primary_selection
         scores = self.scheduler_scores(result.primary_selection)
 
@@ -189,7 +201,7 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             core_suboptions,other_suboptions = mdp.parameter_space.suboptions_enumerate(splitter, parameter_assignments[splitter])
         else:
             # split by inconsistent options
-            splitter_options = parameter_space.parameter_options(splitter)
+            splitter_options = node.parameter_space.parameter_options(splitter)
             option_2 = parameter_assignments[splitter][1]
             index_split = splitter_options.index(option_2)
 
@@ -202,17 +214,17 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         else:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
-        # construct corresponding parameter_subspaces
-        parent_info = parameter_space.collect_parent_info(self.task.specification)
-        parent_info.analysis_result = parameter_space.analysis_result
-        # None (not just absent) for a multi-property specification -- see the guard in verify_parameter_space
-        parent_info.scheduler_choices = getattr(parameter_space, 'scheduler_choices', None)
-        # parent_info.unsat_core_hint = self.colored_mdp.coloring.unsat_core.copy()
-        parameter_subspaces = parameter_space.split(splitter,suboptions)
-        assert parameter_space.size == sum([parameter_subspace.size for parameter_subspace in parameter_subspaces])
-        for parameter_subspace in parameter_subspaces:
-            parameter_subspace.add_parent_info(parent_info)
-        return parameter_subspaces
+        # construct corresponding child search nodes (SearchNode.split snapshots node's ParentInfo-relevant
+        # state and hands it, shared, to every freshly-split child); layer the DT-specific parent_info
+        # fields on top -- these are now always real declared fields (ParentInfo.analysis_result/
+        # scheduler_choices), never a dynamic bolt-on that could silently be absent
+        child_nodes = node.split(splitter,suboptions)
+        assert node.parameter_space.size == sum([child.parameter_space.size for child in child_nodes])
+        for child in child_nodes:
+            child.parent_info.analysis_result = node.analysis_result
+            # None (not just absent) for a multi-property specification -- see the guard in verify_parameter_space
+            child.parent_info.scheduler_choices = node.scheduler_choices
+        return child_nodes
 
     def counters_reset(self):
         self.num_parameter_spaces_considered = 0
@@ -305,21 +317,22 @@ class DtSynthesizer:
             best_assignment_old = best_assignment
 
             parameter_space = self.colored_mdp.parameter_space
+            node = synthesizer.search_node_type(parameter_space)
             synthesizer.explored = 0
             synthesizer.stat = paynt.synthesizer.statistic.Statistic(synthesizer)
             synthesizer.stat.start(parameter_space)
             timeout = depth_timeout if depth < max_depth-1 else overall_timeout / 2 # second half of the time for the last depth
             synthesizer.synthesis_timer = paynt.utils.timer.Timer(timeout)
             synthesizer.synthesis_timer.start()
-            parameter_spaces = [parameter_space]
+            nodes = [node]
 
             if self.best_tree is not None:
                 parameter_subspace = parameter_space.copy()
                 self.colored_mdp.decision_tree.root.apply_hint(parameter_subspace,self.best_tree.root)
-                parameter_spaces = [parameter_subspace,parameter_space]
+                nodes = [synthesizer.search_node_type(parameter_subspace),node]
 
-            for ps in parameter_spaces:
-                synthesizer.synthesize_one(ps)
+            for n in nodes:
+                synthesizer.synthesize_one(n)
             synthesizer.stat.finished_synthesis()
             synthesizer.stat.print()
             synthesizer.synthesis_timer = None
@@ -351,12 +364,12 @@ class DtSynthesizer:
         for depth in range(tree_depth+1):
             self.colored_mdp = self.colored_mdp_factory.reset_tree(depth,enable_harmonization=False)
             synthesizer = SynthesizerARDt(self.colored_mdp, self.task)
-            parameter_space = self.colored_mdp.parameter_space.copy()
-            parameter_space.analysis_result = synthesizer.build_unsat_result()
-            self.colored_mdp.build(parameter_space)
-            consistent,parameter_selection = self.colored_mdp.are_choices_consistent(scheduler_choices, parameter_space)
+            node = synthesizer.search_node_type(self.colored_mdp.parameter_space.copy())
+            node.analysis_result = synthesizer.build_unsat_result()
+            node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space)
+            consistent,parameter_selection = self.colored_mdp.are_choices_consistent(scheduler_choices, node.parameter_space)
             if consistent:
-                synthesizer.verify_parameter_selection(parameter_space,parameter_selection)
+                synthesizer.verify_parameter_selection(node,parameter_selection)
                 if synthesizer.best_assignment is not None:
                     self.best_tree = self.colored_mdp.decision_tree
                     self.best_tree.root.associate_assignment(synthesizer.best_assignment)
