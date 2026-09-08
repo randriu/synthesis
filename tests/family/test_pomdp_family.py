@@ -2,7 +2,7 @@ import pytest
 
 import paynt.colored_mdp
 import paynt.family
-import paynt.family.pomdp_family
+import paynt.family.pomdp
 import paynt.pomdp.fsc
 import paynt.synthesizer.synthesizer
 import paynt.task
@@ -11,7 +11,7 @@ import paynt.task
 class TestPomdpFamilyColoredMdpFactory:
 
     def test_load_sketch_produces_a_pomdp_family_colored_mdp(self, pomdp_family_colored_mdp):
-        assert isinstance(pomdp_family_colored_mdp, paynt.family.pomdp_family.PomdpFamilyColoredMdp)
+        assert isinstance(pomdp_family_colored_mdp, paynt.family.pomdp.PomdpFamilyColoredMdp)
         assert pomdp_family_colored_mdp.feature_kind == "pomdp_family"
 
     def test_observation_structure_is_populated(self, pomdp_family_colored_mdp):
