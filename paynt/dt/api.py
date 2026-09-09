@@ -1,4 +1,6 @@
+from __future__ import annotations
 
+from typing import Any
 
 from .synthesizer import _choose_solver_for_dt_task, _run_dt_map_scheduler, _run_dtpaynt
 from .task import DtTask
@@ -19,17 +21,17 @@ def synthesize(cmdp_factory_dt : DtColoredMdpFactory, paynt_task_dt : DtTask, us
 
     if use_solver == "dtmap":
         return _run_dt_map_scheduler(cmdp_factory_dt, paynt_task_dt.scheduler_to_map, paynt_task_dt.tree_depth)
-    elif use_solver == "dtpaynt":
+    else:
         return _run_dtpaynt(cmdp_factory_dt, paynt_task_dt.tree_depth, paynt_task_dt.timeout)
-    
 
-def create_task(properties, tree_depth):
+
+def create_task(properties : list[Any], tree_depth : int) -> DtTask:
     """API function to create a DtTask from a list of StormPy properties and a tree depth."""
 
     raise NotImplementedError("API not yet implemented.")
 
 
-def create_colored_mdp_factory(model):
+def create_colored_mdp_factory(model : Any) -> DtColoredMdpFactory:
     """API function to create a DtColoredMdpFactory from a StormPy model."""
 
     raise NotImplementedError("API not yet implemented.")

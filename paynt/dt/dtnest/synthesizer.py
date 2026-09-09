@@ -1,11 +1,21 @@
+from __future__ import annotations
+
+from typing import Any
+
+from .task import DtNestTask
 from ..decision_tree import DecisionTree
+from ..colored_mdp import DtColoredMdp
 from ..factory import DtColoredMdpFactory
 from ..synthesizer import DtSynthesizer
 from ..result import DtResult
 import paynt.task
 import paynt.utils.timer
 import paynt.underlying_model.underlying_model
-from ._utils import create_uniform_random_tree, get_submdp_from_unfixed_states, build_tree_helper_tree, get_state_space_for_tree_helper_node, run_scikit_learn_tree, state_to_choice_to_state_to_action, dt_to_state_to_actions
+from ._utils import (
+    create_uniform_random_tree, get_submdp_from_unfixed_states, build_tree_helper_tree, get_state_space_for_tree_helper_node,
+    run_scikit_learn_tree, state_to_choice_to_state_to_action, dt_to_state_to_actions,
+    reduce_constraint_to_optimality, classify_constraint_threshold,
+)
 
 import stormpy
 import payntbind
@@ -15,7 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 
-def _run_dtnest(cmdp_factory_dt : DtColoredMdpFactory, epsilon_error_threshold: float, max_subtree_depth: int, depth_fine_tuning : bool = True, allow_perturbations: bool = True, recompute_scheduler_perturbation: bool = True, timeout : int = 600) -> DtResult:
+def _run_dtnest(
+    cmdp_factory_dt : DtColoredMdpFactory, epsilon_error_threshold: float, max_subtree_depth: int, depth_fine_tuning : bool = True,
+    allow_perturbations: bool = True, recompute_scheduler_perturbation: bool = True, timeout : int | None = 600
+) -> DtResult:
     synthesizer = DtNest(cmdp_factory_dt)
     synthesizer.epsilon = epsilon_error_threshold
     synthesizer.subtree_depth = max_subtree_depth
@@ -29,20 +42,23 @@ def _run_dtnest(cmdp_factory_dt : DtColoredMdpFactory, epsilon_error_threshold: 
 
 class DtNest(DtSynthesizer):
 
-    def __init__(self, *args):
+    def __init__(self, *args : Any):
         super().__init__(*args)
-        self.best_tree = None
-        self.best_tree_value = None
+        self.best_tree : DecisionTree | None = None
+        self.best_tree_value : Any = None
 
         # TODO add cli option to set the remaining settings below (max_subtree_depth/error_threshold/
         # initial_tree already flow from DtNestTask; everything else initialize_settings sets afterward
         # has no CLI knob yet)
         self.initialize_settings()
 
-    def initialize_settings(self):
-        self.subtree_depth = self.task.max_subtree_depth
+    def initialize_settings(self) -> None:
+        # self.task is declared DtTask on the base DtSynthesizer, but DtNest always actually gets a DtNestTask
+        # (max_subtree_depth/error_threshold are DtNestTask-only fields)
+        task : DtNestTask = self.task  # type: ignore[assignment]
+        self.subtree_depth = task.max_subtree_depth
         self.max_iter = 100000 # max number of subtrees to be investigated
-        self.epsilon = self.task.error_threshold
+        self.epsilon = task.error_threshold
         self.timeout = paynt.utils.timer.GlobalTimer.global_timer.time_limit_seconds if paynt.utils.timer.GlobalTimer.global_timer is not None else 600
         self.depth_fine_tuning = True # decreases sub-tree depth once all subtrees of the current depth have been explored
         self.break_on_small_tree = True # dtPAYNT synthesis ends when an implementable tree with good enough value is found
@@ -51,10 +67,10 @@ class DtNest(DtSynthesizer):
         self.use_states_for_node_priority = False # this is super slow for some models but should mean better prioritization
 
     @property
-    def method_name(self):
+    def method_name(self) -> str:
         return "dtNESt"
 
-    def counters_reset(self):
+    def counters_reset(self) -> None:
         # integration stats
         self.dt_learning_calls = 0
         self.dt_learning_successes = 0
@@ -65,7 +81,9 @@ class DtNest(DtSynthesizer):
         self.dtpaynt_tree_found = 0
         self.all_larger = 0
 
-    def choose_tree_to_use(self, current_tree, dtpaynt_tree, dtlearn_trees, recomputed_scheduler_trees):
+    def choose_tree_to_use(
+        self, current_tree : DecisionTree, dtpaynt_tree : DecisionTree, dtlearn_trees : dict[str, Any], recomputed_scheduler_trees : dict[str, Any]
+    ) -> str:
         # this also defines the priority in case of a tie, therefore: current > dtpaynt > dtlearn > recomputed
         current_nodes = len(current_tree.collect_nonterminals())
         nodes = {"current": [current_nodes, current_tree.get_depth(), 1]}
@@ -82,7 +100,9 @@ class DtNest(DtSynthesizer):
         return sorted_nodes[0][0]
     
 
-    def create_tree_node_queue_heuristic(self, helper_tree, desired_depth=6, nodes_to_skip=[], use_states_for_node_priority=False):
+    def create_tree_node_queue_heuristic(
+        self, helper_tree : DecisionTree, desired_depth : int = 6, nodes_to_skip : list[int] = [], use_states_for_node_priority : bool = False
+    ) -> list[dict[str, Any]]:
         nodes = helper_tree.collect_nodes(lambda node : node.get_depth() == desired_depth)
         if nodes is None or len(nodes) == 0:
             return []
@@ -114,15 +134,47 @@ class DtNest(DtSynthesizer):
         return helper_node_stats
     
 
-    def synthesize_subtrees(self, opt_result_value, random_result_value=None):
+    def synthesize_subtrees(
+        self, opt_result_value : float, random_result_value : float | None = None,
+        user_threshold : float | None = None, user_threshold_minimizing : bool | None = None
+    ) -> None:
 
         # init
         self.counters_reset()
+
+        epsilon_already_derived = False
+        if user_threshold is not None:
+            # a bare constraint (e.g. P>=0.95) was reduced to an optimality query by run() -- DtNest has no
+            # way to check a constraint directly, so its own epsilon-band acceptance test is repurposed here
+            # to accept "clears the user's actual threshold" instead of "close to the true optimum"
+            assert user_threshold_minimizing is not None
+            classification, derived_epsilon = classify_constraint_threshold(
+                opt_result_value, random_result_value, user_threshold, user_threshold_minimizing)
+            if classification == "unsat":
+                logger.warning(
+                    f"the requested threshold {user_threshold} is not achievable -- the best possible value "
+                    f"is {opt_result_value}; no admissible tree exists")
+                self.best_tree = None
+                self.best_tree_value = None
+                return
+            if classification == "trivial":
+                logger.info(
+                    f"the requested threshold {user_threshold} is already satisfied by the random/don't-care "
+                    f"scheduler (value {random_result_value}); returning it directly without subtree search")
+                self.best_tree = create_uniform_random_tree(self.colored_mdp)
+                self.best_tree_value = random_result_value
+                return
+            assert derived_epsilon is not None
+            self.epsilon = derived_epsilon
+            epsilon_already_derived = True
+
         if random_result_value is None:
             # if we dont have the random result value just make the threshold to be the epsilon of optimum value
-            mc_result_positive = opt_result_value > 0
-            if self.task.specification.optimality.maximizing == mc_result_positive:
-                self.epsilon *= -1
+            if not epsilon_already_derived:
+                mc_result_positive = opt_result_value > 0
+                assert self.task.specification.optimality is not None
+                if self.task.specification.optimality.maximizing == mc_result_positive:
+                    self.epsilon *= -1
             eps_optimum_threshold = opt_result_value * (1 + self.epsilon)
         else: # this should result in normalised value of the produced tree being within espilon
             opt_random_diff = opt_result_value - random_result_value
@@ -172,6 +224,7 @@ class DtNest(DtSynthesizer):
                 subtree_task = paynt.task.Task.from_specification(subtree_spec, use_exact=self.colored_mdp.use_exact)
                 subtree_colored_mdp_factory = DtColoredMdpFactory(submdp.model, subtree_task)
                 subtree_colored_mdp = subtree_colored_mdp_factory.colored_mdp
+                assert subtree_task.specification.optimality is not None
                 subtree_task.specification.optimality.update_optimum(eps_optimum_threshold)
                 subtree_synthesizer = DtSynthesizer(subtree_colored_mdp_factory)
                 self.dtpaynt_calls += 1
@@ -306,19 +359,47 @@ class DtNest(DtSynthesizer):
         logger.info(f'final tree has value {result.optimality_result.value} with depth {self.colored_mdp.tree_helper_tree.get_depth()} and {len(self.colored_mdp.tree_helper_tree.collect_nonterminals())} nodes')
 
 
-    def run(self, optimum_threshold=None):
+    def run(self, optimum_threshold : Any = None) -> DtResult:
+        # see initialize_settings's comment: DtNest always actually gets a DtNestTask
+        task : DtNestTask = self.task  # type: ignore[assignment]
 
         paynt_mdp = paynt.underlying_model.underlying_model.SubMdp(self.colored_mdp.underlying_mdp, [x for x in range(self.colored_mdp.underlying_mdp.nr_states)], [x for x in range(self.colored_mdp.underlying_mdp.nr_choices)])
-        if len(self.task.specification.constraints) > 0:
-            from ._utils import get_optimality_specification
-            self.task.specification = get_optimality_specification(self.task.specification)
+
+        # DtNest always works from a single optimality-shaped query (see synthesize_subtrees): it has no
+        # mechanism to check a constraint directly, only to approximate a numeric target within an
+        # epsilon-band. A specification with no optimality objective but exactly one constraint is still
+        # usable -- reduce_constraint_to_optimality converts it, and its original threshold flows into
+        # synthesize_subtrees so DtNest's own acceptance test targets exactly what the user asked for
+        # (see classify_constraint_threshold) instead of silently chasing the unconstrained optimum.
+        user_threshold : float | None = None
+        user_threshold_minimizing : bool | None = None
+        spec = self.task.specification
+        if spec.optimality is not None:
+            if len(spec.constraints) > 0:
+                raise ValueError(
+                    f"dtnest does not support constraints alongside an optimality objective (found "
+                    f"{len(spec.constraints)} constraint(s)) -- it has no mechanism to check a constraint, "
+                    f"only to approximate a single optimality query")
+        elif len(spec.constraints) == 1:
+            self.task.specification, constraint = reduce_constraint_to_optimality(spec)
+            user_threshold = constraint.threshold
+            user_threshold_minimizing = constraint.minimizing
+            logger.info(
+                f"no optimality objective given -- treating the constraint {constraint} as an optimality "
+                f"objective for dtnest, using its threshold {user_threshold} as the acceptance target")
+        else:
+            raise ValueError(
+                f"dtnest requires a specification with either an optimality objective or exactly one "
+                f"constraint to approximate as one; found {len(spec.constraints)} constraint(s) and no "
+                f"optimality objective")
+
         mc_result = paynt_mdp.model_check_property(self.task.get_property())
         opt_scheduler = mc_result.result.scheduler
 
         state_to_choice = paynt.underlying_model.underlying_model.ModelIndex.scheduler_to_state_to_choice(
             self.colored_mdp.underlying_mdp, self.colored_mdp.choice_destinations, paynt_mdp, opt_scheduler)
 
-        if self.task.initial_tree is None:
+        if task.initial_tree is None:
 
             state_to_action = state_to_choice_to_state_to_action(state_to_choice, self.colored_mdp)
             initial_tree_helper = run_scikit_learn_tree(self.colored_mdp.relevant_state_valuations, state_to_action, self.colored_mdp.variables, self.colored_mdp.action_labels)
@@ -346,7 +427,7 @@ class DtNest(DtSynthesizer):
 
         assert self.colored_mdp.tree_helper is not None, "tree helper not set, cannot run dtNest"
 
-        self.synthesize_subtrees(opt_result_value, random_result_value)
+        self.synthesize_subtrees(opt_result_value, random_result_value, user_threshold, user_threshold_minimizing)
 
         logger.info(f"the optimal scheduler has value: {opt_result_value}")
         if self.colored_mdp.DONT_CARE_ACTION_LABEL in self.colored_mdp.action_labels:

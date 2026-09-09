@@ -1,3 +1,8 @@
+from __future__ import annotations
+
+from typing import Any
+
+import paynt.task
 import paynt.parameter_space.parameter_space
 import paynt.underlying_model.underlying_model
 from paynt.dt.colored_mdp import DtColoredMdp
@@ -31,7 +36,7 @@ class DtColoredMdpFactory:
     # if true, irrelevant states will not be considered for tree mapping
     filter_deterministic_states = True
 
-    def __init__(self, mdp, task=None, use_exact=False):
+    def __init__(self, mdp : Any, task : paynt.task.Task | None = None, use_exact : bool = False):
         self.task = task
         self.use_exact = use_exact
         # task is optional here (see class docstring), and even when present may be a plain Task rather than
@@ -69,12 +74,12 @@ class DtColoredMdpFactory:
         # get variable domains on relevant states
         variable_name,state_valuations = get_state_valuations(mdp)
         num_variables = len(variable_name)
-        variable_domain = [set() for variable in range(num_variables)]
+        variable_domain_sets : list[set[Any]] = [set() for variable in range(num_variables)]
         for state in self.state_is_relevant_bv:
             valuation = state_valuations[state]
             for variable in range(num_variables):
-                variable_domain[variable].add(valuation[variable])
-        variable_domain = [sorted(domain) for domain in variable_domain]
+                variable_domain_sets[variable].add(valuation[variable])
+        variable_domain = [sorted(domain) for domain in variable_domain_sets]
 
         # filter variables having only one option
         variable_mask = [len(domain) > 1 for domain in variable_domain]
@@ -86,7 +91,9 @@ class DtColoredMdpFactory:
             for valuations in state_valuations
         ]
 
-        self.variables = [DtVariable(name,variable_domain[variable]) for variable,name in enumerate(variable_name)]
+        # DtVariable's own domain parameter is typed as set[int], but its __init__ actually iterates and
+        # sorts whatever iterable it's given -- a plain sorted list (built above) works fine at runtime
+        self.variables = [DtVariable(name,variable_domain[variable]) for variable,name in enumerate(variable_name)]  # type: ignore[arg-type]
         self.relevant_state_valuations = state_valuations
         logger.debug(f"found the following {len(self.variables)} variables: {[str(v) for v in self.variables]}")
 
@@ -94,7 +101,7 @@ class DtColoredMdpFactory:
         # every other colored-MDP factory -- 0 is also the CLI's own default --tree-depth
         self.colored_mdp = self.reset_tree(0)
 
-    def reset_tree(self, depth : int, enable_harmonization : bool = True):
+    def reset_tree(self, depth : int, enable_harmonization : bool = True) -> DtColoredMdp:
         '''
         Rebuild the decision tree template, the parameter space and the coloring, producing a fresh
         DtColoredMdp -- callers reassign their reference (e.g. self.colored_mdp = factory.reset_tree(k)) rather
@@ -128,7 +135,7 @@ class DtColoredMdpFactory:
         is_action_parameter = [False for _ in parameter_info]
         is_decision_parameter = [False for _ in parameter_info]
         is_variable_parameter = [False for _ in parameter_info]
-        node_parameter_info = [[] for _ in decision_tree.collect_nodes()]
+        node_parameter_info : list[list[tuple[int, str, str]]] = [[] for _ in decision_tree.collect_nodes()]
         for parameter_id,info in enumerate(parameter_info):
             node,parameter_name,parameter_type = info
             node_parameter_info[node].append( (parameter_id,parameter_name,parameter_type) )

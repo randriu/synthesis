@@ -6,9 +6,16 @@ node/branch that would select it, and a parameter's options are the decisions av
 this class holds one specific tree/coloring, not a range of memory sizes.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import stormpy
 
 import paynt.colored_mdp
+import paynt.parameter_space.parameter_space
+import paynt.synthesizer.search_node
+import paynt.dt.decision_tree
 import paynt.underlying_model.underlying_model
 from paynt.dt._utils import get_state_valuations
 
@@ -24,10 +31,10 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
     DONT_CARE_ACTION_LABEL = "__random__"
 
     def __init__(
-        self, underlying_mdp, parameter_space, coloring, use_exact,
-        action_labels, choice_to_action, state_is_relevant, state_is_relevant_bv,
-        variables, relevant_state_valuations, decision_tree,
-        is_action_parameter, is_decision_parameter, is_variable_parameter
+        self, underlying_mdp : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, coloring : Any, use_exact : bool,
+        action_labels : list[str], choice_to_action : list[int], state_is_relevant : list[bool], state_is_relevant_bv : Any,
+        variables : list[Any], relevant_state_valuations : list[Any], decision_tree : paynt.dt.decision_tree.DecisionTree,
+        is_action_parameter : list[bool], is_decision_parameter : list[bool], is_variable_parameter : list[bool]
     ):
         super().__init__(underlying_mdp, parameter_space, coloring, use_exact)
         # MDP identity, stable across every reset_tree() call (not just this one tree/depth)
@@ -42,14 +49,22 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
         self.is_action_parameter = is_action_parameter
         self.is_decision_parameter = is_decision_parameter
         self.is_variable_parameter = is_variable_parameter
+        # dtnest-only (paynt.dt.dtnest.synthesizer.DtNest): the externally-learned/incrementally-rebuilt tree
+        # dtnest works from, distinct from decision_tree above (the AR-search's own tree template). Not part
+        # of plain DtSynthesizer's contract -- declared here purely so their type is known at every dtnest
+        # read site, not because every DtColoredMdp genuinely has one.
+        self.tree_helper : Any = None
+        self.tree_helper_tree : paynt.dt.decision_tree.DecisionTree | None = None
 
-    def build_from_choice_mask(self, choices):
+    def build_from_choice_mask(self, choices : Any) -> paynt.underlying_model.underlying_model.SubMdp:
         ''' Convenience used throughout dt/dtnest: restrict to a choice mask without needing a parameter space. '''
         model, state_map, choice_map = paynt.underlying_model.underlying_model.SubmodelBuilder.restrict(
             self.underlying_mdp, choices, self.subsystem_builder_options)
         return paynt.underlying_model.underlying_model.SubMdp(model, state_map, choice_map)
 
-    def build(self, parameter_space, parent_selected_choices=None):
+    def build(
+        self, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, parent_selected_choices : Any = None
+    ) -> tuple[paynt.underlying_model.underlying_model.SubMdp, Any]:
         if parent_selected_choices is None:
             choices = self.coloring.selectCompatibleChoices(parameter_space.native)
         else:
@@ -60,7 +75,9 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
         mdp.parameter_space = parameter_space
         return mdp, choices
 
-    def are_choices_consistent(self, choices, parameter_space):
+    def are_choices_consistent(
+        self, choices : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace
+    ) -> tuple[bool, list[list[int]]]:
         ''' Separate method for profiling purposes. '''
         consistent,parameter_selection = self.coloring.areChoicesConsistent(choices, parameter_space.native)
         for parameter,options in enumerate(parameter_selection):
@@ -70,7 +87,9 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
                 f"option {option} for parameter {parameter} ({parameter_space.parameter_name(parameter)}) is not in the parameter space"
         return consistent,parameter_selection
 
-    def scheduler_is_consistent(self, mdp, node, result, specification):
+    def scheduler_is_consistent(
+        self, mdp : Any, node : paynt.synthesizer.search_node.SearchNode, result : Any, specification : Any
+    ) -> tuple[list[list[int]], bool]:
         ''' Get parameter options involved in the scheduler selection. '''
         scheduler = result.scheduler
         assert scheduler.memoryless and scheduler.deterministic
@@ -78,11 +97,11 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
             self.underlying_mdp, self.choice_destinations, mdp, scheduler)
         choices = paynt.underlying_model.underlying_model.ModelIndex.state_to_choice_to_choices(self.underlying_mdp, state_to_choice)
         if specification.is_single_property:
-            node.scheduler_choices = choices
+            node.scheduler_choices = choices  # type: ignore[attr-defined]
         consistent,parameter_selection = self.are_choices_consistent(choices, mdp.parameter_space)
         return parameter_selection, consistent
 
-    def scheduler_json_to_choices(self, scheduler_json, discard_unreachable_states=False):
+    def scheduler_json_to_choices(self, scheduler_json : list[Any], discard_unreachable_states : bool = False) -> tuple[Any, list[Any]]:
         variable_name,state_valuations = get_state_valuations(self.underlying_mdp)
         nci = self.underlying_mdp.nondeterministic_choice_indices.copy()
         assert self.underlying_mdp.nr_states == len(scheduler_json)
@@ -111,8 +130,8 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
             else:
                 assert False, "action is not available in the state"
         # enable implicit actions
-        for state,choice in enumerate(state_to_choice):
-            if choice is None:
+        for state,existing_choice in enumerate(state_to_choice):
+            if existing_choice is None:
                 logger.warning(f"WARNING: scheduler has no action for state {state}")
                 state_to_choice[state] = nci[state]
 
@@ -135,7 +154,7 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return choices,scheduler_json_relevant
 
-    def get_random_choices(self):
+    def get_random_choices(self) -> Any:
         ''' Gets all choices that represent random action, used to compute the value of uniformly random scheduler. '''
         nci = self.underlying_mdp.nondeterministic_choice_indices.copy()
         state_to_choice = paynt.underlying_model.underlying_model.ModelIndex.empty_scheduler(self.underlying_mdp)
@@ -145,8 +164,8 @@ class DtColoredMdp(paynt.colored_mdp.ColoredMdp):
                 if self.choice_to_action[choice] == random_action:
                     state_to_choice[state] = choice
                     break
-        for state,choice in enumerate(state_to_choice):
-            if choice is None:
+        for state,existing_choice in enumerate(state_to_choice):
+            if existing_choice is None:
                 state_to_choice[state] = nci[state]
 
         choices = paynt.underlying_model.underlying_model.ModelIndex.state_to_choice_to_choices(self.underlying_mdp, state_to_choice)

@@ -1,11 +1,15 @@
+from __future__ import annotations
 
+from typing import Any
+
+import paynt.specification.property
 from paynt.dt.task import DtTask
 
 class DtNestTask(DtTask):
 
     def __init__(
-        self, properties, error_threshold, tree_depth=7, initial_tree=None, timeout=600, use_exact=False,
-        max_subtree_depth=7, **kwargs
+        self, properties : list[Any], error_threshold : float, tree_depth : int = 7, initial_tree : Any = None,
+        timeout : int | None = 600, use_exact : bool = False, max_subtree_depth : int = 7, **kwargs : Any
     ):
 
         super().__init__(properties, tree_depth, timeout=timeout, use_exact=use_exact, **kwargs)
@@ -14,12 +18,15 @@ class DtNestTask(DtTask):
         self.max_subtree_depth = max_subtree_depth
 
     @classmethod
-    def from_specification(
-        cls, specification, tree_depth=7, timeout=None, use_exact=False,
-        error_threshold=0.05, initial_tree=None, max_subtree_depth=7,
-        **kwargs
-    ):
-        task = super().from_specification(specification, tree_depth=tree_depth, timeout=timeout, use_exact=use_exact, **kwargs)
+    def from_specification(  # type: ignore[override]
+        cls, specification : paynt.specification.property.Specification, tree_depth : int = 7, timeout : int | None = None,
+        use_exact : bool = False, error_threshold : float = 0.05, initial_tree : Any = None, max_subtree_depth : int = 7,
+        **kwargs : Any
+    ) -> "DtNestTask":
+        # see DtTask.from_specification's comment: super().from_specification uses cls.__new__(cls), so this
+        # is really a DtNestTask at runtime whenever called as DtNestTask.from_specification(...)
+        task : DtNestTask = super().from_specification(  # type: ignore[assignment]
+            specification, tree_depth=tree_depth, timeout=timeout, use_exact=use_exact, **kwargs)
         task.error_threshold = error_threshold
         task.initial_tree = initial_tree
         task.max_subtree_depth = max_subtree_depth
