@@ -15,7 +15,14 @@ paynt.underlying_model.underlying_model.ModelIndex; the one splitting heuristic 
 shared by multiple synthesizer classes, not part of the representation.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
+import paynt.task
+import paynt.parameter_space.parameter_space
 import paynt.underlying_model.underlying_model
+import paynt.synthesizer.search_node
 
 import logging
 logger = logging.getLogger(__name__)
@@ -30,7 +37,10 @@ class ColoredMdp:
     # label associated with un-labelled choices, shared by every coloring-construction implementation
     EMPTY_LABEL = "__no_label__"
 
-    def __init__(self, underlying_mdp, parameter_space, coloring, use_exact=False):
+    def __init__(
+        self, underlying_mdp : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, coloring : Any,
+        use_exact : bool = False
+    ):
         # M: the underlying (uncolored) MDP, a stormpy sparse model
         self.underlying_mdp = underlying_mdp
         # V: the constrained parameter space
@@ -43,11 +53,13 @@ class ColoredMdp:
         self.subsystem_builder_options = paynt.underlying_model.underlying_model.SubmodelBuilder.default_builder_options()
         self.choice_destinations = paynt.underlying_model.underlying_model.ModelIndex.compute_choice_destinations(underlying_mdp, use_exact)
 
-    def export_result(self, dtmc):
+    def export_result(self, dtmc : Any) -> None:
         ''' to be overridden '''
         pass
 
-    def build(self, parameter_space, parent_selected_choices=None):
+    def build(
+        self, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, parent_selected_choices : Any = None
+    ) -> tuple[paynt.underlying_model.underlying_model.SubMdp, Any]:
         '''
         Compute the induced sub-MDP C[eta] for the given parameter (sub)space.
         :param parent_selected_choices unused by this base implementation; DtColoredMdp's override uses it
@@ -61,7 +73,7 @@ class ColoredMdp:
         mdp.parameter_space = parameter_space
         return mdp, choices
 
-    def build_assignment(self, parameter_space):
+    def build_assignment(self, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace) -> paynt.underlying_model.underlying_model.SubMdp:
         ''' Compute the induced DTMC C[theta] for a full parameter assignment. '''
         assert parameter_space.size == 1, "expecting parameter space of size 1"
         choices = self.coloring.selectCompatibleChoices(parameter_space.native)
@@ -71,7 +83,7 @@ class ColoredMdp:
         dtmc = paynt.underlying_model.underlying_model.SubmodelBuilder.mdp_to_dtmc(model)
         return paynt.underlying_model.underlying_model.SubMdp(dtmc, state_map, choice_map)
 
-    def scheduler_selection(self, mdp, scheduler):
+    def scheduler_selection(self, mdp : Any, scheduler : Any) -> list[list[int]]:
         ''' Get parameter options involved in the scheduler selection (the inverse of build(): choices -> V). '''
         assert scheduler.memoryless and scheduler.deterministic
         state_to_choice = paynt.underlying_model.underlying_model.ModelIndex.scheduler_to_state_to_choice(
@@ -80,7 +92,9 @@ class ColoredMdp:
         parameter_selection = self.coloring.collectHoleOptions(choices)
         return parameter_selection
 
-    def scheduler_is_consistent(self, mdp, node, result, specification):
+    def scheduler_is_consistent(
+        self, mdp : Any, node : paynt.synthesizer.search_node.SearchNode, result : Any, specification : Any
+    ) -> tuple[list[list[int]], bool]:
         '''
         Get the parameter assignment induced by this scheduler and fill undefined
         parameters by some option from the parameter space of this mdp.
@@ -116,6 +130,6 @@ class IdentityColoredMdpFactory:
     re-unfolding at a different depth/memory size. Exists purely so Sketch.load_sketch/paynt.api.get_synthesizer
     can treat every feature uniformly as a (colored_mdp_factory, task) pair without special-casing this one.
     '''
-    def __init__(self, colored_mdp, task):
+    def __init__(self, colored_mdp : ColoredMdp, task : paynt.task.Task):
         self.colored_mdp = colored_mdp
         self.task = task

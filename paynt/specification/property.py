@@ -119,8 +119,11 @@ class Property:
         self.property = prop
         rf = prop.raw_formula
 
-        self.game_optimizing_player = None # player index for game properties
-        self.game_formula = None
+        self.game_optimizing_player : int | None = None # player index for game properties
+        self.game_formula : Any = None
+        # set alongside game_formula by construct_property, for game properties only -- declared here (not
+        # just assigned dynamically there) so it has the same documented default as game_formula itself
+        self.game_formula_alt : Any = None
 
         self.use_exact = use_exact
 
@@ -273,8 +276,11 @@ class OptimalityProperty(Property):
         self.property = prop
         rf = prop.raw_formula
 
-        self.game_optimizing_player = None # player index for game properties
-        self.game_formula = None
+        self.game_optimizing_player : int | None = None # player index for game properties
+        self.game_formula : Any = None
+        # set alongside game_formula by construct_property, for game properties only -- declared here (not
+        # just assigned dynamically there) so it has the same documented default as game_formula itself
+        self.game_formula_alt : Any = None
 
         self.use_exact = use_exact
 

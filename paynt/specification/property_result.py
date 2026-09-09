@@ -23,7 +23,9 @@ class ConstraintsResult:
     A list of constraint results.
     Note: some results might be None (not evaluated).
     '''
-    def __init__(self, results : list["PropertyResult | None"]):
+    # PropertyResult for a plain specification, MdpPropertyResult for the AR-family check_specification path
+    # -- accessed generically here (only .sat), so kept as Any rather than a Union of the two unrelated classes
+    def __init__(self, results : list[Any]):
         self.results = results
         self.undecided_constraints = [i for i,result in enumerate(results) if result is not None and result.sat is None]
 

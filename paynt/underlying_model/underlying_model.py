@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 import stormpy
 
 import paynt.specification.property
@@ -14,39 +18,47 @@ logger = logging.getLogger(__name__)
 class Mdp:
 
     @classmethod
-    def assert_no_overlapping_guards(cls, model):
+    def assert_no_overlapping_guards(cls, model : Any) -> None:
         if model.labeling.contains_label("overlap_guards"):
             assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
 
-    def __init__(self, model):
+    def __init__(self, model : Any):
         # Mdp.assert_no_overlapping_guards(model)
         self.model = model
         if len(model.initial_states) > 1:
             logger.warning("WARNING: obtained model with multiple initial states")
+        # Not set here, and not a concept this generic/colored-MDP-agnostic class otherwise knows about --
+        # tagged onto an already-built Mdp/SubMdp externally by ColoredMdp.build(), so that AR/CEGIS/Hybrid
+        # code walking a search node can recover which parameter (sub)space produced this particular
+        # induced model. Declared here (rather than left as an undeclared dynamic attribute) purely so its
+        # type is known at every one of its many read sites across the synthesizer packages.
+        self.parameter_space : Any = None
 
     @property
-    def states(self):
+    def states(self) -> int:
         return self.model.nr_states
 
     @property
-    def is_deterministic(self):
+    def is_deterministic(self) -> bool:
         return self.model.nr_choices == self.model.nr_states
 
     @property
-    def initial_state(self):
+    def initial_state(self) -> int:
         return self.model.initial_states[0]
 
-    def model_check_property(self, prop, alt=False):
+    def model_check_property(self, prop : paynt.specification.property.Property, alt : bool = False) -> paynt.specification.property_result.PropertyResult:
         formula = prop.formula if not alt else prop.formula_alt
         result = paynt.specification.property.Property.model_check(self.model,formula)
         value = result.at(self.initial_state)
         return paynt.specification.property_result.PropertyResult(prop, result, value)
 
-    def check_specification(self, spec, constraint_indices=None, short_evaluation=False):
+    def check_specification(
+        self, spec : paynt.specification.property.Specification, constraint_indices : Any = None, short_evaluation : bool = False
+    ) -> paynt.specification.property_result.SpecificationResult:
         ''' Assuming this is a DTMC. '''
         if constraint_indices is None:
             constraint_indices = spec.all_constraint_indices()
-        results = [None for _ in spec.constraints]
+        results : list[paynt.specification.property_result.PropertyResult | None] = [None for _ in spec.constraints]
         for index in constraint_indices:
             result = self.model_check_property(spec.constraints[index])
             results[index] = result
@@ -56,6 +68,7 @@ class Mdp:
         spec_result.constraints_result = paynt.specification.property_result.ConstraintsResult(results)
 
         if spec.has_optimality and not (short_evaluation and spec_result.constraints_result.sat is False):
+            assert spec.optimality is not None
             spec_result.optimality_result = self.model_check_property(spec.optimality)
         return spec_result
 
@@ -63,7 +76,7 @@ class Mdp:
 
 class SubMdp(Mdp):
 
-    def __init__(self, model, underlying_mdp_state_map, underlying_mdp_choice_map):
+    def __init__(self, model : Any, underlying_mdp_state_map : list[int], underlying_mdp_choice_map : list[int]):
         super().__init__(model)
         self.underlying_mdp_choice_map = underlying_mdp_choice_map
         self.underlying_mdp_state_map = underlying_mdp_state_map
@@ -71,10 +84,10 @@ class SubMdp(Mdp):
 
 class Smg(Mdp):
 
-    def __init__(self, model):
+    def __init__(self, model : Any):
         super().__init__(model)
 
-    def model_check_property(self, prop, alt=False):
+    def model_check_property(self, prop : paynt.specification.property.Property, alt : bool = False) -> paynt.specification.property_result.PropertyResult:
         formula = prop.game_formula if not alt else prop.game_formula_alt
 
         result = payntbind.synthesis.model_check_smg(self.model, formula,
@@ -93,14 +106,14 @@ class SubmodelBuilder:
     '''
 
     @staticmethod
-    def default_builder_options():
+    def default_builder_options() -> Any:
         builder_options = stormpy.SubsystemBuilderOptions()
         builder_options.build_state_mapping = True
         builder_options.build_action_mapping = True
         return builder_options
 
     @staticmethod
-    def restrict(mdp, choices, builder_options):
+    def restrict(mdp : Any, choices : Any, builder_options : Any) -> tuple[Any, list[int], list[int]]:
         '''
         Restrict the MDP to the selected actions.
         :param choices a bitvector of selected actions
@@ -119,12 +132,12 @@ class SubmodelBuilder:
         return model, state_map, choice_map
 
     @staticmethod
-    def build_submdp(mdp, choices, builder_options):
+    def build_submdp(mdp : Any, choices : Any, builder_options : Any) -> SubMdp:
         model, state_map, choice_map = SubmodelBuilder.restrict(mdp, choices, builder_options)
         return SubMdp(model, state_map, choice_map)
 
     @staticmethod
-    def mdp_to_dtmc(mdp):
+    def mdp_to_dtmc(mdp : Any) -> Any:
         tm = mdp.transition_matrix
         tm.make_row_grouping_trivial()
         assert tm.nr_columns == tm.nr_rows, "expected transition matrix without non-trivial row groups"
@@ -147,18 +160,18 @@ class ModelIndex:
     '''
 
     @staticmethod
-    def compute_choice_destinations(model, use_exact=False):
+    def compute_choice_destinations(model : Any, use_exact : bool = False) -> Any:
         if use_exact:
             return payntbind.synthesis.computeChoiceDestinationsExact(model)
         else:
             return payntbind.synthesis.computeChoiceDestinations(model)
 
     @staticmethod
-    def empty_scheduler(model):
+    def empty_scheduler(model : Any) -> list[int | None]:
         return [None] * model.nr_states
 
     @staticmethod
-    def discard_unreachable_choices(model, choice_destinations, state_to_choice):
+    def discard_unreachable_choices(model : Any, choice_destinations : Any, state_to_choice : list[int | None]) -> list[int | None]:
         state_to_choice_reachable = ModelIndex.empty_scheduler(model)
         state_visited = [False] * model.nr_states
         initial_state = list(model.initial_states)[0]
@@ -175,7 +188,9 @@ class ModelIndex:
         return state_to_choice_reachable
 
     @staticmethod
-    def scheduler_to_state_to_choice(underlying_mdp, choice_destinations, submdp, scheduler, discard_unreachable_choices=True):
+    def scheduler_to_state_to_choice(
+        underlying_mdp : Any, choice_destinations : Any, submdp : SubMdp, scheduler : Any, discard_unreachable_choices : bool = True
+    ) -> list[int | None]:
         ''' Convert a scheduler over a sub-MDP to a state-to-choice mapping over the underlying MDP.
         param: underlying_mdp: the underlying MDP used to construct the sub-MDP
         param: choice_destinations: the choice destinations of the underlying MDP
@@ -198,7 +213,7 @@ class ModelIndex:
         return state_to_choice
 
     @staticmethod
-    def state_to_choice_to_choices(model, state_to_choice):
+    def state_to_choice_to_choices(model : Any, state_to_choice : list[int | None]) -> Any:
         num_choices = model.nr_choices
         choices = stormpy.BitVector(num_choices, False)
         for choice in state_to_choice:
@@ -207,7 +222,7 @@ class ModelIndex:
         return choices
 
     @staticmethod
-    def identify_absorbing_states(model):
+    def identify_absorbing_states(model : Any) -> list[bool]:
         state_is_absorbing = [True] * model.nr_states
         tm = model.transition_matrix
         for state in range(model.nr_states):
@@ -221,9 +236,9 @@ class ModelIndex:
         return state_is_absorbing
 
     @staticmethod
-    def identify_states_with_actions(model):
+    def identify_states_with_actions(model : Any) -> list[bool]:
         ''' Get a mask of states having more than one action. '''
-        state_has_actions = [None] * model.nr_states
+        state_has_actions : list[bool] = [False] * model.nr_states
         ndi = model.nondeterministic_choice_indices
         for state in range(model.nr_states):
             num_actions = ndi[state+1]-ndi[state]
@@ -231,21 +246,21 @@ class ModelIndex:
         return state_has_actions
 
     @staticmethod
-    def identify_target_states(model, prop):
+    def identify_target_states(model : Any, prop : paynt.specification.property.Property) -> Any:
         if prop.is_discounted_reward:
             return stormpy.BitVector(model.nr_states,False)
         target_label = prop.get_target_label()
         return model.labeling.get_states(target_label)
 
     @staticmethod
-    def make_vector_defined(vector):
+    def make_vector_defined(vector : list[float]) -> list[float]:
         vector_noinf = [value if value != math.inf else 0 for value in vector]
         default_value = sum(vector_noinf) / len(vector)
         vector_valid = [value if value != math.inf else default_value for value in vector]
         return vector_valid
 
     @staticmethod
-    def choice_values(mdp, prop, state_values):
+    def choice_values(mdp : Any, prop : paynt.specification.property.Property, state_values : list[float]) -> list[float]:
         '''
         Get choice values after model checking MDP against a property.
         Value of choice c: s -> s' is computed as
@@ -274,7 +289,7 @@ class ModelIndex:
         return choice_values
 
     @staticmethod
-    def compute_expected_visits(mdp, prop, choices, disable_expected_visits=False):
+    def compute_expected_visits(mdp : Any, prop : paynt.specification.property.Property, choices : Any, disable_expected_visits : bool = False) -> list[float]:
         '''
         Compute the expected number of visits in the states of the DTMC induced by the given choices.
         '''
@@ -294,7 +309,7 @@ class ModelIndex:
             dtmc_visits = [value if value != math.inf else 0 for value in dtmc_visits]
 
         # map vector of expected visits onto the state space of the given mdp
-        expected_visits = [0] * mdp.nr_states
+        expected_visits : list[float] = [0] * mdp.nr_states
         for state in range(dtmc.nr_states):
             mdp_state = state_map[state]
             visits = dtmc_visits[state]

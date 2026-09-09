@@ -1,6 +1,14 @@
+from __future__ import annotations
+
+from typing import Any
+
+import paynt.colored_mdp
+import paynt.task
+import paynt.synthesizer.search_node
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.conflict_generator.dtmc
 import paynt.synthesizer.conflict_generator.mdp
+import paynt.parameter_space.parameter_space
 import paynt.parameter_space.smt
 
 import logging
@@ -9,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
 
-    def __init__(self, colored_mdp, task):
+    def __init__(self, colored_mdp : paynt.colored_mdp.ColoredMdp, task : paynt.task.Task):
         super().__init__(colored_mdp, task)
 
         self.conflict_generator = self.choose_conflict_generator(colored_mdp, task)
@@ -19,9 +27,12 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
             "Cannot use CEGIS for maximizing reward formulae -- consider using AR or hybrid methods."
 
 
-    def choose_conflict_generator(self, colored_mdp, task):
+    def choose_conflict_generator(
+        self, colored_mdp : paynt.colored_mdp.ColoredMdp, task : paynt.task.Task
+    ) -> paynt.synthesizer.conflict_generator.dtmc.ConflictGeneratorDtmc:
         if task.conflict_generator_type == "mdp":
-            conflict_generator = paynt.synthesizer.conflict_generator.mdp.ConflictGeneratorMdp(colored_mdp, task)
+            conflict_generator : paynt.synthesizer.conflict_generator.dtmc.ConflictGeneratorDtmc = \
+                paynt.synthesizer.conflict_generator.mdp.ConflictGeneratorMdp(colored_mdp, task)
         else:
             # default conflict generator
             conflict_generator = paynt.synthesizer.conflict_generator.dtmc.ConflictGeneratorDtmc(colored_mdp, task)
@@ -29,24 +40,28 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
 
 
     @property
-    def method_name(self):
+    def method_name(self) -> str:
         return "CEGIS " + self.conflict_generator.name
 
 
-    def collect_conflict_requests(self, node, mc_result):
+    def collect_conflict_requests(self, node : paynt.synthesizer.search_node.SearchNode, mc_result : Any) -> list[tuple[int, Any, Any]]:
         '''
         Construct conflict request wrt each unsatisfiable property,
             pack such properties as well as their MDP results (if available)
         '''
-        conflict_requests = []
+        conflict_requests : list[tuple[int, Any, Any]] = []
+        assert node.constraint_indices is not None
         for index in node.constraint_indices:
             member_result = mc_result.constraints_result.results[index]
             if member_result.sat:
                 continue
-            prop = self.task.specification.constraints[index]
-            parameter_space_result = node.analysis_result.constraints_result.results[index] if node.analysis_result is not None else None
+            prop : Any = self.task.specification.constraints[index]
+            parameter_space_result = None
+            if node.analysis_result is not None:
+                assert node.analysis_result.constraints_result is not None
+                parameter_space_result = node.analysis_result.constraints_result.results[index]
             conflict_requests.append( (index,prop,parameter_space_result) )
-        if self.task.specification.has_optimality:
+        if self.task.specification.optimality is not None:
             member_result = mc_result.optimality_result
             index = len(self.task.specification.constraints)
             prop = self.task.specification.optimality
@@ -56,12 +71,15 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         return conflict_requests
 
 
-    def analyze_parameter_space_assignment_cegis(self, node, assignment):
+    def analyze_parameter_space_assignment_cegis(
+        self, node : paynt.synthesizer.search_node.SearchNode, assignment : paynt.parameter_space.parameter_space.ParameterSpace
+    ) -> tuple[list[Any], paynt.parameter_space.parameter_space.ParameterSpace | None]:
         """
         :return (1) list of conflicts to exclude from design space (might be empty)
         :return (2) accepting assignment (or None)
         """
         assert node.mdp is not None, "analyzed parameter space does not have an associated underlying MDP"
+        assert self.stat is not None
 
         dtmc = self.colored_mdp.build_assignment(assignment)
         self.stat.iteration(dtmc)
@@ -72,6 +90,7 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         if accepting:
             accepting_assignment = assignment
         if improving_value is not None:
+            assert self.task.specification.optimality is not None
             self.task.specification.optimality.update_optimum(improving_value)
             self.best_assignment_value = improving_value
         if accepting and not self.task.specification.can_be_improved():
@@ -83,7 +102,7 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         return conflicts, accepting_assignment
 
 
-    def synthesize_one(self, node):
+    def synthesize_one(self, node : paynt.synthesizer.search_node.SearchNode) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
 
         # build the induced sub-MDP, mapping mdp states to parameter indices
         node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space)
@@ -103,6 +122,7 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
                     return self.best_assignment
 
             pruned = smt_solver.exclude_conflicts(node, assignment, conflicts)
+            assert self.explored is not None
             self.explored += pruned
 
             # construct next assignment

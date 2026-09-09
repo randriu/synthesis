@@ -10,7 +10,7 @@ from . import version
 def get_version():
     """Return PAYNT version string."""
 
-    return version.__version__
+    return version()
 
 
 def get_synthesizer(colored_mdp_factory, method="ar", fsc_synthesis=False, storm_control=None, dtnest=False):

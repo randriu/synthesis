@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 import payntbind
 
 import paynt.synthesizer.conflict_generator.dtmc
@@ -9,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ConflictGeneratorMdp(paynt.synthesizer.conflict_generator.dtmc.ConflictGeneratorDtmc):
 
-    def initialize(self):
+    def initialize(self) -> None:
         state_to_parameters_bv = self.colored_mdp.coloring.getStateToHoles().copy()
         state_to_parameters = []
         for state,parameters_bv in enumerate(state_to_parameters_bv):
@@ -21,5 +25,5 @@ class ConflictGeneratorMdp(paynt.synthesizer.conflict_generator.dtmc.ConflictGen
             state_to_parameters, formulae
         )
 
-    def prepare_model(self, model):
+    def prepare_model(self, model : Any) -> None:
         self.counterexample_generator.prepare_mdp(model.model, model.underlying_mdp_state_map)

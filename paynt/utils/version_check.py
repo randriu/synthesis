@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import payntbind.info
 import stormpy.info
 
@@ -6,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 # Checks whether stormpy and payntbind use the same Storm as backend
 # Note that even if all these checks pass there is still a chance that the version of Storm used are incompatible but this should be rare
-def check_stormpy_compatibility():
+def check_stormpy_compatibility() -> None:
 
     incompatibility_found = False
 

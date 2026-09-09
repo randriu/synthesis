@@ -6,12 +6,21 @@ Lives under utils/ rather than as a top-level module since it is synthesis-inter
 library user never calls directly, not part of the public API.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import math
 
 import payntbind
 
+import paynt.colored_mdp
 
-def estimate_scheduler_difference(colored_mdp, mdp, underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits):
+
+def estimate_scheduler_difference(
+    colored_mdp : paynt.colored_mdp.ColoredMdp, mdp : Any, underlying_mdp_choice_map : list[int],
+    inconsistent_assignments : dict[int, list[int]], choice_values : list[float], expected_visits : list[float]
+) -> dict[int, float]:
     '''
     Default AR-splitting heuristic: estimate, per inconsistent parameter, how much the choice values
     differ across the parameter's options (weighted by expected visits). This is the generic
@@ -25,7 +34,10 @@ def estimate_scheduler_difference(colored_mdp, mdp, underlying_mdp_choice_map, i
         colored_mdp.coloring, inconsistent_assignments, expected_visits)
 
 
-def estimate_scheduler_difference_pomdp(colored_mdp, mdp, underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits):
+def estimate_scheduler_difference_pomdp(
+    colored_mdp : paynt.colored_mdp.ColoredMdp, mdp : Any, underlying_mdp_choice_map : list[int],
+    inconsistent_assignments : dict[int, list[int]], choice_values : list[float], expected_visits : list[float]
+) -> dict[int, float]:
     '''
     POMDP specialized variant of estimate_scheduler_difference, hand-optimized for posterior-unaware
     unfolding using colored_mdp.parameter_option_to_actions (the reverse coloring built during unfolding) instead
@@ -35,7 +47,7 @@ def estimate_scheduler_difference_pomdp(colored_mdp, mdp, underlying_mdp_choice_
     '''
     # create inverse underlying-choice-to-restricted-choice map
     # TODO optimize this for multiple properties
-    underlying_to_restricted_action_map = [None] * colored_mdp.underlying_mdp.nr_choices
+    underlying_to_restricted_action_map : list[int | None] = [None] * colored_mdp.underlying_mdp.nr_choices
     for choice in range(mdp.nr_choices):
         underlying_to_restricted_action_map[underlying_mdp_choice_map[choice]] = choice
 
@@ -47,11 +59,11 @@ def estimate_scheduler_difference_pomdp(colored_mdp, mdp, underlying_mdp_choice_
             choice_to_state.append(state)
 
     # for each parameter, compute its difference sum and a number of affected states
-    inconsistent_differences = {}
+    inconsistent_differences : dict[int, float] = {}
     for parameter_index,options in inconsistent_assignments.items():
-        difference_sum = 0
+        difference_sum = 0.0
         states_affected = 0
-        edges_0 = colored_mdp.parameter_option_to_actions[parameter_index][options[0]]
+        edges_0 = colored_mdp.parameter_option_to_actions[parameter_index][options[0]]  # type: ignore[attr-defined]
         for choice_index,_ in enumerate(edges_0):
 
             choice_0_global = edges_0[choice_index]
@@ -67,8 +79,8 @@ def estimate_scheduler_difference_pomdp(colored_mdp, mdp, underlying_mdp_choice_
 
             state_values = []
             for option in options:
-                assert len(colored_mdp.parameter_option_to_actions[parameter_index][option]) > choice_index
-                choice_global = colored_mdp.parameter_option_to_actions[parameter_index][option][choice_index]
+                assert len(colored_mdp.parameter_option_to_actions[parameter_index][option]) > choice_index  # type: ignore[attr-defined]
+                choice_global = colored_mdp.parameter_option_to_actions[parameter_index][option][choice_index]  # type: ignore[attr-defined]
                 choice = underlying_to_restricted_action_map[choice_global]
                 choice_value = choice_values[choice]
                 state_values.append(choice_value)
@@ -81,7 +93,7 @@ def estimate_scheduler_difference_pomdp(colored_mdp, mdp, underlying_mdp_choice_
             states_affected += 1
 
         if states_affected == 0:
-            parameter_score = 0
+            parameter_score = 0.0
         else:
             parameter_score = difference_sum / states_affected
         inconsistent_differences[parameter_index] = parameter_score
@@ -89,7 +101,7 @@ def estimate_scheduler_difference_pomdp(colored_mdp, mdp, underlying_mdp_choice_
     return inconsistent_differences
 
 
-def parameters_with_max_score(parameter_score):
+def parameters_with_max_score(parameter_score : dict[int, float]) -> list[int]:
     max_score = max(parameter_score.values())
     with_max_score = [parameter_index for parameter_index in parameter_score if parameter_score[parameter_index] == max_score]
     return with_max_score

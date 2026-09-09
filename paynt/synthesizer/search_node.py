@@ -30,7 +30,7 @@ class ParentInfo():
         self.refinement_depth : int | None = None
         # set only by dt.synthesizer.SynthesizerARDt.split_undecided_space; None for every other caller and
         # for a multi-property DT specification
-        self.analysis_result : paynt.specification.property_result.SpecificationResult | None = None
+        self.analysis_result : paynt.specification.property_result.MdpSpecificationResult | None = None
         self.scheduler_choices : Any = None
 
 
@@ -51,11 +51,16 @@ class SearchNode:
             self.refinement_depth = parent_info.refinement_depth + 1
         self.constraint_indices : list[int] | None = parent_info.constraint_indices if parent_info is not None else None
 
-        # populated by ColoredMdp.build(self.parameter_space, ...)
+        # populated by ColoredMdp.build(self.parameter_space, ...) -- always a SubMdp in practice (every
+        # ColoredMdp.build override constructs one via SubmodelBuilder.build_submdp/build_from_choice_mask),
+        # never a bare Mdp
         self.selected_choices : Any = None
-        self.mdp : paynt.underlying_model.underlying_model.Mdp | None = None
+        self.mdp : paynt.underlying_model.underlying_model.SubMdp | None = None
         # populated by Synthesizer.check_specification / SynthesizerARDt.verify_parameter_space
-        self.analysis_result : paynt.specification.property_result.SpecificationResult | None = None
+        # always an MdpSpecificationResult in practice (every producer -- SynthesizerAR.check_specification,
+        # SynthesizerARDt.build_unsat_result -- constructs that subclass, never the bare base), so typed as
+        # such rather than the more generic SpecificationResult
+        self.analysis_result : paynt.specification.property_result.MdpSpecificationResult | None = None
         # lazily populated by SearchNode.encode, CEGIS/Hybrid only
         self.encoding : paynt.parameter_space.smt.ParameterSpaceEncoding | None = None
 

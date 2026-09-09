@@ -1,3 +1,11 @@
+from __future__ import annotations
+
+from typing import Any
+
+import paynt.colored_mdp
+import paynt.task
+import paynt.synthesizer.search_node
+import paynt.parameter_space.parameter_space
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_ar
 import paynt.synthesizer.synthesizer_cegis
@@ -22,35 +30,35 @@ class StageControl:
     # whether adaptive hybrid is enabled
     adaptive_hybrid = True
 
-    def __init__(self, parameter_space_size):
+    def __init__(self, parameter_space_size : int):
         # timings
         self.timer_ar = paynt.utils.timer.Timer()
         self.timer_cegis = paynt.utils.timer.Timer()
 
         self.parameter_space_size = parameter_space_size
-        self.pruned_ar = 0
-        self.pruned_cegis = 0
-        
+        self.pruned_ar : float = 0
+        self.pruned_cegis : float = 0
+
         # multiplier to derive time allocated for cegis
         # time_ar * factor = time_cegis
         # =1 is fair, >1 favours cegis, <1 favours ar
-        self.cegis_efficiency = 1
+        self.cegis_efficiency : float = 1
 
-    def start_ar(self):
+    def start_ar(self) -> None:
         self.timer_cegis.stop()
         self.timer_ar.start()
 
-    def start_cegis(self):
+    def start_cegis(self) -> None:
         self.timer_ar.stop()
         self.timer_cegis.start()
 
-    def prune_ar(self, pruned):
+    def prune_ar(self, pruned : int) -> None:
         self.pruned_ar += pruned / self.parameter_space_size
 
-    def prune_cegis(self, pruned):
+    def prune_cegis(self, pruned : int) -> None:
         self.pruned_cegis += pruned / self.parameter_space_size
 
-    def cegis_has_time(self):
+    def cegis_has_time(self) -> bool:
         """
         :return True if cegis still has some time
         """
@@ -88,10 +96,10 @@ class StageControl:
 class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS):
 
     @property
-    def method_name(self):
+    def method_name(self) -> str:
         return "hybrid"
 
-    def synthesize_one(self, node):
+    def synthesize_one(self, node : paynt.synthesizer.search_node.SearchNode) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
 
         self.conflict_generator.initialize()
         smt_solver = paynt.parameter_space.smt.SmtSolver(self.colored_mdp.parameter_space)
@@ -113,6 +121,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
             # analyze the parameter space
             self.verify_parameter_space(node)
             self.update_optimum(node)
+            assert node.analysis_result is not None
             if node.analysis_result.can_improve == False:
                 self.explore(node.parameter_space)
                 self.stage_control.prune_ar(node.parameter_space.size)
@@ -125,6 +134,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
             if node.analysis_result.optimality_result is not None:
                 result = node.analysis_result.optimality_result
             else:
+                assert node.analysis_result.constraints_result is not None
                 result = node.analysis_result.constraints_result.results[0]
             priority_node = self.search_node_type(node.parameter_space.assume_options_copy(result.primary_selection))
 
@@ -144,6 +154,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
 
                 conflicts, accepting_assignment = self.analyze_parameter_space_assignment_cegis(node, assignment)
                 pruned = smt_solver.exclude_conflicts(node, assignment, conflicts)
+                assert self.explored is not None
                 self.explored += pruned
                 self.stage_control.prune_cegis(pruned)
 

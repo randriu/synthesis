@@ -81,7 +81,7 @@ class Statistic:
 
         self.parameter_space_size : int | None = None
         self.synthesis_timer = paynt.utils.timer.Timer()
-        self.status_horizon = Statistic.status_period_seconds
+        self.status_horizon : float = Statistic.status_period_seconds
 
 
     def start(self, parameter_space : Any) -> None:
@@ -133,6 +133,7 @@ class Statistic:
 
     def status(self) -> str:
         ret_str = "> "
+        assert self.synthesizer.explored is not None and self.parameter_space_size is not None
         fraction_explored = self.synthesizer.explored / self.parameter_space_size
         time_estimate = safe_division(self.synthesis_timer.read(), fraction_explored)
         percentage_explored = int(fraction_explored * 100000) / 1000.0
@@ -166,7 +167,7 @@ class Statistic:
         # ret_str += f", pres = {self.synthesizer.num_preserved}"
 
         spec = self.task.specification
-        if spec.has_optimality:
+        if spec.optimality is not None:
             opt = self.synthesizer.best_assignment_value
             if opt is None:
                 opt = spec.optimality.optimum
@@ -224,7 +225,7 @@ class Statistic:
 
     def get_summary_synthesis(self) -> str:
         spec = self.task.specification
-        if spec.has_optimality and spec.optimality.optimum is not None:
+        if spec.optimality is not None and spec.optimality.optimum is not None:
             if isinstance(spec.optimality.optimum, stormpy.Rational):
                 optimum = spec.optimality.optimum
             else:
@@ -247,6 +248,7 @@ class Statistic:
     def get_summary(self) -> str:
         specification = self.get_summary_specification()
 
+        assert self.synthesizer.explored is not None and self.parameter_space_size is not None
         fraction_explored = int((self.synthesizer.explored / self.parameter_space_size) * 100)
         explored = f"explored: {fraction_explored} %"
 
