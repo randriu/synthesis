@@ -9,11 +9,11 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
     def method_name(self):
         return "1-by-1"
 
-    def synthesize_one(self, parameter_space):
+    def synthesize_one(self, node):
 
-        for parameter_combination in parameter_space.all_combinations():
+        for parameter_combination in node.parameter_space.all_combinations():
 
-            assignment = parameter_space.construct_assignment(parameter_combination)
+            assignment = node.parameter_space.construct_assignment(parameter_combination)
             dtmc = self.colored_mdp.build_assignment(assignment)
             self.stat.iteration(dtmc)
             result = dtmc.check_specification(self.task.specification, short_evaluation=True)
@@ -24,8 +24,9 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
                 self.best_assignment = assignment
             if improving_value is not None:
                 self.task.specification.optimality.update_optimum(improving_value)
-            if accepting and not self.task.specification.can_be_improved:
-                return accepting_assignment
+                self.best_assignment_value = improving_value
+            if accepting and not self.task.specification.can_be_improved():
+                return self.best_assignment
 
         return self.best_assignment
 

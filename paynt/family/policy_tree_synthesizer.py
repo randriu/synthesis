@@ -8,6 +8,7 @@ genuinely different algorithm (game abstraction + policy compatibility merging),
 import paynt.synthesizer.synthesizer
 import paynt.underlying_model.underlying_model
 import paynt.utils.scoring
+import paynt.family.result
 from paynt.family.policy_tree import PolicyTree
 
 import logging
@@ -270,7 +271,9 @@ class PolicyTreeSynthesizer(paynt.synthesizer.synthesizer.Synthesizer):
 
 
     def run(self, optimum_threshold=None):
-        return self.evaluate()
+        evaluations = self.evaluate()
+        success = len(evaluations) > 0 and all(evaluation.sat for evaluation in evaluations)
+        return paynt.family.result.PolicyTreeResult(success, policy_tree=self.policy_tree)
 
 
     def export_evaluation_result(self, evaluations, export_filename_base):

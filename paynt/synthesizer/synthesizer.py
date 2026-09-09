@@ -1,6 +1,7 @@
 import paynt.synthesizer.statistic
 import paynt.synthesizer.search_node
 import paynt.utils.timer
+import paynt.result
 
 import logging
 logger = logging.getLogger(__name__)
@@ -94,6 +95,13 @@ class Synthesizer:
     def explore(self, parameter_space):
         self.explored += parameter_space.size
 
+    def _reset_best_assignment(self):
+        ''' Shared by synthesize() (when not keep_optimum) and run() (which always resets, but only after
+        capturing best_assignment/best_assignment_value into the Result it returns). '''
+        self.best_assignment = None
+        self.best_assignment_value = None
+        self.task.specification.reset()
+
     def evaluate_all(self, parameter_space, prop, keep_value_only=False):
         ''' to be overridden '''
         pass
@@ -181,12 +189,13 @@ class Synthesizer:
 
         assignment = self.best_assignment
         if not keep_optimum:
-            self.best_assignment = None
-            self.best_assignment_value = None
-            self.task.specification.reset()
+            self._reset_best_assignment()
 
         return assignment
 
 
     def run(self, optimum_threshold=None):
-        return self.synthesize(optimum_threshold=optimum_threshold)
+        assignment = self.synthesize(optimum_threshold=optimum_threshold, keep_optimum=True)
+        value = self.best_assignment_value
+        self._reset_best_assignment()
+        return paynt.result.Result(success=assignment is not None, value=value, assignment=assignment)

@@ -1,8 +1,6 @@
 '''
 Colored MDP representing a family of MDPs: parameters select which concrete environment instance
-(rather than which FSC/policy structure) is in effect. This is the "uncontrollable parameter" fragment
-from the paper (arXiv:2511.08078) -- searching for a policy that works across every member of the family,
-as opposed to searching for the structure of the policy itself.
+(rather than which FSC/policy structure) is in effect.
 '''
 
 import payntbind

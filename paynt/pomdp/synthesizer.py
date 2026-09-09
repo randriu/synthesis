@@ -8,6 +8,8 @@ control flow -- see that module instead if you're looking for --storm-pomdp.
 
 import paynt.synthesizer.synthesizer_ar
 import paynt.synthesizer.synthesizer_hybrid
+import paynt.utils.timer
+import paynt.pomdp.result
 
 import logging
 logger = logging.getLogger(__name__)
@@ -25,12 +27,28 @@ class PomdpSynthesizer:
         elif method == "hybrid":
             self.synthesizer = paynt.synthesizer.synthesizer_hybrid.SynthesizerHybrid
         self.total_iters = 0
+        # best assignment/value found so far across memory-size iterations -- strategy_iterative constructs a
+        # fresh inner synthesizer per iteration and discards it, so this is the only place these survive once
+        # a later, larger-memory iteration doesn't improve on an earlier one. best_colored_mdp is the specific
+        # PomdpColoredMdp instance (i.e. memory-size unfolding) that produced best_assignment -- needed
+        # because parameter indices are tied to one specific unfolding, and self.colored_mdp gets reassigned
+        # to a fresh (larger) unfolding on every later iteration, so it can't be relied on to still match
+        # best_assignment by the time synthesis finishes.
+        self.best_assignment = None
+        self.best_assignment_value = None
+        self.best_colored_mdp = None
 
     def synthesize(self, parameter_space=None, print_stats=True):
         if parameter_space is None:
             parameter_space = self.colored_mdp.parameter_space
         synthesizer = self.synthesizer(self.colored_mdp, self.task)
         assignment = synthesizer.synthesize(parameter_space, keep_optimum=True, print_stats=print_stats)
+        if assignment is not None:
+            # keep_optimum=True means this only fires when the assignment genuinely improves on
+            # self.task.specification.optimality's current (cross-iteration) optimum
+            self.best_assignment = assignment
+            self.best_assignment_value = synthesizer.best_assignment_value
+            self.best_colored_mdp = self.colored_mdp
         iters_mdp = synthesizer.stat.iterations_mdp if synthesizer.stat.iterations_mdp is not None else 0
         self.total_iters += iters_mdp
         return assignment
@@ -40,8 +58,9 @@ class PomdpSynthesizer:
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
         mem_size = self.colored_mdp_factory.task.memory_size
-        opt = self.task.specification.optimality.optimum
         while True:
+            if paynt.utils.timer.GlobalTimer.time_limit_reached():
+                break
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size))
             if unfold_imperfect_only:
                 self.colored_mdp = self.colored_mdp_factory.set_imperfect_memory_size(mem_size)
@@ -49,9 +68,6 @@ class PomdpSynthesizer:
                 self.colored_mdp = self.colored_mdp_factory.set_global_memory_size(mem_size)
 
             self.synthesize(self.colored_mdp.parameter_space)
-
-            opt_old = opt
-            opt = self.task.specification.optimality.optimum
 
             mem_size += 1
 
@@ -61,3 +77,10 @@ class PomdpSynthesizer:
         if self.task.export_synthesis_filename_base is not None:
             # TODO add export option for pure PAYNT synthesis
             logger.info("--export-synthesis is not yet supported for plain PAYNT POMDP synthesis (only for SAYNT)")
+
+        fsc = None
+        if self.best_assignment is not None:
+            fsc = self.best_colored_mdp.assignment_to_fsc(self.best_assignment)
+        return paynt.pomdp.result.PomdpResult(
+            success=self.best_assignment is not None, value=self.best_assignment_value,
+            assignment=self.best_assignment, fsc=fsc)

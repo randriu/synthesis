@@ -149,7 +149,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
 
                 if accepting_assignment is not None:
                     self.best_assignment = accepting_assignment
-                    if not self.task.specification.can_be_improved:
+                    if not self.task.specification.can_be_improved():
                         return self.best_assignment
 
                 # assignment is UNSAT: move on to the next assignment

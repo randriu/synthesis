@@ -73,6 +73,7 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
             accepting_assignment = assignment
         if improving_value is not None:
             self.task.specification.optimality.update_optimum(improving_value)
+            self.best_assignment_value = improving_value
         if accepting and not self.task.specification.can_be_improved():
             return [], accepting_assignment
 
