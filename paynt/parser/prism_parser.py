@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 import stormpy
 import payntbind
 
@@ -17,7 +21,9 @@ logger = logging.getLogger(__name__)
 class PrismParser:
 
     @classmethod
-    def read_prism(cls, sketch_path, properties_path, relative_error, use_exact=False):
+    def read_prism(
+        cls, sketch_path : str, properties_path : str, relative_error : float, use_exact : bool = False
+    ) -> tuple[Any, Any, paynt.specification.property.Specification, paynt.parameter_space.parameter_space.ParameterSpace | None, Any, Any, Any]:
 
         # parse the program
         prism, parameter_definitions = PrismParser.load_sketch_prism(sketch_path)
@@ -49,6 +55,7 @@ class PrismParser:
         obs_evaluator = None
         if parameter_space is not None:
             assert prism_model_type in ["DTMC","MDP","POMDP"], "parameter detected, but the program is neither DTMC nor (PO)MDP"
+            assert parameter_expressions is not None
             # unfold parameter options via Jani
             jani_unfolder = paynt.parser.jani.JaniUnfolder(prism, parameter_expressions, specification, parameter_space, use_exact=use_exact)
             specification = jani_unfolder.specification
@@ -67,7 +74,7 @@ class PrismParser:
 
     
     @classmethod
-    def load_sketch_prism(cls, sketch_path):
+    def load_sketch_prism(cls, sketch_path : str) -> tuple[Any, list[tuple[str, str, str]]]:
         # read lines
         with open(sketch_path) as f:
             sketch_lines = f.readlines()
@@ -131,7 +138,9 @@ class PrismParser:
 
 
     @classmethod
-    def parse_parameters(cls, prism, expression_parser, parameter_definitions):
+    def parse_parameters(
+        cls, prism : Any, expression_parser : Any, parameter_definitions : list[tuple[str, str, str]]
+    ) -> tuple[Any, list[list[Any]], paynt.parameter_space.parameter_space.ParameterSpace]:
 
         # parse parameter definitions
         parameter_space = paynt.parameter_space.parameter_space.ParameterSpace()
@@ -169,6 +178,7 @@ class PrismParser:
                     options = [str(o) for o in range(range_start,range_end+1, increment)]
             else:
                 options = parameter_options.split(",")
+                options_numerical : list[float]
                 if parameter_type == "int":
                     options_numerical = [int(o) for o in options]
                 else:
@@ -201,7 +211,7 @@ class PrismParser:
 
  
     @classmethod
-    def parse_property(cls, line, prism=None):
+    def parse_property(cls, line : str, prism : Any = None) -> Any:
         '''
         Parse a line containing a single PCTL property.
         @return the property or None if no property was detected
@@ -217,7 +227,9 @@ class PrismParser:
         return props[0]
 
     @classmethod
-    def parse_specification(cls, properties_path, relative_error=0, prism=None, use_exact=False):
+    def parse_specification(
+        cls, properties_path : str, relative_error : float = 0, prism : Any = None, use_exact : bool = False
+    ) -> paynt.specification.property.Specification:
         '''
         Expecting one property per line. The line may be terminated with a semicolon.
         Empty lines or comments are allowed.
@@ -226,7 +238,6 @@ class PrismParser:
             raise ValueError(f"the properties file {properties_path} does not exist")
         logger.info(f"loading properties from {properties_path} ...")
 
-        lines = ""
         with open(properties_path) as file:
             lines = [line for line in file]
         

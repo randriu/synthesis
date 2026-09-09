@@ -1,8 +1,13 @@
+from __future__ import annotations
+
+from typing import Any
+
 import stormpy
 import payntbind
 
 import paynt.underlying_model.model_builder
 import paynt.colored_mdp
+import paynt.parameter_space.parameter_space
 import paynt.family
 import paynt.family.task
 import paynt.posmg
@@ -17,6 +22,7 @@ import paynt.dt.dtnest.task
 
 from paynt.parser.prism_parser import PrismParser
 from paynt.parser.drn_parser import DrnParser
+from paynt.parser.jani import JaniUnfolder
 
 from ._utils import substitute_suffix, make_rewards_action_based
 
@@ -29,17 +35,23 @@ logger = logging.getLogger(__name__)
 class Sketch:
 
     @classmethod
-    def load_sketch(cls, sketch_path, properties_path,
-        export=None, relative_error=0, precision=1e-4, constraint_bound=None, use_exact=False, task_kwargs=None):
+    def load_sketch(
+        cls, sketch_path : str, properties_path : str,
+        export : str | None = None, relative_error : float = 0, precision : float = 1e-4,
+        constraint_bound : Any = None, use_exact : bool = False, task_kwargs : dict[str, Any] | None = None
+    ) -> tuple[Any, paynt.task.Task]:
 
-        prism = None
-        explicit_model = None
-        specification = None
-        parameter_space = None
-        coloring = None
-        jani_unfolder = None
-        decpomdp_manager = None
-        obs_evaluator = None
+        # this function's real types are heavily branch-dependent (which of the PRISM/DRN/Cassandra parsers
+        # ran, and, for PRISM, whether the sketch had parameters) -- kept as Any/Optional rather than forcing
+        # every branch's read site to re-narrow a handful of mutually-exclusive control-flow paths
+        prism : Any = None
+        explicit_model : Any = None
+        specification : paynt.specification.property.Specification | None = None
+        parameter_space : paynt.parameter_space.parameter_space.ParameterSpace | None = None
+        coloring : Any = None
+        jani_unfolder : JaniUnfolder | None = None
+        decpomdp_manager : Any = None
+        obs_evaluator : Any = None
 
         paynt.specification.property.Property.model_checking_precision = precision
 
@@ -101,6 +113,7 @@ class Sketch:
                 pass
 
         assert filetype is not None, "unknown format of input file"
+        assert specification is not None
         logger.info("sketch parsing OK")
 
         paynt.specification.property.Property.initialize(use_exact)
@@ -129,7 +142,10 @@ class Sketch:
 
         task_kwargs = task_kwargs or {}
 
+        colored_mdp_factory : Any
+        task : paynt.task.Task
         if jani_unfolder is not None:
+            assert parameter_space is not None
             if prism.model_type == stormpy.storage.PrismModelType.DTMC:
                 task = paynt.task.Task.from_specification(specification, use_exact=use_exact, **task_kwargs)
                 colored_mdp = paynt.colored_mdp.ColoredMdp(explicit_model, parameter_space, coloring, use_exact=use_exact)
@@ -160,7 +176,7 @@ class Sketch:
 
 
     @classmethod
-    def export(cls, export, sketch_path, jani_unfolder, explicit_model):
+    def export(cls, export : str, sketch_path : str, jani_unfolder : JaniUnfolder | None, explicit_model : Any) -> None:
         if export == "jani":
             assert jani_unfolder is not None, "jani unfolder was not used"
             output_path = substitute_suffix(sketch_path, '.', 'jani')
@@ -173,4 +189,4 @@ class Sketch:
                 "cannot '--export pomdp' with non-POMDP sketches"
             output_path = substitute_suffix(sketch_path, '.', 'pomdp')
             property_path = substitute_suffix(sketch_path, '/', 'props.pomdp')
-            paynt.parser.pomdp_parser.PomdpParser.write_model_in_pomdp_solve_format(explicit_model, output_path, property_path)
+            DrnParser.write_model_in_pomdp_solve_format(explicit_model, output_path, property_path)

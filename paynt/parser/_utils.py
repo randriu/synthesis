@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import Any
 
 import payntbind
 import stormpy
@@ -6,15 +9,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def substitute_suffix(string, delimiter, replacer):
+def substitute_suffix(string : str, delimiter : str, replacer : Any) -> str:
     '''Subsitute the suffix behind the last delimiter.'''
     output_string = string.split(delimiter)
     output_string[-1] = str(replacer)
-    output_string = delimiter.join(output_string)
-    return output_string
+    return delimiter.join(output_string)
 
 
-def make_rewards_action_based(model):
+def make_rewards_action_based(model : Any) -> None:
     tm = model.transition_matrix
     for name,reward_model in model.reward_models.items():
         assert not reward_model.has_transition_rewards, "Paynt does not support transition rewards"
@@ -22,7 +24,7 @@ def make_rewards_action_based(model):
             continue
         logger.info("converting state rewards '{}' to state-action rewards".format(name))
         if reward_model.has_state_action_rewards:
-            logger.info("state rewards will be added to existing state-action rewards".format(name))
+            logger.info("state rewards '{}' will be added to existing state-action rewards".format(name))
             action_reward = reward_model.state_action_rewards.copy()
         else:
             action_reward = [0] * model.nr_choices

@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 import stormpy
 import payntbind
 
@@ -17,7 +21,7 @@ class DrnParser:
     WHITESPACES = ' \t\n\v\f\r'
 
     @classmethod
-    def parse_drn(cls, sketch_path, use_exact=False):
+    def parse_drn(cls, sketch_path : str, use_exact : bool = False) -> Any:
         # try to read a drn file and return POSMG or POMDP based on the type
         # ValueError if file is not dnr or the model is of unsupported type
         explicit_model = None
@@ -55,7 +59,7 @@ class DrnParser:
                 raise ValueError
 
     @classmethod
-    def pomdp_from_posmg(cls, old_path: str, new_path) -> list:
+    def pomdp_from_posmg(cls, old_path: str, new_path : str) -> list[int]:
         # Change type of model in drn file from posmg to pomdp and store it in a new file
         # old_path - path to drn file with posmg model
         # new_path - path to drn file to store pomdp model
@@ -93,7 +97,7 @@ class DrnParser:
         return string[:start_idx] + string[end_idx+1:]
 
     @classmethod
-    def read_drn(cls, sketch_path, use_exact=False):
+    def read_drn(cls, sketch_path : str, use_exact : bool = False) -> Any:
         builder_options = stormpy.DirectEncodingParserOptions()
         builder_options.build_choice_labels = True
         if use_exact:
@@ -102,7 +106,7 @@ class DrnParser:
             return stormpy.build_model_from_drn(sketch_path, builder_options)
 
     @classmethod
-    def write_model_in_pomdp_solve_format(cls, pomdp, output_path, property_path):
+    def write_model_in_pomdp_solve_format(cls, pomdp : Any, output_path : str, property_path : str) -> None:
 
         num_states = pomdp.nr_states
         num_choices = pomdp.nr_choices
@@ -123,7 +127,7 @@ observations: {}
 
         # initial state
         state_init = pomdp.initial_states[0]
-        initial_distr = [1 if state == state_init else 0 for state in range(num_states)]
+        initial_distr : Any = [1 if state == state_init else 0 for state in range(num_states)]
         initial_distr = [str(x) for x in initial_distr]
         initial_distr = ' '.join(initial_distr)
         desc += f"start:\n{initial_distr}\n\n"

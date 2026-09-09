@@ -1,11 +1,15 @@
+from __future__ import annotations
+
+from typing import Any
+
 import stormpy
 import payntbind
 
+import paynt.parameter_space.parameter_space
 import paynt.specification.property
 import paynt.underlying_model.model_builder
 
 import itertools
-from collections import defaultdict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,14 +21,14 @@ class CombinationColoring:
     Note: color 0 is reserved for general parameter-free objects.
     '''
     def __init__(self):
-        self.coloring = {}
-        self.reverse_coloring = [None]
+        self.coloring : dict[Any, int] = {}
+        self.reverse_coloring : list[Any] = [None]
 
     @property
-    def num_colors(self):
+    def num_colors(self) -> int:
         return len(self.coloring)
 
-    def get_or_make_color(self, parameter_assignment):
+    def get_or_make_color(self, parameter_assignment : Any) -> int:
         new_color = self.num_colors + 1
         color = self.coloring.get(parameter_assignment, new_color)
         if color == new_color:
@@ -36,7 +40,10 @@ class CombinationColoring:
 class JaniUnfolder:
     ''' Unfolder of parameter combinations into JANI program. '''
 
-    def __init__(self, prism, parameter_expressions, specification, parameter_space, use_exact=False):
+    def __init__(
+        self, prism : Any, parameter_expressions : list[list[Any]], specification : paynt.specification.property.Specification,
+        parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, use_exact : bool = False
+    ):
 
         logger.debug("constructing JANI program...")
         
@@ -52,6 +59,7 @@ class JaniUnfolder:
             if type(prop_old) == paynt.specification.property.Property:
                 p = paynt.specification.property.Property(prop_new,use_exact)
             else:
+                assert isinstance(prop_old, paynt.specification.property.OptimalityProperty)
                 epsilon = prop_old.epsilon
                 p = paynt.specification.property.OptimalityProperty(prop_new,epsilon,use_exact)
             properties_unpacked.append(p)
@@ -94,7 +102,9 @@ class JaniUnfolder:
         return
 
     @staticmethod
-    def unfold_jani(jani, parameter_space, parameter_expressions):
+    def unfold_jani(
+        jani : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, parameter_expressions : list[list[Any]]
+    ) -> tuple[Any, dict[int, list[tuple[int, int]]]]:
         # ensure that jani.constants are in the same order as our parameters
         open_constants = [c for c in jani.constants if not c.defined]
         parameter_variables = [c.expression_variable for c in open_constants]
@@ -133,7 +143,7 @@ class JaniUnfolder:
         return jani_program,edge_to_parameter_options
 
     @staticmethod
-    def edge_parameters(edge, parameter_variables):
+    def edge_parameters(edge : Any, parameter_variables : list[Any]) -> list[int]:
         variables = set()
         variables |= edge.guard.get_variables()
         for assignment in edge.template_edge.assignments:
@@ -148,14 +158,16 @@ class JaniUnfolder:
         return [parameter for parameter,variable in enumerate(parameter_variables) if variable in variables]
 
     @staticmethod
-    def automaton_has_parameters(automaton, parameter_variables):
+    def automaton_has_parameters(automaton : Any, parameter_variables : list[Any]) -> bool:
         for edge in automaton.edges:
             if len(JaniUnfolder.edge_parameters(edge,parameter_variables)) > 0:
                 return True
         return False
 
     @staticmethod
-    def construct_automaton(automaton, parameter_variables, parameter_expressions, combination_coloring):
+    def construct_automaton(
+        automaton : Any, parameter_variables : list[Any], parameter_expressions : list[list[Any]], combination_coloring : CombinationColoring
+    ) -> Any:
         new_aut = stormpy.storage.JaniAutomaton(automaton.name, automaton.location_variable)
         [new_aut.add_location(loc) for loc in automaton.locations]
         [new_aut.add_initial_location(idx) for idx in automaton.initial_location_indices]
@@ -167,7 +179,9 @@ class JaniUnfolder:
         return new_aut
 
     @staticmethod
-    def construct_edges(edge, parameter_variables, parameter_expressions, combination_coloring):
+    def construct_edges(
+        edge : Any, parameter_variables : list[Any], parameter_expressions : list[list[Any]], combination_coloring : CombinationColoring
+    ) -> list[Any]:
         edge_parameters = JaniUnfolder.edge_parameters(edge,parameter_variables)
         if len(edge_parameters) == 0:
             return [JaniUnfolder.construct_edge(edge)]
@@ -179,7 +193,9 @@ class JaniUnfolder:
         new_edges = []
         for combination in itertools.product(*combinations):
             substitution = {
-                parameter_variables[parameter] : expressions[combination[parameter]]
+                # combination[parameter] is guarded non-None by the if-clause below, but mypy doesn't
+                # narrow a comprehension's key/value expression from its own filter condition
+                parameter_variables[parameter] : expressions[combination[parameter]]  # type: ignore[index]
                 for parameter,expressions in enumerate(parameter_expressions)
                 if combination[parameter] is not None
             }
@@ -189,7 +205,7 @@ class JaniUnfolder:
         return new_edges
 
     @staticmethod
-    def construct_edge(edge, substitution = None):
+    def construct_edge(edge : Any, substitution : Any = None) -> Any:
         guard = stormpy.Expression(edge.template_edge.guard)
         assignments = edge.template_edge.assignments.clone()
         if substitution is not None:
@@ -211,7 +227,7 @@ class JaniUnfolder:
         )
 
 
-    def write_jani(self, output_path):
+    def write_jani(self, output_path : str) -> None:
         logger.debug(f"Writing unfolded program to {output_path}")
         with open(output_path, "w") as f:
             f.write(str(self.jani_unfolded))
