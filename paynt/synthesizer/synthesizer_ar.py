@@ -103,7 +103,8 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 assignment = node.parameter_space.assume_options_copy(result.primary_selection)
                 dtmc = self.colored_mdp.build_assignment(assignment)
                 res = dtmc.check_specification(self.task.specification)
-                if res.accepting_dtmc(self.task.specification):
+                accepting,_ = res.accepting_dtmc(self.task.specification)
+                if accepting:
                     result.sat = True
                     admissible_assignment = assignment
 
