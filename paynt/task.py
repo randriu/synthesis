@@ -17,15 +17,19 @@ every parser should funnel through this (or paynt.specification.property.constru
 rather than constructing a Specification by hand.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import paynt.specification.property
 
 
 class Task:
 
     def __init__(
-        self, properties, timeout=None, use_exact=False, relative_error=0,
-        export_synthesis_filename_base=None, conflict_generator_type=None, disable_expected_visits=False,
-        discard_unreachable_choices=False
+        self, properties : list[Any], timeout : int | None = None, use_exact : bool = False, relative_error : float = 0,
+        export_synthesis_filename_base : str | None = None, conflict_generator_type : str | None = None,
+        disable_expected_visits : bool = False, discard_unreachable_choices : bool = False
     ):
         self.specification = paynt.specification.property.construct_specification(properties, relative_error, use_exact)
         self.timeout = timeout
@@ -38,11 +42,11 @@ class Task:
 
     @classmethod
     def from_specification(
-        cls, specification, timeout=None, use_exact=False,
-        export_synthesis_filename_base=None, conflict_generator_type=None, disable_expected_visits=False,
-        discard_unreachable_choices=False,
-        **kwargs
-    ):
+        cls, specification : paynt.specification.property.Specification, timeout : int | None = None, use_exact : bool = False,
+        export_synthesis_filename_base : str | None = None, conflict_generator_type : str | None = None,
+        disable_expected_visits : bool = False, discard_unreachable_choices : bool = False,
+        **kwargs : Any
+    ) -> "Task":
         '''
         Wrap an already-constructed Specification directly, bypassing property parsing. Used when a caller
         already has a (e.g. copied/negated) Specification in hand rather than a fresh list of raw properties,
@@ -66,6 +70,6 @@ class Task:
         task.discard_unreachable_choices = discard_unreachable_choices
         return task
 
-    def get_property(self):
+    def get_property(self) -> paynt.specification.property.Property:
         assert self.specification.num_properties == 1, "expecting a single property"
         return self.specification.all_properties()[0]

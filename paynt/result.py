@@ -3,10 +3,17 @@ The final result of a completed synthesis run for a Task. Feature-specific resul
 their own fields -- e.g. paynt.dt.result.DtResult adds the synthesized tree.
 '''
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import paynt.parameter_space.parameter_space
+
 
 class Result:
 
-    def __init__(self, success, value=None, assignment=None):
+    def __init__(self, success : bool, value : float | None = None, assignment : "paynt.parameter_space.parameter_space.ParameterSpace | None" = None):
         self.success = success
         # the achieved optimum, or None if the specification has no optimality objective
         self.value = value

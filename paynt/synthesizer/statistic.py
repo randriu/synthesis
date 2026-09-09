@@ -1,8 +1,16 @@
+from __future__ import annotations
+
+from typing import Any, TYPE_CHECKING
+
 import stormpy.storage
 
 import paynt.utils.timer
-import paynt.synthesizer.synthesizer
 import paynt.underlying_model.underlying_model
+
+if TYPE_CHECKING:
+    # synthesizer.py imports this module (for Statistic itself), so only import it for annotations to avoid
+    # a circular import at runtime
+    import paynt.synthesizer.synthesizer
 
 import math
 
@@ -12,7 +20,7 @@ logger = logging.getLogger(__name__)
 # zero approximation to avoid zero division exception
 APPROX_ZERO = 0.000001
 
-def safe_division(dividend, divisor):
+def safe_division(dividend : float, divisor : float) -> float:
     """Safe division of dividend by operand
     :param number dividend: upper operand of the division
     :param number divisor: lower operand of the division, may be zero
@@ -30,48 +38,60 @@ class Statistic:
     status_period_seconds = 3
     synthesis_timer_total = paynt.utils.timer.Timer()
 
-    def __init__(self, synthesizer):
+    def __init__(self, synthesizer : "paynt.synthesizer.synthesizer.Synthesizer"):
 
         self.synthesizer = synthesizer
         self.colored_mdp = self.synthesizer.colored_mdp
         self.task = self.synthesizer.task
 
-        self.iterations_dtmc = None
+        self.iterations_dtmc : int | None = None
         self.acc_size_dtmc = 0
         self.avg_size_dtmc = 0
 
-        self.iterations_mdp = None
+        self.iterations_mdp : int | None = None
         self.acc_size_mdp = 0
         self.avg_size_mdp = 0
 
-        self.iterations_game = None
+        self.iterations_game : int | None = None
         self.acc_size_game = 0
         self.avg_size_game = 0
 
-        self.synthesized_assignment = None
-        self.job_type = None
+        self.synthesized_assignment : Any = None
+        self.job_type : str | None = None
+        # populated by finished_evaluation, read by get_summary_evaluation
+        self.evaluations : list[Any] = []
 
-        # MDP family
-        self.num_mdps_total = None
-        self.num_mdps_sat = None
-        self.num_tree_nodes = None
-        self.num_tree_nodes_merged = None
-        self.num_policies = None
-        self.num_policies_merged = None
+        # MDP family (policy-tree synthesis): num_nodes/num_nodes_merged/num_leaves/num_leaves_merged/
+        # postprocessing_time are set directly on a Statistic instance by
+        # paynt.family.policy_tree_synthesizer.PolicyTreeSynthesizer.evaluate_all, not by this constructor --
+        # declared here (rather than left as an undeclared dynamic attribute) purely so their type is known.
+        # Kept as Any (not "int | None"): print_mdp_family_table_entries, the only reader, is a debug-only
+        # utility that assumes (and always has assumed, pre-existing to this backfill) these are already
+        # populated by the time it's called -- an Optional type would just force artificial asserts around
+        # every arithmetic use below for a precondition nothing enforces at the type level anyway.
+        self.num_mdps_total : Any = None
+        self.num_mdps_sat : Any = None
+        self.num_nodes : Any = None
+        self.num_nodes_merged : Any = None
+        self.num_leaves : Any = None
+        self.num_leaves_merged : Any = None
+        self.num_policies : Any = None
+        self.num_policies_merged : Any = None
+        self.postprocessing_time : Any = None
 
-        self.parameter_space_size = None
+        self.parameter_space_size : int | None = None
         self.synthesis_timer = paynt.utils.timer.Timer()
         self.status_horizon = Statistic.status_period_seconds
 
 
-    def start(self, parameter_space):
+    def start(self, parameter_space : Any) -> None:
         logger.info("synthesis initiated, design space: {}".format(parameter_space.size_or_order))
         self.parameter_space_size = parameter_space.size
         self.synthesis_timer.start()
         if not self.synthesis_timer_total.running:
             self.synthesis_timer_total.start()
 
-    def iteration(self, model):
+    def iteration(self, model : Any) -> None:
         ''' Identify the type of the model and count corresponding iteration. '''
         if isinstance(model, paynt.underlying_model.underlying_model.Mdp):
             model = model.model
@@ -82,28 +102,28 @@ class Statistic:
         else:
             logger.debug(f"unknown model type {type(model)}")
 
-    def iteration_dtmc(self, size_dtmc):
+    def iteration_dtmc(self, size_dtmc : int) -> None:
         if self.iterations_dtmc is None:
             self.iterations_dtmc = 0
         self.iterations_dtmc += 1
         self.acc_size_dtmc += size_dtmc
         self.print_status()
 
-    def iteration_mdp(self, size_mdp):
+    def iteration_mdp(self, size_mdp : int) -> None:
         if self.iterations_mdp is None:
             self.iterations_mdp = 0
         self.iterations_mdp += 1
         self.acc_size_mdp += size_mdp
         self.print_status()
 
-    def iteration_game(self, size_game):
+    def iteration_game(self, size_game : int) -> None:
         if self.iterations_game is None:
             self.iterations_game = 0
         self.iterations_game += 1
         self.acc_size_game += size_game
         self.print_status()
 
-    def new_fsc_found(self, value, assignment, size):
+    def new_fsc_found(self, value : Any, assignment : Any, size : int) -> None:
         time_elapsed = round(self.synthesis_timer_total.read(),1)
         # print(f'new opt: {value}')
         # print(f'new opt: {value}, elapsed {time_elapsed}s')
@@ -111,7 +131,7 @@ class Statistic:
               # \nValue = {value} | Time elapsed = {time_elapsed}s | FSC size = {size}\nFSC = {assignment}\n', flush=True)
 
 
-    def status(self):
+    def status(self) -> str:
         ret_str = "> "
         fraction_explored = self.synthesizer.explored / self.parameter_space_size
         time_estimate = safe_division(self.synthesis_timer.read(), fraction_explored)
@@ -135,7 +155,7 @@ class Statistic:
             s_ending = "s" if time_estimate_hours > 1 else ""
             ret_str += f" ({time_estimate_hours} hour{s_ending})"
 
-        iters = []
+        iters : list[str] = []
         if self.iterations_game is not None:
             iters += [f"game: {self.iterations_game}"]
         if self.iterations_mdp is not None:
@@ -157,25 +177,25 @@ class Statistic:
         return ret_str
 
 
-    def print_status(self):
+    def print_status(self) -> None:
         if not self.synthesis_timer.read() > self.status_horizon:
             return
         logger.info(self.status())
         self.status_horizon = self.synthesis_timer.read() + Statistic.status_period_seconds
 
 
-    def finished_synthesis(self):
+    def finished_synthesis(self) -> None:
         self.job_type = "synthesis"
         self.synthesis_timer.stop()
         self.synthesized_assignment = self.synthesizer.best_assignment
 
-    def finished_evaluation(self, evaluations):
+    def finished_evaluation(self, evaluations : list) -> None:
         self.job_type = "evaluation"
         self.synthesis_timer.stop()
         self.evaluations = evaluations
 
 
-    def get_summary_specification(self):
+    def get_summary_specification(self) -> str:
         spec = self.task.specification
         specification = ""
         if len(spec.constraints) > 0:
@@ -184,7 +204,7 @@ class Statistic:
             specification += f"optimality objective: {str(spec.optimality)}\n"
         return specification
 
-    def get_summary_iterations(self):
+    def get_summary_iterations(self) -> str:
         iterations = ""
         if self.iterations_game is not None:
             avg_size = round(safe_division(self.acc_size_game, self.iterations_game))
@@ -202,7 +222,7 @@ class Statistic:
             iterations += f"{type_stats}\n"
         return iterations
 
-    def get_summary_synthesis(self):
+    def get_summary_synthesis(self) -> str:
         spec = self.task.specification
         if spec.has_optimality and spec.optimality.optimum is not None:
             if isinstance(spec.optimality.optimum, stormpy.Rational):
@@ -214,7 +234,8 @@ class Statistic:
             feasible = "yes" if self.synthesized_assignment is not None else "no"
             return f"feasible: {feasible}"
 
-    def get_summary_evaluation(self):
+    def get_summary_evaluation(self) -> str:
+        import paynt.synthesizer.synthesizer
         if not self.evaluations or not isinstance(self.evaluations[0], paynt.synthesizer.synthesizer.ParameterSpaceEvaluation):
             return ""
         members_sat = sum( [evaluation.parameter_space.size for evaluation in self.evaluations if evaluation.sat ])
@@ -223,7 +244,7 @@ class Statistic:
         return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
 
 
-    def get_summary(self):
+    def get_summary(self) -> str:
         specification = self.get_summary_specification()
 
         fraction_explored = int((self.synthesizer.explored / self.parameter_space_size) * 100)
@@ -249,11 +270,11 @@ class Statistic:
                 f"{sep}"
         return summary
 
-    def print(self):
+    def print(self) -> None:
         logger.info(f'\n{self.get_summary()}')
 
 
-    def print_mdp_family_table_entries(self):
+    def print_mdp_family_table_entries(self) -> None:
         model_info = "model info:\t"
         model_info += "\t".join(["states","choices","MDPs","states*MDPs","SAT MDPs","SAT %",])
         print(model_info)
@@ -296,6 +317,6 @@ class Statistic:
 
         print(self.iterations_game,end=" ")
         print(self.iterations_mdp,end=" ")
-        iters_by_mdp = round((self.iterations_game+self.iterations_mdp)/self.num_mdps_total*100,2)
+        iters_by_mdp = round((self.iterations_game+self.iterations_mdp)/self.num_mdps_total*100,2)  # type: ignore[operator]
         print(iters_by_mdp)
         print()

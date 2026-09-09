@@ -52,6 +52,8 @@ dev = [
     "black[jupyter]",
     # Linting
     "ruff",
+    # Type checking
+    "mypy",
 ]
 test = [
     "pytest",
@@ -112,6 +114,18 @@ select = ["E", "F"]
 
 [project.scripts]
 paynt = "paynt.cli:main"
+
+[tool.mypy]
+# Gradual, non-blocking first pass, matching the ruff/black precedent (narrowly scoped rules, nothing has
+# ever been enforced on this codebase before): only check files that already carry hints, and don't force
+# every unannotated function in an otherwise-hinted file to also get one (that would just make the ongoing
+# backfill fail loudly file-by-file instead of accumulating cleanly).
+python_version = "3.10"
+check_untyped_defs = false
+disallow_untyped_defs = false
+warn_unused_ignores = true
+ignore_missing_imports = true
+exclude = ["build/", "payntbind/"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"

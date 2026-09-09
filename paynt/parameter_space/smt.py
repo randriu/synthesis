@@ -1,8 +1,19 @@
+from __future__ import annotations
+
+from typing import Any, TYPE_CHECKING
+
 import sys
 import z3
 
+import paynt.parameter_space.parameter_space
+
+if TYPE_CHECKING:
+    # search_node imports this module, so only import it for annotations to avoid a circular import at
+    # runtime -- from __future__ import annotations means these hints are never evaluated eagerly anyway
+    import paynt.synthesizer.search_node
+
 # import pycvc5 if installed
-import importlib
+import importlib.util
 if importlib.util.find_spec('pycvc5') is not None:
     import pycvc5
 
@@ -12,15 +23,15 @@ logger = logging.getLogger(__name__)
 
 class ParameterSpaceEncoding():
 
-    def __init__(self, smt_solver, parameter_space):
+    def __init__(self, smt_solver : "SmtSolver", parameter_space : paynt.parameter_space.parameter_space.ParameterSpace):
 
         self.smt_solver = smt_solver
         self.parameter_space = parameter_space
 
         # for each parameter, a formula encoding its possible options
-        self.parameter_clauses = None
+        self.parameter_clauses : list[Any] = []
         # SMT formula describing the parameter_space
-        self.encoding = None
+        self.encoding : Any = None
         # set to False as soon as pick_assignment returns None
         self.has_assignments = True
 
@@ -53,7 +64,7 @@ class ParameterSpaceEncoding():
         self.encoding = encoding
 
 
-    def pick_assignment(self):
+    def pick_assignment(self) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
 
         if not self.has_assignments:
             return None
@@ -86,19 +97,21 @@ class ParameterSpaceEncoding():
 
 class SmtSolver():
 
-    def __init__(self, parameter_space):
+    def __init__(self, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace):
 
-        # SMT solver containing description of the unexplored design space
-        self.solver = None
+        # SMT solver containing description of the unexplored design space (z3.Solver, or pycvc5.Solver when
+        # that optional backend is installed -- kept as Any rather than a Union, since pycvc5 is an optional
+        # import not always available to name as a type)
+        self.solver : Any = None
         # SMT solver choice
         self.use_python_z3 = False
         self.use_cvc = False
 
         # for each parameter contains a corresponding solver variable
-        self.solver_vars = None
+        self.solver_vars : list[Any] = []
         # for each parameter contains a list of equalities [p==opt1,p==opt2,...],
         #   where p is the corresponding solver variable
-        self.solver_clauses = None
+        self.solver_clauses : list[list[Any]] = []
 
         # current depth of push/pop solving
         self.solver_depth = 0
@@ -138,7 +151,7 @@ class SmtSolver():
             self.solver_clauses.append(clauses)
 
 
-    def create_parameter_clause(self, parameter, option):
+    def create_parameter_clause(self, parameter : int, option : int) -> Any:
         var = self.solver_vars[parameter]
         if self.use_python_z3:
             return var == option
@@ -148,14 +161,17 @@ class SmtSolver():
             return None
 
 
-    def pick_assignment(self, node):
+    def pick_assignment(self, node : "paynt.synthesizer.search_node.SearchNode") -> paynt.parameter_space.parameter_space.ParameterSpace | None:
         '''
         :return unexplored parameter assignment from node's parameter space (or None if no instance remains)
         '''
         node.encode(self)
+        assert node.encoding is not None
         return node.encoding.pick_assignment()
 
-    def pick_assignment_priority(self, node, priority_node):
+    def pick_assignment_priority(
+        self, node : "paynt.synthesizer.search_node.SearchNode", priority_node : "paynt.synthesizer.search_node.SearchNode | None"
+    ) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
 
         if priority_node is None:
             return self.pick_assignment(node)
@@ -169,7 +185,9 @@ class SmtSolver():
         return self.pick_assignment(node)
 
 
-    def exclude_conflicts(self, node, assignment, conflicts):
+    def exclude_conflicts(
+        self, node : "paynt.synthesizer.search_node.SearchNode", assignment : paynt.parameter_space.parameter_space.ParameterSpace, conflicts : list
+    ) -> int:
         '''
         :param conflicts a list of conflicts (may be empty)
         :return estimate of pruned assignments
@@ -180,7 +198,9 @@ class SmtSolver():
         return pruning_estimate
 
 
-    def exclude_conflict(self, node, assignment, conflict):
+    def exclude_conflict(
+        self, node : "paynt.synthesizer.search_node.SearchNode", assignment : paynt.parameter_space.parameter_space.ParameterSpace, conflict : list[int]
+    ) -> int:
         '''
         Exclude assignment from node's parameter space encoding using provided conflict.
         :param node search node whose current encoding should be refined
@@ -221,7 +241,7 @@ class SmtSolver():
         return pruning_estimate
 
 
-    def level(self, refinement_depth):
+    def level(self, refinement_depth : int) -> None:
         ''' Reset solver depth level to correspond to refinement level. '''
 
         if refinement_depth == 0:
