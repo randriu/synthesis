@@ -257,4 +257,4 @@ class DtSynthesizer:
         time_total = round(paynt.utils.timer.GlobalTimer.read(),2)
         logger.info(f"synthesis finished after {time_total} seconds")
 
-        return self.best_tree
+        return paynt.dt.result.DtResult(success=self.best_tree is not None, value=self.best_tree_value, tree=self.best_tree)

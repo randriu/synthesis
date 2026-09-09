@@ -24,9 +24,7 @@ def _run_dtnest(cmdp_factory_dt : DtColoredMdpFactory, epsilon_error_threshold: 
     synthesizer.recompute_scheduler = recompute_scheduler_perturbation
     synthesizer.timeout = timeout
 
-    best_tree = synthesizer.run()
-
-    return DtResult(success=best_tree is not None, value=synthesizer.best_tree_value, tree=best_tree)
+    return synthesizer.run()
 
 
 class DtNest(DtSynthesizer):
@@ -381,4 +379,4 @@ class DtNest(DtSynthesizer):
             if self.task.export_synthesis_filename_base is not None:
                 self.export_decision_tree(self.best_tree, self.task.export_synthesis_filename_base)
 
-        return self.best_tree
+        return DtResult(success=self.best_tree is not None, value=self.best_tree_value, tree=self.best_tree)
