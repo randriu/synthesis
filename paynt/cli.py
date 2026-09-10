@@ -35,6 +35,15 @@ def add_options(options : list[Any]) -> Any:
     return _add_options
 
 
+def print_version(ctx : click.Context, param : click.Parameter, value : bool) -> None:
+    ''' Eager --version callback: prints the version and exits immediately, before click validates the
+    otherwise-required PROJECT argument. '''
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(f"Paynt {version()}")
+    ctx.exit()
+
+
 def setup_logger(log_path : str | None = None) -> list[logging.Handler]:
     ''' Setup routine for logging. '''
 
@@ -114,6 +123,8 @@ def setup_logger(log_path : str | None = None) -> list[logging.Handler]:
     help="base filename to output synthesis result")
 @click.option("--profiling", is_flag=True, default=False, panel="Output",
     help="run profiling")
+@click.option("--version", is_flag=True, default=False, is_eager=True, expose_value=False, callback=print_version, panel="Output",
+    help="print PAYNT version and exit")
 
 def paynt_run(
     project : str, sketch : str, props : str, relative_error : float, optimum_threshold : float | None, precision : float,
