@@ -1,0 +1,29 @@
+// Exported by prism
+// Original model type: POSMG
+@type: POSMG
+@parameters
+
+@reward_models
+
+@nr_states
+4
+@nr_choices
+6
+@model
+state 0 {0} <0> init
+	action a1 []
+		0 : 1
+	action a2 []
+		2 : 0.5
+		3 : 0.5
+	action a3 []
+		1 : 1
+state 1 {1} <1>
+	action b []
+		0 : 1
+state 2 {2} <1>
+	action c []
+		2 : 1
+state 3 {3} <1> goal
+	action d []
+		3 : 1

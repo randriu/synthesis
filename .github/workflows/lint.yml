@@ -1,0 +1,43 @@
+name: Lint
+# Checks Python code style (black), lint findings (ruff), and type hints (mypy) against paynt/ and tests/.
+# The job fails if any check finds a problem, but all three always run regardless of each other's outcome
+# (via if: success() || failure()) so every finding shows up in one run instead of being discovered one
+# push at a time. Runs directly on a plain Python install (no stormpy/payntbind build needed) since all
+# three tools operate on Python source alone; mypy's ignore_missing_imports config tolerates paynt's
+# compiled/third-party dependencies not being installed.
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  # needed to trigger the workflow manually
+  workflow_dispatch:
+
+jobs:
+
+  lint:
+    name: black / ruff / mypy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install linting tools
+        run: pip install black==26.5.1 ruff==0.16.6 mypy==2.3.1
+
+      - name: Run black --check
+        run: black --check --diff paynt/ tests/
+
+      - name: Run ruff check
+        if: success() || failure()
+        run: ruff check paynt/ tests/
+
+      - name: Run mypy
+        if: success() || failure()
+        run: mypy paynt/

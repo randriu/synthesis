@@ -1,16 +1,14 @@
-
-
-# TODO this will inherit from general result class eventually
+import paynt.result
 
 from .decision_tree import DecisionTree
 
 import logging
+
 logger = logging.getLogger(__name__)
 
-class DtResult:
 
-    def __init__(self, success : bool, value : float | None, tree : DecisionTree | None):
-        
-        self.success = success
-        self.value = value
+class DtResult(paynt.result.Result):
+
+    def __init__(self, success: bool, value: float | None, tree: DecisionTree | None):
+        super().__init__(success, value)
         self.tree = tree

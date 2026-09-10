@@ -1,4 +1,11 @@
-import paynt.quotient.quotient
+from __future__ import annotations
+
+from typing import Any
+
+import paynt.task
+import paynt.parameter_space.parameter_space
+import paynt.underlying_model.underlying_model
+from paynt.dt.colored_mdp import DtColoredMdp
 
 from paynt.parser._utils import make_rewards_action_based
 
@@ -9,163 +16,95 @@ from .decision_tree import DecisionTree, DtVariable
 from ._utils import get_state_valuations
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-class DtColoredMdpFactory(paynt.quotient.quotient.Quotient):
+class DtColoredMdpFactory:
+    """
+    Constructs a DtColoredMdp for a given decision-tree depth. Unlike the FSC-unfolding factories
+    (POSMG/Dec-POMDP/POMDP), a fresh tree/coloring must be rebuilt for every depth tried during search
+    (DtSynthesizer.synthesize_tree_sequence tries several), not just when memory needs to grow -- so
+    reset_tree is the main entry point, called far more often than __init__ itself.
+
+    task is optional (unlike the other factories) to support constructing a DtColoredMdpFactory purely from
+    an MDP before the specification/tree-depth/timeout are known, then attaching the real Task once it is
+    (see paynt.dt.api.get_synthesizer) -- this is a real, exercised library usage pattern, not a hypothetical.
+    """
 
     # label for action executing a random action selection
-    DONT_CARE_ACTION_LABEL = "__random__"
-    # if true, an explicit action executing a random choice of an available action will be added to each state
-    add_dont_care_action = True
+    DONT_CARE_ACTION_LABEL = DtColoredMdp.DONT_CARE_ACTION_LABEL
     # if true, irrelevant states will not be considered for tree mapping
     filter_deterministic_states = True
 
-    def __init__(self, mdp, specification=None, use_exact=False):
-        super().__init__(specification=specification, use_exact=use_exact)
+    def __init__(self, mdp: Any, task: paynt.task.Task | None = None, use_exact: bool = False):
+        self.task = task
+        self.use_exact = use_exact
+        # task is optional here (see class docstring), and even when present may be a plain Task rather than
+        # a DtTask (e.g. dtnest's per-subtree re-synthesis constructs one via Task.from_specification, which
+        # has no add_dont_care_action field at all) -- getattr falls back to DtTask's own default in both cases
+        add_dont_care_action = getattr(task, "add_dont_care_action", True)
 
-        make_rewards_action_based(mdp) # needed for quotient MDP initialization
+        make_rewards_action_based(mdp)  # needed for initialization
 
-        # mask of relevant states: non-absorbing states with more than one action
-        self.state_is_relevant = None
-        # bitvector of relevant states
-        self.state_is_relevant_bv = None
-
-        # list of relevant variables: variables having at least two different options on relevant states
-        self.variables = None
-        # for every state, a valuation of relevant variables
-        self.relevant_state_valuations = None
-        # decision tree obtained after reset_tree
-        self.decision_tree = None
-
-        # deprecated
-        # updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
-        # if updated is not None: mdp = updated
-
-        # identify relevant states
-        self.state_is_relevant = [True for state in range(mdp.nr_states)]
-        state_is_absorbing = self.identify_absorbing_states(mdp)
-        self.state_is_relevant = [relevant and not state_is_absorbing[state] for state,relevant in enumerate(self.state_is_relevant)]
+        # identify relevant states: non-absorbing states with more than one action
+        state_is_relevant = [True for state in range(mdp.nr_states)]
+        state_is_absorbing = paynt.underlying_model.underlying_model.ModelIndex.identify_absorbing_states(mdp)
+        state_is_relevant = [relevant and not state_is_absorbing[state] for state, relevant in enumerate(state_is_relevant)]
 
         if DtColoredMdpFactory.filter_deterministic_states:
-            state_has_actions = self.identify_states_with_actions(mdp)
-            self.state_is_relevant = [relevant and state_has_actions[state] for state,relevant in enumerate(self.state_is_relevant)]
-        self.state_is_relevant_bv = stormpy.BitVector(mdp.nr_states)
-        [self.state_is_relevant_bv.set(state,value) for state,value in enumerate(self.state_is_relevant)]
-        logger.debug(f"MDP has {self.state_is_relevant_bv.number_of_set_bits()}/{self.state_is_relevant_bv.size()} relevant states")
+            state_has_actions = paynt.underlying_model.underlying_model.ModelIndex.identify_states_with_actions(mdp)
+            state_is_relevant = [relevant and state_has_actions[state] for state, relevant in enumerate(state_is_relevant)]
+        state_is_relevant_bv = stormpy.BitVector(mdp.nr_states)
+        [state_is_relevant_bv.set(state, value) for state, value in enumerate(state_is_relevant)]
+        logger.debug(f"MDP has {state_is_relevant_bv.number_of_set_bits()}/{state_is_relevant_bv.size()} relevant states")
+        self.state_is_relevant = state_is_relevant
+        self.state_is_relevant_bv = state_is_relevant_bv
 
-        action_labels,_ = payntbind.synthesis.extractActionLabels(mdp)
-        if DtColoredMdpFactory.DONT_CARE_ACTION_LABEL not in action_labels and DtColoredMdpFactory.add_dont_care_action:
+        action_labels, _ = payntbind.synthesis.extractActionLabels(mdp)
+        if DtColoredMdpFactory.DONT_CARE_ACTION_LABEL not in action_labels and add_dont_care_action:
             logger.debug("adding explicit don't-care action to relevant states...")
-            mdp = payntbind.synthesis.addDontCareAction(mdp,self.state_is_relevant_bv)
+            mdp = payntbind.synthesis.addDontCareAction(mdp, self.state_is_relevant_bv)
 
-        self.quotient_mdp = mdp
+        self.underlying_mdp = mdp
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(mdp)
-        self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(mdp)
+        self.action_labels, self.choice_to_action = payntbind.synthesis.extractActionLabels(mdp)
         logger.info(f"MDP has {len(self.action_labels)} actions")
         # TODO filter irrelevant actions?
 
         # get variable domains on relevant states
-        variable_name,state_valuations = get_state_valuations(mdp)
+        variable_name, state_valuations = get_state_valuations(mdp)
         num_variables = len(variable_name)
-        variable_domain = [set() for variable in range(num_variables)]
+        variable_domain_sets: list[set[Any]] = [set() for variable in range(num_variables)]
         for state in self.state_is_relevant_bv:
             valuation = state_valuations[state]
             for variable in range(num_variables):
-                variable_domain[variable].add(valuation[variable])
-        variable_domain = [sorted(domain) for domain in variable_domain]
+                variable_domain_sets[variable].add(valuation[variable])
+        variable_domain = [sorted(domain) for domain in variable_domain_sets]
 
         # filter variables having only one option
         variable_mask = [len(domain) > 1 for domain in variable_domain]
-        variable_name = [value for variable,value in enumerate(variable_name) if variable_mask[variable]]
-        variable_domain = [value for variable,value in enumerate(variable_domain) if variable_mask[variable]]
+        variable_name = [value for variable, value in enumerate(variable_name) if variable_mask[variable]]
+        variable_domain = [value for variable, value in enumerate(variable_domain) if variable_mask[variable]]
         # we filter unused variables from state valuations: this means that multiple states can now have the same "valuation"
-        state_valuations = [
-            [value for variable,value in enumerate(valuations) if variable_mask[variable]]
-            for valuations in state_valuations
-        ]
+        state_valuations = [[value for variable, value in enumerate(valuations) if variable_mask[variable]] for valuations in state_valuations]
 
-        self.variables = [DtVariable(name,variable_domain[variable]) for variable,name in enumerate(variable_name)]
+        # DtVariable's own domain parameter is typed as set[int], but its __init__ actually iterates and
+        # sorts whatever iterable it's given -- a plain sorted list (built above) works fine at runtime
+        self.variables = [DtVariable(name, variable_domain[variable]) for variable, name in enumerate(variable_name)]  # type: ignore[arg-type]
         self.relevant_state_valuations = state_valuations
         logger.debug(f"found the following {len(self.variables)} variables: {[str(v) for v in self.variables]}")
 
+        # build an initial (depth-0) tree so this factory always produces a usable colored_mdp, matching
+        # every other colored-MDP factory -- 0 is also the CLI's own default --tree-depth
+        self.colored_mdp = self.reset_tree(0)
 
-    def scheduler_json_to_choices(self, scheduler_json, discard_unreachable_states=False):
-        variable_name,state_valuations = get_state_valuations(self.quotient_mdp)
-        nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
-        assert self.quotient_mdp.nr_states == len(scheduler_json)
-        state_to_choice = self.empty_scheduler()
-        for state_decision in scheduler_json:
-            valuation = [state_decision["s"][name] for name in variable_name]
-            for state,state_valuation in enumerate(state_valuations):
-                if valuation == state_valuation:
-                    break
-            else:
-                assert False, "state valuation not found"
-
-            actions = state_decision["c"]
-            assert len(actions) == 1
-            action_labels = actions[0]["labels"]
-            assert len(action_labels) <= 1
-            if len(action_labels) == 0:
-                state_to_choice[state] = nci[state]
-                continue
-            action = self.action_labels.index(action_labels[0])
-            # find a choice that executes this action
-            for choice in range(nci[state],nci[state+1]):
-                if self.choice_to_action[choice] == action:
-                    state_to_choice[state] = choice
-                    break
-            else:
-                assert False, "action is not available in the state"
-        # enable implicit actions
-        for state,choice in enumerate(state_to_choice):
-            if choice is None:
-                logger.warning(f"WARNING: scheduler has no action for state {state}")
-                state_to_choice[state] = nci[state]
-
-        if discard_unreachable_states:
-            state_to_choice = self.discard_unreachable_choices(state_to_choice)
-        # keep only relevant states
-        state_to_choice = [choice if self.state_is_relevant[state] else None for state,choice in enumerate(state_to_choice)]
-        choices = self.state_to_choice_to_choices(state_to_choice)
-
-        scheduler_json_relevant = []
-        for state_decision in scheduler_json:
-            valuation = [state_decision["s"][name] for name in variable_name]
-            for state,state_valuation in enumerate(state_valuations):
-                if valuation == state_valuation:
-                    break
-            if state_to_choice[state] is None:
-                continue
-            scheduler_json_relevant.append(state_decision)
-
-        return choices,scheduler_json_relevant
-    
-    # gets all choices that represent random action, used to compute the value of uniformly random scheduler
-    def get_random_choices(self):
-        nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
-        state_to_choice = self.empty_scheduler()
-        random_action = self.action_labels.index(DtColoredMdpFactory.DONT_CARE_ACTION_LABEL)
-        for state in range(self.quotient_mdp.nr_states):
-            # find a choice that executes this action
-            for choice in range(nci[state],nci[state+1]):
-                if self.choice_to_action[choice] == random_action:
-                    state_to_choice[state] = choice
-                    break
-        for state,choice in enumerate(state_to_choice):
-            if choice is None:
-                state_to_choice[state] = nci[state]
-
-        choices = self.state_to_choice_to_choices(state_to_choice)
-
-        return choices
-
-
-    def reset_tree(self, depth : int, enable_harmonization : bool = True):
-        '''
-        Rebuild the decision tree template, the design space and the coloring.
-        '''
+    def reset_tree(self, depth: int, enable_harmonization: bool = True) -> DtColoredMdp:
+        """
+        Rebuild the decision tree template, the parameter space and the coloring, producing a fresh
+        DtColoredMdp -- callers reassign their reference (e.g. self.colored_mdp = factory.reset_tree(k)) rather
+        than relying on in-place mutation.
+        """
         logger.debug(f"building tree of depth {depth}")
 
         num_actions = len(self.action_labels)
@@ -173,154 +112,65 @@ class DtColoredMdpFactory(paynt.quotient.quotient.Quotient):
         if DtColoredMdpFactory.DONT_CARE_ACTION_LABEL in self.action_labels:
             dont_care_action = self.action_labels.index(DtColoredMdpFactory.DONT_CARE_ACTION_LABEL)
 
-        self.decision_tree = DecisionTree(self.action_labels,self.variables)
-        self.decision_tree.set_depth(depth)
+        decision_tree = DecisionTree(self.action_labels, self.variables)
+        decision_tree.set_depth(depth)
 
-        variables = self.decision_tree.variables
+        variables = decision_tree.variables
         variable_name = [v.name for v in variables]
         variable_domain = [v.domain for v in variables]
-        tree_list = self.decision_tree.to_list()
-        self.coloring = payntbind.synthesis.ColoringSmt(
-            self.quotient_mdp.nondeterministic_choice_indices, self.choice_to_action,
-            num_actions, dont_care_action,
-            self.quotient_mdp.state_valuations, self.state_is_relevant_bv,
-            variable_name, variable_domain, tree_list, enable_harmonization
+        tree_list = decision_tree.to_list()
+        coloring = payntbind.synthesis.ColoringSmt(
+            self.underlying_mdp.nondeterministic_choice_indices,
+            self.choice_to_action,
+            num_actions,
+            dont_care_action,
+            self.underlying_mdp.state_valuations,
+            self.state_is_relevant_bv,
+            variable_name,
+            variable_domain,
+            tree_list,
+            enable_harmonization,
         )
-        # return
-        self.coloring.enableStateExploration(self.quotient_mdp)
+        coloring.enableStateExploration(self.underlying_mdp)
 
-        # reconstruct the family
-        parameter_info = self.coloring.getFamilyInfo()
-        self.family = paynt.family.family.Family()
-        self.is_action_parameter = [False for _ in parameter_info]
-        self.is_decision_parameter = [False for _ in parameter_info]
-        self.is_variable_parameter = [False for _ in parameter_info]
-        node_parameter_info = [[] for _ in self.decision_tree.collect_nodes()]
-        for parameter_id,info in enumerate(parameter_info):
-            node,parameter_name,parameter_type = info
-            node_parameter_info[node].append( (parameter_id,parameter_name,parameter_type) )
+        # reconstruct the parameter space
+        parameter_info = coloring.getFamilyInfo()
+        parameter_space = paynt.parameter_space.parameter_space.ParameterSpace()
+        is_action_parameter = [False for _ in parameter_info]
+        is_decision_parameter = [False for _ in parameter_info]
+        is_variable_parameter = [False for _ in parameter_info]
+        node_parameter_info: list[list[tuple[int, str, str]]] = [[] for _ in decision_tree.collect_nodes()]
+        for parameter_id, info in enumerate(parameter_info):
+            node, parameter_name, parameter_type = info
+            node_parameter_info[node].append((parameter_id, parameter_name, parameter_type))
             if parameter_type == "__action__":
-                self.is_action_parameter[parameter_id] = True
+                is_action_parameter[parameter_id] = True
                 option_labels = self.action_labels
             elif parameter_type == "__decision__":
-                self.is_decision_parameter[parameter_id] = True
+                is_decision_parameter[parameter_id] = True
                 option_labels = variable_name
             else:
-                self.is_variable_parameter[parameter_id] = True
+                is_variable_parameter[parameter_id] = True
                 variable = variable_name.index(parameter_type)
                 option_labels = variables[variable].parameter_domain
-            self.family.add_hole(parameter_name, option_labels) # TODO refactor, rename holes to parameters
-        self.decision_tree.root.associate_parameters(node_parameter_info)
+            parameter_space.add_parameter(parameter_name, option_labels)
+        decision_tree.root.associate_parameters(node_parameter_info)
 
-
-    def build_unsat_result(self):
-        spec_result = paynt.verification.property_result.MdpSpecificationResult()
-        spec_result.constraints_result = paynt.verification.property_result.ConstraintsResult([])
-        spec_result.optimality_result = paynt.verification.property_result.MdpOptimalityResult(None)
-        spec_result.evaluate(None)
-        spec_result.can_improve = False
-        return spec_result
-
-    def build(self, family):
-        if family.parent_info is None:
-            choices = self.coloring.selectCompatibleChoices(family.family)
-        else:
-            choices = self.coloring.selectCompatibleChoices(family.family, family.parent_info.selected_choices)
-        assert choices.number_of_set_bits() > 0
-
-        # proceed as before
-        family.selected_choices = choices
-        family.mdp = self.build_from_choice_mask(choices)
-        family.mdp.family = family
-
-
-    def are_choices_consistent(self, choices, family):
-        ''' Separate method for profiling purposes. '''
-        consistent,parameter_selection = self.coloring.areChoicesConsistent(choices, family.family)
-        for parameter,options in enumerate(parameter_selection):
-            assert len(options) == len(set(options)), str(parameter_selection)
-            for option in options:
-                assert option in family.hole_options(parameter), \
-                f"option {option} for parameter {parameter} ({family.hole_name(parameter)}) is not in the family"
-        return consistent,parameter_selection
-
-
-    def scheduler_is_consistent(self, mdp, prop, result):
-        ''' Get parameter options involved in the scheduler selection. '''
-        scheduler = result.scheduler
-        assert scheduler.memoryless and scheduler.deterministic
-        state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler)
-        choices = self.state_to_choice_to_choices(state_to_choice)
-        if self.specification.is_single_property:
-            mdp.family.scheduler_choices = choices
-        consistent,parameter_selection = self.are_choices_consistent(choices, mdp.family)
-        return parameter_selection, consistent
-
-
-    def scheduler_scores(self, mdp, prop, result, selection):
-        inconsistent_assignments = {parameter:options for parameter,options in enumerate(selection) if len(options) > 1 }
-        assert len(inconsistent_assignments) > 0, f"obtained selection with no inconsistencies: {selection}"
-        inconsistent_action_parameters = [(parameter,options) for parameter,options in inconsistent_assignments.items() if self.is_action_parameter[parameter]]
-        inconsistent_decision_parameters = [(parameter,options) for parameter,options in inconsistent_assignments.items() if self.is_decision_parameter[parameter]]
-        inconsistent_variable_parameters = [(parameter,options) for parameter,options in inconsistent_assignments.items() if self.is_variable_parameter[parameter]]
-
-        # choose one splitter
-        splitter = None
-        # try action or decision parameters first
-        if len(inconsistent_action_parameters) > 0:
-            splitter = inconsistent_action_parameters[0][0]
-        elif len(inconsistent_decision_parameters) > 0:
-            splitter = inconsistent_decision_parameters[0][0]
-        else:
-            splitter = inconsistent_variable_parameters[0][0]
-        assert splitter is not None, "splitter not set"
-        # force the score of the selected splitter
-        return {splitter:10}
-
-
-    def split(self, family):
-
-        mdp = family.mdp
-        assert not mdp.is_deterministic
-
-        # split family wrt last undecided result
-        result = family.analysis_result.undecided_result()
-        parameter_assignments = result.primary_selection
-        scores = self.scheduler_scores(mdp, result.prop, result.primary.result, result.primary_selection)
-
-        splitters = self.holes_with_max_score(scores)
-        splitter = splitters[0]
-        if self.is_action_parameter[splitter] or self.is_decision_parameter[splitter]:
-            assert len(parameter_assignments[splitter]) > 1
-            core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, parameter_assignments[splitter])
-        else:
-            subfamily_options = family.hole_options(splitter)
-
-            # split in half
-            index_split = len(subfamily_options)//2
-
-            # split by inconsistent options
-            option_1 = parameter_assignments[splitter][0]; index_1 = subfamily_options.index(option_1)
-            option_2 = parameter_assignments[splitter][1]; index_2 = subfamily_options.index(option_2)
-            index_split = index_2
-
-            core_suboptions = [subfamily_options[:index_split], subfamily_options[index_split:]]
-
-            for options in core_suboptions: assert len(options) > 0
-            other_suboptions = []
-
-        if len(other_suboptions) == 0:
-            suboptions = core_suboptions
-        else:
-            suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
-
-        # construct corresponding subfamilies
-        parent_info = family.collect_parent_info(self.specification)
-        parent_info.analysis_result = family.analysis_result
-        parent_info.scheduler_choices = family.scheduler_choices
-        # parent_info.unsat_core_hint = self.coloring.unsat_core.copy()
-        subfamilies = family.split(splitter,suboptions)
-        assert family.size == sum([family.size for family in subfamilies])
-        for subfamily in subfamilies:
-            subfamily.add_parent_info(parent_info)
-        return subfamilies
+        colored_mdp = DtColoredMdp(
+            self.underlying_mdp,
+            parameter_space,
+            coloring,
+            self.use_exact,
+            self.action_labels,
+            self.choice_to_action,
+            self.state_is_relevant,
+            self.state_is_relevant_bv,
+            self.variables,
+            self.relevant_state_valuations,
+            decision_tree,
+            is_action_parameter,
+            is_decision_parameter,
+            is_variable_parameter,
+        )
+        self.colored_mdp = colored_mdp
+        return colored_mdp

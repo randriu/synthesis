@@ -1,35 +1,113 @@
-import paynt.quotient.posmg
+from __future__ import annotations
+
+from typing import Any
+
+import paynt.colored_mdp
+import paynt.task
+import paynt.parameter_space.parameter_space
 import paynt.synthesizer.synthesizer
-import paynt.quotient.pomdp
-import paynt.verification.property_result
+import paynt.synthesizer.search_node
+import paynt.specification.property_result
+import paynt.underlying_model.underlying_model
+import paynt.utils.scoring
 
 import logging
+
 logger = logging.getLogger(__name__)
+
+
+def scheduler_scores(
+    colored_mdp: paynt.colored_mdp.ColoredMdp, task: paynt.task.Task, mdp: Any, prop: Any, result: Any, selection: list[list[int]]
+) -> dict[int, float] | None:
+    inconsistent_assignments = {parameter: options for parameter, options in enumerate(selection) if len(options) > 1}
+    choice_values = paynt.underlying_model.underlying_model.ModelIndex.choice_values(mdp.model, prop, result.get_values())
+    choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+    expected_visits = paynt.underlying_model.underlying_model.ModelIndex.compute_expected_visits(
+        mdp.model, prop, choices, disable_expected_visits=task.disable_expected_visits
+    )
+    # POMDP has a specialized, hand-optimized scorer for the common posterior-unaware case; every other
+    # colored-MDP variant (and posterior-aware POMDPs) uses the generic implementation. Dispatched by
+    # feature_kind, not an isinstance check, so this module never needs to import paynt.pomdp.
+    if colored_mdp.feature_kind == "pomdp" and not colored_mdp.posterior_aware:  # type: ignore[attr-defined]
+        scores = paynt.utils.scoring.estimate_scheduler_difference_pomdp(
+            colored_mdp, mdp.model, mdp.underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits
+        )
+    else:
+        scores = paynt.utils.scoring.estimate_scheduler_difference(
+            colored_mdp, mdp.model, mdp.underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits
+        )
+    return scores
+
+
+def split_parameter_space(
+    colored_mdp: paynt.colored_mdp.ColoredMdp, task: paynt.task.Task, node: paynt.synthesizer.search_node.SearchNode
+) -> list[paynt.synthesizer.search_node.SearchNode]:
+    """
+    AR splitting step: pick the highest-scoring inconsistent parameter and split node's parameter_space
+    options for it into subspaces, wrapped as child search nodes. A free function rather than a ColoredMdp
+    method, so it works uniformly across every colored-MDP variant without any of them carrying
+    search-decision logic themselves, and so it can be passed around as a plain callable on a future
+    multiprocessing path.
+    :param colored_mdp anything exposing .parameter_space/.coloring -- any ColoredMdp qualifies
+    :param task the Task currently being solved (not read from colored_mdp -- it doesn't carry one)
+    :param node the SearchNode currently being split
+    """
+    mdp = node.mdp
+    assert mdp is not None
+    assert not mdp.is_deterministic
+
+    # split wrt last undecided result
+    assert node.analysis_result is not None
+    result = node.analysis_result.undecided_result()
+    parameter_assignments = result.primary_selection
+    scores = scheduler_scores(colored_mdp, task, mdp, result.prop, result.primary.result, result.primary_selection)
+    if scores is None:
+        scores = {parameter: 0 for parameter in range(mdp.parameter_space.num_parameters) if mdp.parameter_space.parameter_num_options(parameter) > 1}
+
+    splitters = paynt.utils.scoring.parameters_with_max_score(scores)
+    splitter = splitters[0]
+    if len(parameter_assignments[splitter]) > 1:
+        core_suboptions, other_suboptions = mdp.parameter_space.suboptions_enumerate(splitter, parameter_assignments[splitter])
+    else:
+        assert mdp.parameter_space.parameter_num_options(splitter) > 1
+        core_suboptions = mdp.parameter_space.suboptions_half(splitter)
+        other_suboptions = []
+
+    if len(other_suboptions) == 0:
+        suboptions = core_suboptions
+    else:
+        suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
+
+    # construct corresponding child search nodes (SearchNode.split snapshots node's ParentInfo-relevant
+    # state and hands it to each freshly-split child, same as add_parent_info used to do manually here)
+    return node.split(splitter, suboptions)
+
 
 class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
     @property
-    def method_name(self):
+    def method_name(self) -> str:
         return "AR"
 
-    def check_specification(self, family):
-        ''' Check specification for mdp or smg based on self.quotient '''
-        mdp = family.mdp
+    def check_specification(self, node: paynt.synthesizer.search_node.SearchNode) -> None:
+        """Check specification for mdp or smg based on self.colored_mdp"""
+        mdp = node.mdp
+        assert mdp is not None
 
-        if isinstance(self.quotient, paynt.quotient.posmg.PosmgQuotient):
-            model = self.quotient.create_smg_from_mdp(mdp)
+        if self.colored_mdp.feature_kind == "posmg":
+            model = self.colored_mdp.create_smg_from_mdp(mdp)  # type: ignore[attr-defined]
         else:
             model = mdp
 
         # check constraints
         admissible_assignment = None
-        spec = self.quotient.specification
-        if family.constraint_indices is None:
-            family.constraint_indices = spec.all_constraint_indices()
-        results = [None for _ in spec.constraints]
-        for index in family.constraint_indices:
+        spec = self.task.specification
+        if node.constraint_indices is None:
+            node.constraint_indices = list(spec.all_constraint_indices())
+        results: list[paynt.specification.property_result.MdpPropertyResult | None] = [None for _ in spec.constraints]
+        for index in node.constraint_indices:
             constraint = spec.constraints[index]
-            result = paynt.verification.property_result.MdpPropertyResult(constraint)
+            result = paynt.specification.property_result.MdpPropertyResult(constraint)
             results[index] = result
 
             # check primary direction
@@ -39,12 +117,13 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 break
 
             # check if the primary scheduler is consistent
-            result.primary_selection,consistent = self.quotient.scheduler_is_consistent(mdp, constraint, result.primary.result)
+            result.primary_selection, consistent = self.colored_mdp.scheduler_is_consistent(mdp, node, result.primary.result, self.task.specification)
             if consistent:
-                assignment = family.assume_options_copy(result.primary_selection)
-                dtmc = self.quotient.build_assignment(assignment)
-                res = dtmc.check_specification(self.quotient.specification)
-                if res.accepting_dtmc(self.quotient.specification):
+                assignment = node.parameter_space.assume_options_copy(result.primary_selection)
+                dtmc = self.colored_mdp.build_assignment(assignment)
+                res = dtmc.check_specification(self.task.specification)
+                accepting, _ = res.accepting_dtmc(self.task.specification)
+                if accepting:
                     result.sat = True
                     admissible_assignment = assignment
 
@@ -56,13 +135,13 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 result.sat = True
                 continue
 
-        spec_result = paynt.verification.property_result.MdpSpecificationResult()
-        spec_result.constraints_result = paynt.verification.property_result.ConstraintsResult(results)
+        spec_result = paynt.specification.property_result.MdpSpecificationResult()
+        spec_result.constraints_result = paynt.specification.property_result.ConstraintsResult(results)
 
         # check optimality
-        if spec.has_optimality and not spec_result.constraints_result.sat is False:
+        if spec.optimality is not None and spec_result.constraints_result.sat is not False:
             opt = spec.optimality
-            result = paynt.verification.property_result.MdpOptimalityResult(opt)
+            result = paynt.specification.property_result.MdpOptimalityResult(opt)
 
             # check primary direction
             result.primary = model.model_check_property(opt)
@@ -71,65 +150,80 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 result.can_improve = False
             else:
                 # LB < OPT, check if LB is tight
-                result.primary_selection,consistent = self.quotient.scheduler_is_consistent(mdp, opt, result.primary.result)
+                result.primary_selection, consistent = self.colored_mdp.scheduler_is_consistent(mdp, node, result.primary.result, self.task.specification)
                 result.can_improve = True
                 if consistent:
                     # LB < OPT and it's tight, double-check the constraints and the value on the DTMC
                     result.can_improve = False
-                    assignment = family.assume_options_copy(result.primary_selection)
-                    dtmc = self.quotient.build_assignment(assignment)
-                    res = dtmc.check_specification(self.quotient.specification)
+                    assignment = node.parameter_space.assume_options_copy(result.primary_selection)
+                    dtmc = self.colored_mdp.build_assignment(assignment)
+                    res = dtmc.check_specification(self.task.specification)
+                    assert res.constraints_result is not None
                     if res.constraints_result.sat and spec.optimality.improves_optimum(res.optimality_result.value):
                         result.improving_assignment = assignment
                         result.improving_value = res.optimality_result.value
             spec_result.optimality_result = result
 
-        spec_result.evaluate(family, admissible_assignment)
-        family.analysis_result = spec_result
+        spec_result.evaluate(node.parameter_space, admissible_assignment)
+        node.analysis_result = spec_result
 
-    def verify_family(self, family):
-        self.quotient.build(family)
+    def verify_parameter_space(self, node: paynt.synthesizer.search_node.SearchNode) -> None:
+        node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space)
+        assert self.stat is not None
 
         # TODO include iteration_game in iteration? is it necessary?
-        if isinstance(self.quotient, paynt.quotient.posmg.PosmgQuotient):
-            self.stat.iteration_game(family.mdp.states)
+        if self.colored_mdp.feature_kind == "posmg":
+            self.stat.iteration_game(node.mdp.states)
         else:
-            self.stat.iteration(family.mdp)
+            self.stat.iteration(node.mdp)
 
-        self.check_specification(family)
+        self.check_specification(node)
 
-    def update_optimum(self, family):
-        ia = family.analysis_result.improving_assignment
+    def update_optimum(self, node: paynt.synthesizer.search_node.SearchNode) -> None:
+        assert node.analysis_result is not None
+        ia = node.analysis_result.improving_assignment
         if ia is None:
             return
-        if not self.quotient.specification.has_optimality:
+        optimality = self.task.specification.optimality
+        if optimality is None:
             self.best_assignment = ia
             return
-        iv = family.analysis_result.improving_value
-        if not self.quotient.specification.optimality.improves_optimum(iv):
+        iv = node.analysis_result.improving_value
+        if not optimality.improves_optimum(iv):
             return
-        self.quotient.specification.optimality.update_optimum(iv)
+        optimality.update_optimum(iv)
         self.best_assignment = ia
         self.best_assignment_value = iv
         # logger.info(f"value {round(iv,4)} achieved after {round(paynt.utils.timer.GlobalTimer.read(),2)} seconds")
-        if isinstance(self.quotient, paynt.quotient.pomdp.PomdpQuotient):
-            self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
+        if self.colored_mdp.feature_kind == "pomdp":
+            assert self.stat is not None
+            self.stat.new_fsc_found(node.analysis_result.improving_value, ia, self.colored_mdp.policy_size(ia))  # type: ignore[attr-defined]
 
-    def synthesize_one(self, family):
-        families = [family]
-        while families:
+    def synthesize_one(self, node: paynt.synthesizer.search_node.SearchNode) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
+        nodes = [node]
+        while nodes:
             if self.resource_limit_reached():
                 break
-            family = families.pop(-1)
-            self.verify_family(family)
-            self.update_optimum(family)
-            if not self.quotient.specification.has_optimality and self.best_assignment is not None:
+            node = nodes.pop(-1)
+            self.verify_parameter_space(node)
+            self.update_optimum(node)
+            if not self.task.specification.has_optimality and self.best_assignment is not None:
                 break
             # break
-            if family.analysis_result.can_improve is False:
-                self.explore(family)
+            assert node.analysis_result is not None
+            if node.analysis_result.can_improve is False:
+                self.explore(node.parameter_space)
                 continue
             # undecided
-            subfamilies = self.quotient.split(family)
-            families = families + subfamilies
+            child_nodes = self.split_undecided_space(node)
+            nodes = nodes + child_nodes
         return self.best_assignment
+
+    def split_undecided_space(self, node: paynt.synthesizer.search_node.SearchNode) -> list[paynt.synthesizer.search_node.SearchNode]:
+        """
+        Overridable hook: the default just delegates to the shared split_parameter_space free function.
+        DtSynthesizer overrides this since decision-tree splitting classifies parameters by kind
+        (action/decision/variable) rather than by scored inconsistency variance -- a genuinely different
+        algorithm, not a performance variant of this one (unlike POMDP's scheduler_scores specialization).
+        """
+        return split_parameter_space(self.colored_mdp, self.task, node)

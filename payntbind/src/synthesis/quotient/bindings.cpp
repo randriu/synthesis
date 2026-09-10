@@ -133,7 +133,7 @@ std::vector<uint64_t> schedulerToStateToGlobalChoice(
     return state_to_choice;
 }
 
-std::map<uint64_t,double> computeInconsistentHoleVariance(
+std::map<uint64_t,double> computeInconsistentParameterVariance(
     Family const& family,
     std::vector<uint64_t> const& row_groups, std::vector<uint64_t> const& choice_to_global_choice,
     std::vector<double> const& choice_to_value,
@@ -318,7 +318,7 @@ void bindings_coloring(py::module& m) {
     bindings_coloring_vt<double>(m, "");
     bindings_coloring_vt<storm::RationalNumber>(m, "Exact");
 
-    m.def("computeInconsistentHoleVariance", &synthesis::computeInconsistentHoleVariance);
+    m.def("computeInconsistentParameterVariance", &synthesis::computeInconsistentParameterVariance);
 
     m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);
 

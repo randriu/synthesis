@@ -1,0 +1,10 @@
+# Starter clang-format config for payntbind's own C++ sources (not the vendored payntbind/src/synthesis/
+# decpomdp/madp/ MADP Toolbox code, which keeps its own upstream formatting). Not enforced yet -- nothing
+# has ever been reformatted against this config, deliberately: doing so is its own separately-scheduled PR,
+# not part of introducing the tooling. Use payntbind/check_format.sh to see what it would change.
+BasedOnStyle: Google
+IndentWidth: 4
+ColumnLimit: 120
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+SortIncludes: false
