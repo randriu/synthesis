@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 from . import version
 
 import paynt.api
@@ -21,17 +25,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def add_options(options):
+def add_options(options : list[Any]) -> Any:
     ''' Standard click idiom for composing a decorator list built elsewhere (here, a feature's own _cli.py)
     onto a command function, applied in the same order as if the decorators had been written inline. '''
-    def _add_options(func):
+    def _add_options(func : Any) -> Any:
         for option in reversed(options):
             func = option(func)
         return func
     return _add_options
 
 
-def setup_logger(log_path = None):
+def setup_logger(log_path : str | None = None) -> list[logging.Handler]:
     ''' Setup routine for logging. '''
 
     root = logging.getLogger()
@@ -41,7 +45,7 @@ def setup_logger(log_path = None):
     # formatter = logging.Formatter('%(asctime)s %(threadName)s - %(name)s - %(levelname)s - %(message)s')
     formatter = logging.Formatter('%(asctime)s - %(filename)s:%(lineno)d - %(message)s')
 
-    handlers = []
+    handlers : list[logging.Handler] = []
     if log_path is not None:
         fh = logging.FileHandler(log_path)
         fh.setLevel(logging.DEBUG)
@@ -112,21 +116,22 @@ def setup_logger(log_path = None):
     help="run profiling")
 
 def paynt_run(
-    project, sketch, props, relative_error, optimum_threshold, precision, exact, timeout,
-    export,
-    method,
-    disable_expected_visits,
-    fsc_synthesis, fsc_memory_size, posterior_aware,
-    storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
-    use_storm_cutoffs, unfold_strategy_storm,
-    export_synthesis,
-    mdp_discard_unreachable_choices,
-    tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
-    constraint_bound,
-    dtnest, dtnest_subtree_depth, dtnest_error_threshold,
-    ce_generator,
-    profiling
-):
+    project : str, sketch : str, props : str, relative_error : float, optimum_threshold : float | None, precision : float,
+    exact : bool, timeout : int | None,
+    export : str | None,
+    method : str,
+    disable_expected_visits : bool,
+    fsc_synthesis : bool, fsc_memory_size : int, posterior_aware : bool,
+    storm_pomdp : bool, iterative_storm : tuple[int,int,int] | None, get_storm_result : int | None, storm_options : str, prune_storm : bool,
+    use_storm_cutoffs : bool, unfold_strategy_storm : str,
+    export_synthesis : str | None,
+    mdp_discard_unreachable_choices : bool,
+    tree_depth : int, tree_enumeration : bool, tree_map_scheduler : str | None, add_dont_care_action : bool,
+    constraint_bound : float | None,
+    dtnest : bool, dtnest_subtree_depth : int, dtnest_error_threshold : float,
+    ce_generator : str,
+    profiling : bool
+) -> None:
 
     profiler = None
     if profiling:
@@ -137,11 +142,11 @@ def paynt_run(
     logger.info("This is Paynt version {}.".format(version()))
     paynt.utils.version_check.check_stormpy_compatibility()
 
-    # Every option below that affects synthesis behavior (as opposed to model loading/parsing) is threaded through as a Task field. 
+    # Every option below that affects synthesis behavior (as opposed to model loading/parsing) is threaded through as a Task field.
     # Sketch.load_sketch doesn't know the sketch's feature until it has parsed it, so task_kwargs
     # carries every feature's options at once; whichever Task subclass ends up being constructed picks out
     # only the keys it recognizes (see paynt.task.Task.from_specification).
-    task_kwargs = dict(
+    task_kwargs : dict[str, Any] = dict(
         export_synthesis_filename_base=export_synthesis,
         conflict_generator_type=ce_generator,
         disable_expected_visits=disable_expected_visits,
@@ -172,10 +177,11 @@ def paynt_run(
     synthesizer.run(optimum_threshold)
 
     if profiling:
+        assert profiler is not None
         profiler.disable()
         print_profiler_stats(profiler)
 
-def print_profiler_stats(profiler):
+def print_profiler_stats(profiler : cProfile.Profile) -> None:
     stats = pstats.Stats(profiler)
     NUM_LINES = 10
 
@@ -183,7 +189,8 @@ def print_profiler_stats(profiler):
     stats.sort_stats('tottime').print_stats(NUM_LINES)
 
     logger.debug("percentage breakdown:")
-    entries = [ (key,data[2]) for key,data in stats.stats.items()]
+    # .stats/.total_tt are genuine pstats.Stats attributes at runtime, just missing from typeshed's stub
+    entries = [ (key,data[2]) for key,data in stats.stats.items()]  # type: ignore[attr-defined]
     entries = sorted(entries, key=lambda x : x[1], reverse=True)
     entries = entries[:NUM_LINES]
     for key,data in entries:
@@ -192,11 +199,11 @@ def print_profiler_stats(profiler):
             callee = method
         else:
             callee = f"{module}:{line}({method})"
-        percentage = round(data / stats.total_tt * 100,1)
-        percentage = str(percentage).ljust(4)
-        print(f"{percentage} %  {callee}")
+        percentage = round(data / stats.total_tt * 100,1)  # type: ignore[attr-defined]
+        percentage_str = str(percentage).ljust(4)
+        print(f"{percentage_str} %  {callee}")
 
-def main():
+def main() -> None:
     setup_logger()
     paynt_run()
 

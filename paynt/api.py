@@ -4,16 +4,22 @@ api - "User-friendly" API for PAYNT.
 This module exposes high-level functions for programmatic use of PAYNT.
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 from . import version
 
 
-def get_version():
+def get_version() -> str:
     """Return PAYNT version string."""
 
     return version()
 
 
-def get_synthesizer(colored_mdp_factory, method="ar", fsc_synthesis=False, storm_control=None, dtnest=False):
+def get_synthesizer(
+    colored_mdp_factory : Any, method : str = "ar", fsc_synthesis : bool = False, storm_control : Any = None, dtnest : bool = False
+) -> Any:
     '''
     The one canonical synthesis dispatcher: reads colored_mdp_factory.colored_mdp.feature_kind and routes to
     the right synthesizer, so callers (paynt.cli, library users) never need to isinstance-check or import a
@@ -70,5 +76,3 @@ def get_synthesizer(colored_mdp_factory, method="ar", fsc_synthesis=False, storm
         return paynt.posmg.PosmgSynthesizer(colored_mdp_factory)
 
     return paynt.synthesizer.synthesizer.Synthesizer.for_method(colored_mdp, task, method)
-
-

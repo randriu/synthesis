@@ -3,9 +3,14 @@ Colored MDP representing a family of MDPs: parameters select which concrete envi
 (rather than which FSC/policy structure) is in effect.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import payntbind
 
 import paynt.colored_mdp
+import paynt.parameter_space.parameter_space
 import paynt.underlying_model.underlying_model
 import paynt.specification.property
 
@@ -19,8 +24,11 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
 
     feature_kind = "family"
 
-    def __init__(self, underlying_mdp, parameter_space, coloring, use_exact,
-                 num_actions, action_labels, choice_to_action, state_action_choices, state_to_actions):
+    def __init__(
+        self, underlying_mdp : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, coloring : Any, use_exact : bool,
+        num_actions : int, action_labels : list[str], choice_to_action : list[int],
+        state_action_choices : list[list[list[int]]], state_to_actions : list[list[int]]
+    ):
         super().__init__(underlying_mdp, parameter_space, coloring, use_exact)
         # number of distinct actions in the underlying MDP
         self.num_actions = num_actions
@@ -33,7 +41,7 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
         # for each state of the underlying MDP, a list of available actions
         self.state_to_actions = state_to_actions
 
-    def build_assignment(self, parameter_space):
+    def build_assignment(self, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace) -> paynt.underlying_model.underlying_model.SubMdp:
         '''
         Overrides ColoredMdp.build_assignment: fixing every parameter (i.e. picking one member of the
         parameter_space) does not fix the agent's policy -- that is separate, handled by apply_policy_to_parameter_space --
@@ -45,10 +53,10 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
             self.underlying_mdp, choices, self.subsystem_builder_options)
         return paynt.underlying_model.underlying_model.SubMdp(model, state_map, choice_map)
 
-    def empty_policy(self):
+    def empty_policy(self) -> list[int | None]:
         return paynt.underlying_model.underlying_model.ModelIndex.empty_scheduler(self.underlying_mdp)
 
-    def scheduler_to_policy(self, scheduler, mdp):
+    def scheduler_to_policy(self, scheduler : Any, mdp : paynt.underlying_model.underlying_model.SubMdp) -> list[int | None]:
         state_to_choice = paynt.underlying_model.underlying_model.ModelIndex.scheduler_to_state_to_choice(
             self.underlying_mdp, self.choice_destinations, mdp, scheduler)
         policy = self.empty_policy()
@@ -58,22 +66,22 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
                 policy[state] = self.choice_to_action[choice]
         return policy
 
-    def policy_to_state_valuation_actions(self, policy):
+    def policy_to_state_valuation_actions(self, policy : tuple[list[int | None], list[int]]) -> list[tuple[dict[str, Any], str]]:
         '''
         Create a representation for a policy that associates action labels with state valuations. States with only
         one available action are omitted.
         '''
-        policy,_ = policy
+        policy_actions,_ = policy
         sv = self.underlying_mdp.state_valuations
         state_valuation_to_action = []
-        for state,action in enumerate(policy):
+        for state,action in enumerate(policy_actions):
             if action is None:
                 continue
             if len(self.state_to_actions[state])==1:
                 continue
             # get action label
-            action = self.action_labels[action]
-            if action == "empty_label":
+            action_label = self.action_labels[action]
+            if action_label == "empty_label":
                 continue
 
             # get state valuation
@@ -84,7 +92,7 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
                     continue
                 valuation[variable] = value
 
-            state_valuation_to_action.append( (valuation,action) )
+            state_valuation_to_action.append( (valuation,action_label) )
 
         # omit variables that are assigned to the same value
         default_valuation,_ = state_valuation_to_action[0]
@@ -99,16 +107,16 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
         ]
         return state_valuation_to_action
 
-    def policy_to_json(self, state_valuation_to_action, dt_control=False):
+    def policy_to_json(self, state_valuation_to_action : list[tuple[dict[str, Any], str]], dt_control : bool = False) -> list[Any]:
         '''
         :param state_valuation_to_action: a list of tuples (valuation,action) where valuation is a dictionary of variable
         :param dt_control: if True, outputs JSON in the format expected by the DT control tool,
                 otherwise simpler format is used
         '''
-        json_whole = []
+        json_whole : list[Any] = []
         for index, valuation_action in enumerate(state_valuation_to_action):
             if dt_control:
-                json_unit = {}
+                json_unit : dict[str, Any] = {}
                 valuation, action = valuation_action
                 json_unit["c"] = [{"origin": {"action-label": action}}]
                 json_unit["s"] = valuation
@@ -118,7 +126,9 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return json_whole
 
-    def fix_and_apply_policy_to_parameter_space(self, selected_choices, policy):
+    def fix_and_apply_policy_to_parameter_space(
+        self, selected_choices : Any, policy : list[int | None]
+    ) -> tuple[tuple[list[int | None], list[int]], paynt.underlying_model.underlying_model.SubMdp]:
         '''
         Apply policy to the underlying MDP restricted to selected_choices. Every undefined action in a policy
         is set to an arbitrary one. Upon constructing the MDP, reset unused actions in a policy to None.
@@ -131,6 +141,7 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
         policy = [action if action is not None else self.state_to_actions[state][0] for state,action in enumerate(policy)]
         policy_choices = []
         for state,action in enumerate(policy):
+            assert action is not None
             policy_choices += self.state_action_choices[state][action]
         choices = payntbind.synthesis.policyToChoicesForFamily(policy_choices, selected_choices)
 
@@ -142,10 +153,9 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
             policy_fixed[state] = policy[state]
 
         mask = [state for state,action in enumerate(policy_fixed) if action is not None]
-        policy_fixed = (policy_fixed,mask)
-        return policy_fixed,mdp
+        return (policy_fixed,mask),mdp
 
-    def apply_policy_to_parameter_space(self, selected_choices, policy):
+    def apply_policy_to_parameter_space(self, selected_choices : Any, policy : list[int | None]) -> paynt.underlying_model.underlying_model.SubMdp:
         policy_choices = []
         for state,action in enumerate(policy):
             if action is None:
@@ -160,7 +170,7 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return mdp
 
-    def assert_mdp_is_deterministic(self, mdp, parameter_space):
+    def assert_mdp_is_deterministic(self, mdp : paynt.underlying_model.underlying_model.SubMdp, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace) -> None:
         if mdp.is_deterministic:
             return
 
@@ -179,7 +189,7 @@ class FamilyColoredMdp(paynt.colored_mdp.ColoredMdp):
         logger.error("aborting...")
         exit(1)
 
-    def build_game_abstraction_solver(self, prop):
+    def build_game_abstraction_solver(self, prop : paynt.specification.property.Property) -> Any:
         target_label = prop.get_target_label()
         precision = paynt.specification.property.Property.model_checking_precision
         solver = payntbind.synthesis.GameAbstractionSolver(

@@ -4,8 +4,15 @@ analysis (via StormPOMDPControl), each side informing the other's next iteration
 iterative_storm_loop/strategy_storm control flow that used to live directly on SynthesizerPomdp.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 from paynt.pomdp.synthesizer import PomdpSynthesizer
+import paynt.pomdp.factory
+import paynt.pomdp.saynt.control
 import paynt.pomdp.saynt.synthesizer_ar_storm
+import paynt.parameter_space.parameter_space
 import paynt.utils.timer
 
 from threading import Thread
@@ -18,7 +25,12 @@ logger = logging.getLogger(__name__)
 
 class SayntSynthesizer(PomdpSynthesizer):
 
-    def __init__(self, colored_mdp_factory, method, storm_control):
+    def __init__(
+        self,
+        colored_mdp_factory : paynt.pomdp.factory.PomdpColoredMdpFactory,
+        method : str,
+        storm_control : paynt.pomdp.saynt.control.StormPOMDPControl,
+    ) -> None:
         super().__init__(colored_mdp_factory, method)
         self.storm_control = storm_control
         self.storm_control.colored_mdp = self.colored_mdp
@@ -26,13 +38,21 @@ class SayntSynthesizer(PomdpSynthesizer):
         self.storm_control.specification = self.task.specification
         self.storm_control.spec_formulas = self.task.specification.stormpy_formulae()
         self.synthesis_terminate = False
-        self.synthesizer = paynt.pomdp.saynt.synthesizer_ar_storm.SynthesizerARStorm # SAYNT only works with abstraction refinement
+        # SAYNT only works with abstraction refinement
+        self.synthesizer : type[paynt.pomdp.saynt.synthesizer_ar_storm.SynthesizerARStorm] = paynt.pomdp.saynt.synthesizer_ar_storm.SynthesizerARStorm
+        self.saynt_timer : paynt.utils.timer.Timer | None = None
         if self.storm_control.iteration_timeout is not None:
             self.saynt_timer = paynt.utils.timer.Timer()
             self.synthesizer.saynt_timer = self.saynt_timer
             self.storm_control.saynt_timer = self.saynt_timer
 
-    def unfold_and_synthesize(self, mem_size, unfold_storm, unfold_imperfect_only=True):
+        # set by iterative_storm_loop/run_synthesis_timeout, read by strategy_iterative_storm/strategy_storm
+        # (via self.synthesizer.s_queue) once synthesis is actually running
+        self.interactive_queue : Queue | None = None
+
+    def unfold_and_synthesize(
+        self, mem_size : int, unfold_storm : bool, unfold_imperfect_only : bool = True
+    ) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
         # unfold memory according to the best result
         if not unfold_storm:
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
@@ -97,7 +117,7 @@ class SayntSynthesizer(PomdpSynthesizer):
         return assignment
 
     # iterative strategy using Storm analysis to enhance the synthesis
-    def strategy_iterative_storm(self, unfold_imperfect_only, unfold_storm=True):
+    def strategy_iterative_storm(self, unfold_imperfect_only : bool, unfold_storm : bool = True) -> None:
         '''
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
@@ -107,6 +127,7 @@ class SayntSynthesizer(PomdpSynthesizer):
         while True:
             assignment = self.unfold_and_synthesize(mem_size,unfold_storm)
             if assignment is not None:
+                assert self.task.specification.optimality is not None
                 self.storm_control.latest_paynt_result = assignment
                 self.storm_control.paynt_export = self.colored_mdp.extract_policy(assignment, self.task.specification)
                 self.storm_control.paynt_bounds = self.task.specification.optimality.optimum
@@ -119,7 +140,7 @@ class SayntSynthesizer(PomdpSynthesizer):
 
             mem_size += 1
 
-    def print_synthesized_controllers(self):
+    def print_synthesized_controllers(self) -> None:
         hline = "\n------------------------------------\n"
         print(hline)
         print("PAYNT results: ")
@@ -131,10 +152,12 @@ class SayntSynthesizer(PomdpSynthesizer):
         print("controller size: {}".format(self.storm_control.belief_controller_size))
         print(hline)
 
-    def iterative_storm_loop(self, timeout, paynt_timeout, storm_timeout, iteration_limit=0):
+    def iterative_storm_loop(self, timeout : int, paynt_timeout : int, storm_timeout : int, iteration_limit : int = 0) -> None:
         ''' Main SAYNT loop. '''
+        assert self.saynt_timer is not None
         self.interactive_queue = Queue()
-        self.synthesizer.s_queue = self.interactive_queue
+        queue = self.interactive_queue
+        self.synthesizer.s_queue = queue
         self.storm_control.interactive_storm_setup()
         iteration = 1
         paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, self.storm_control.unfold_storm))
@@ -146,14 +169,14 @@ class SayntSynthesizer(PomdpSynthesizer):
             if iteration == 1:
                 paynt_thread.start()
             else:
-                self.interactive_queue.put("resume")
+                queue.put("resume")
 
             logger.info("Timeout for PAYNT started")
 
             time.sleep(paynt_timeout)
-            self.interactive_queue.put("timeout")
+            queue.put("timeout")
 
-            while not self.interactive_queue.empty():
+            while not queue.empty():
                 time.sleep(0.1)
 
             if iteration == 1:
@@ -172,7 +195,7 @@ class SayntSynthesizer(PomdpSynthesizer):
 
             iteration += 1
 
-        self.interactive_queue.put("terminate")
+        queue.put("terminate")
         self.synthesis_terminate = True
         paynt_thread.join()
 
@@ -181,9 +204,10 @@ class SayntSynthesizer(PomdpSynthesizer):
         self.saynt_timer.stop()
 
     # run PAYNT POMDP synthesis with a given timeout
-    def run_synthesis_timeout(self, timeout):
+    def run_synthesis_timeout(self, timeout : int) -> None:
         self.interactive_queue = Queue()
-        self.synthesizer.s_queue = self.interactive_queue
+        queue = self.interactive_queue
+        self.synthesizer.s_queue = queue
         paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, False))
         iteration_timeout = time.time() + timeout
         paynt_thread.start()
@@ -194,13 +218,13 @@ class SayntSynthesizer(PomdpSynthesizer):
 
             time.sleep(1)
 
-        self.interactive_queue.put("pause")
-        self.interactive_queue.put("terminate")
+        queue.put("pause")
+        queue.put("terminate")
         self.synthesis_terminate = True
         paynt_thread.join()
 
     # PAYNT POMDP synthesis that uses pre-computed results from Storm as guide
-    def strategy_storm(self, unfold_imperfect_only, unfold_storm=True):
+    def strategy_storm(self, unfold_imperfect_only : bool, unfold_storm : bool = True) -> None:
         '''
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
@@ -212,6 +236,7 @@ class SayntSynthesizer(PomdpSynthesizer):
                 self.storm_control.parse_results(self.colored_mdp)
             assignment = self.unfold_and_synthesize(mem_size,unfold_storm)
             if assignment is not None:
+                assert self.task.specification.optimality is not None
                 self.storm_control.latest_paynt_result = assignment
                 self.storm_control.paynt_export = self.colored_mdp.extract_policy(assignment, self.task.specification)
                 self.storm_control.paynt_bounds = self.task.specification.optimality.optimum
@@ -219,7 +244,7 @@ class SayntSynthesizer(PomdpSynthesizer):
             self.storm_control.update_data()
             mem_size += 1
 
-    def export_fsc(self, export_filename_base):
+    def export_fsc(self, export_filename_base : str) -> None:
         fsc_json = None
         if self.storm_control.saynt_fsc is not None:
             fsc_json = self.storm_control.saynt_fsc.__str__()
@@ -236,7 +261,14 @@ class SayntSynthesizer(PomdpSynthesizer):
 
         logger.info(f"Exported FSC to {export_filename_base}.fsc.json")
 
-    def run(self, optimum_threshold=None):
+    # NOTE: unlike every other feature's run() (see paynt.result.Result / paynt.pomdp.result.PomdpResult),
+    # this override does not construct and return a Result -- SAYNT produces two parallel results (PAYNT's
+    # and Storm's, see print_synthesized_controllers/StormPOMDPControl) and deciding what a single SAYNT
+    # Result should even contain (which value becomes .value? does it need its own SayntResult subclass
+    # carrying both?) is a real design question that was never part of the Result-class work done so far
+    # (paynt/result.py's steps a-f cover generic AR/CEGIS/Hybrid, POMDP, and PolicyTree; SAYNT was not
+    # among them) -- flagging rather than guessing at a shape here.
+    def run(self, optimum_threshold : Any = None) -> None:  # type: ignore[override]
         logger.info("Storm POMDP option enabled")
         logger.info("Storm settings: iterative - {}, get_storm_result - {}, storm_options - {}, prune_storm - {}, unfold_strategy - {}, use_storm_cutoffs - {}".format(
                     (self.storm_control.iteration_timeout, self.storm_control.paynt_timeout, self.storm_control.storm_timeout), self.storm_control.get_result,
@@ -244,6 +276,10 @@ class SayntSynthesizer(PomdpSynthesizer):
         ))
         # start SAYNT
         if self.storm_control.iteration_timeout is not None:
+            # iteration_timeout/paynt_timeout/storm_timeout are always set together, from the same
+            # --iterative-storm 3-tuple CLI option (see StormPOMDPControl.set_options)
+            assert self.storm_control.paynt_timeout is not None
+            assert self.storm_control.storm_timeout is not None
             self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout,
                                     paynt_timeout=self.storm_control.paynt_timeout,
                                     storm_timeout=self.storm_control.storm_timeout,

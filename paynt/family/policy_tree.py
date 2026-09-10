@@ -6,7 +6,13 @@ just tree-shape operations (postprocessing/merging, stats, export) a caller can 
 paynt.dt.decision_tree.DecisionTree is used once returned from a decision-tree synthesis result.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import paynt.synthesizer.search_node
+import paynt.parameter_space.parameter_space
+import paynt.family.colored_mdp
 from paynt.specification.property import Property
 import paynt.utils.timer
 
@@ -18,44 +24,51 @@ logging.disable(logging.CRITICAL)
 import graphviz
 logging.disable(logging.NOTSET)
 
+# a policy over the underlying MDP: for each state, the executed action (or None if unconstrained/unreachable),
+# plus a mask of the state indices where the action is actually defined
+Policy = tuple[list[int | None], list[int]]
 
-def policies_are_compatible(policy1, policy2):
-    policy1,policy1_mask = policy1
-    policy2,_ = policy2
+
+def policies_are_compatible(policy1 : Policy, policy2 : Policy) -> bool:
+    policy1_actions,policy1_mask = policy1
+    policy2_actions,_ = policy2
     for state in policy1_mask:
-        a1 = policy1[state]
-        a2 = policy2[state]
+        a1 = policy1_actions[state]
+        a2 = policy2_actions[state]
         if a2 is not None and a1 != a2:
             return False
     return True
 
-def merge_policies(policy1, policy2):
+def merge_policies(policy1 : Policy, policy2 : Policy) -> Policy | None:
     '''
     Attempt to merge multiple policies into one.
     :returns one policy or None if some policies were incompatible
     '''
     if not policies_are_compatible(policy1,policy2):
         return None
-    policy1,_ = policy1
-    policy2,_ = policy2
-    policy = [a1 or policy2[state] for state,a1 in enumerate(policy1)]
+    policy1_actions,_ = policy1
+    policy2_actions,_ = policy2
+    policy = [a1 or policy2_actions[state] for state,a1 in enumerate(policy1_actions)]
     mask = [state for state,action in enumerate(policy) if action is not None]
     return (policy,mask)
 
-def merge_policies_exclusively(policy1, policy2):
-    policy1,_ = policy1
-    policy2,_ = policy2
-    policy12 = policy1.copy()
-    policy21 = policy2.copy()
-    for state,a1 in enumerate(policy1):
-        a2 = policy2[state]
+def merge_policies_exclusively(policy1 : Policy, policy2 : Policy) -> tuple[list[int | None], list[int | None]]:
+    policy1_actions,_ = policy1
+    policy2_actions,_ = policy2
+    policy12 = policy1_actions.copy()
+    policy21 = policy2_actions.copy()
+    for state,a1 in enumerate(policy1_actions):
+        a2 = policy2_actions[state]
         if a1 is None:
             policy12[state] = a2
         if a2 is None:
             policy21[state] = a1
     return policy12,policy21
 
-def double_check_policy(colored_mdp, node, prop, policy):
+def double_check_policy(
+    colored_mdp : paynt.family.colored_mdp.FamilyColoredMdp, node : paynt.synthesizer.search_node.SearchNode,
+    prop : Property, policy : list[int | None]
+) -> None:
     ''' Re-verify (at tighter precision) that policy is actually SAT for node's parameter space -- used by
     PolicyTreeNode.double_check, itself only run when PolicyTreeSynthesizer.double_check_policy_tree_leaves
     is enabled. Takes colored_mdp/node explicitly (not a Synthesizer instance) since it needs no search
@@ -75,37 +88,46 @@ def double_check_policy(colored_mdp, node, prop, policy):
 
 class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
 
-    def __init__(self, parameter_space, parent_info=None):
+    # bumped by make_policies_compatible; reset (and read) only by PolicyTree.postprocess
+    mdps_model_checked : int = 0
+
+    def __init__(
+        self, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace,
+        parent_info : paynt.synthesizer.search_node.ParentInfo | None = None
+    ):
         super().__init__(parameter_space, parent_info)
 
         # a previously-computed game-abstraction policy supplied by the parent split, tried before solving a
         # fresh game abstraction for this node (see PolicyTreeSynthesizer.verify_parameter_space)
-        self.candidate_policy = None
+        self.candidate_policy : list[int | None] | None = None
 
-        self.splitter = None
-        self.suboptions = []
-        self.child_nodes = []
+        self.splitter : int | None = None
+        self.suboptions : list[list[int]] = []
+        self.child_nodes : list["PolicyTreeNode"] = []
 
-        self.sat = None
-        self.policy_index = None
+        self.sat : bool | None = None
+        self.policy_index : int | None = None
 
     @property
-    def is_leaf(self):
+    def is_leaf(self) -> bool:
         return self.sat is not None
 
-    def num_nodes(self):
+    def num_nodes(self) -> int:
         num = 1
         for child in self.child_nodes:
             num += child.num_nodes()
         return num
 
-    def num_leaves(self):
+    def num_leaves(self) -> int:
         num = 1 if self.is_leaf else 0
         for child in self.child_nodes:
             num += child.num_leaves()
         return num
 
-    def attach_children(self, splitter, suboptions, parameter_subspaces, candidate_policies=None):
+    def attach_children(
+        self, splitter : int, suboptions : list[list[int]], parameter_subspaces : list[paynt.parameter_space.parameter_space.ParameterSpace],
+        candidate_policies : list[list[int | None] | None] | None = None
+    ) -> None:
         '''
         Wrap each of parameter_subspaces (already-split ParameterSpace values) as a child PolicyTreeNode.
         Named distinctly from the inherited SearchNode.split (which computes the parameter_space split
@@ -124,22 +146,26 @@ class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
             child_node.candidate_policy = candidate_policy
             self.child_nodes.append(child_node)
 
-    def double_check(self, colored_mdp, prop, policies):
+    def double_check(self, colored_mdp : paynt.family.colored_mdp.FamilyColoredMdp, prop : Property, policies : list[Policy | None]) -> None:
         assert self.sat is not None
         self.mdp, self.selected_choices = colored_mdp.build(self.parameter_space)
         if self.sat is False:
             result = self.mdp.model_check_property(prop)
             assert not result.sat
         else:
-            double_check_policy(colored_mdp, self, prop, policies[self.policy_index][0])
+            assert self.policy_index is not None
+            policy = policies[self.policy_index]
+            assert policy is not None
+            double_check_policy(colored_mdp, self, prop, policy[0])
 
 
-    def merge_children_indices(self, indices):
+    def merge_children_indices(self, indices : list[int]) -> None:
         if len(indices) <= 1:
             return
         target = indices[0]
         for j in reversed(indices[1:]):
             self.suboptions[target] += self.suboptions[j]
+            assert self.splitter is not None
             self.child_nodes[target].parameter_space.parameter_set_options(self.splitter,self.suboptions[target])
             self.suboptions.pop(j)
             self.child_nodes.pop(j)
@@ -154,11 +180,11 @@ class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
         self.suboptions = []
         self.child_nodes = []
 
-    def merge_children_sat(self):
+    def merge_children_sat(self) -> None:
         indices = [i for i,child in enumerate(self.child_nodes) if child.sat is True]
         self.merge_children_indices(indices)
 
-    def merge_children_having_same_solution(self):
+    def merge_children_having_same_solution(self) -> None:
         if self.is_leaf:
             return
 
@@ -183,9 +209,15 @@ class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
             self.merge_children_indices(join_to_i)
             i += 1
 
-    def make_policies_compatible(colored_mdp, prop, node1, node2, policies):
+    @staticmethod
+    def make_policies_compatible(
+        colored_mdp : paynt.family.colored_mdp.FamilyColoredMdp, prop : Property,
+        node1 : "PolicyTreeNode", node2 : "PolicyTreeNode", policies : list[Policy | None]
+    ) -> Policy | None:
+        assert node1.policy_index is not None and node2.policy_index is not None
         policy1 = policies[node1.policy_index]
         policy2 = policies[node2.policy_index]
+        assert policy1 is not None and policy2 is not None
         policy = merge_policies(policy1,policy2)
         if policy is not None:
             return policy
@@ -209,7 +241,9 @@ class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
         # neither fits
         return None
 
-    def merge_children_having_compatible_policies(self, colored_mdp, prop, policies):
+    def merge_children_having_compatible_policies(
+        self, colored_mdp : paynt.family.colored_mdp.FamilyColoredMdp, prop : Property, policies : list[Policy | None]
+    ) -> None:
         if self.is_leaf:
             return
         i = 0
@@ -229,6 +263,7 @@ class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
                 if policy is None:
                     continue
                 # nodes can be merged
+                assert child1.policy_index is not None and child2.policy_index is not None
                 policies[child1.policy_index] = policy
                 policies[child2.policy_index] = None
                 join_to_i.append(j)
@@ -236,7 +271,7 @@ class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
             self.merge_children_indices(join_to_i)
             i += 1
 
-    def skip_redundant_children(self):
+    def skip_redundant_children(self) -> None:
         ''' Adopt grandchildren of each child that uses the same splitter as self. '''
         if self.splitter is None:
             return
@@ -256,10 +291,10 @@ class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
 
 
     @property
-    def node_id(self):
+    def node_id(self) -> str:
         return str(self.parameter_space).replace(' ','').replace(':','=')
 
-    def add_nodes_to_graphviz_tree(self, graphviz_tree):
+    def add_nodes_to_graphviz_tree(self, graphviz_tree : graphviz.Digraph) -> None:
         node_label = ""
         if self.sat is False:
             node_label = "∅"
@@ -272,7 +307,7 @@ class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
         for child in reversed(self.child_nodes):
             child.add_nodes_to_graphviz_tree(graphviz_tree)
 
-    def add_edges_to_graphviz_tree(self, graphviz_tree):
+    def add_edges_to_graphviz_tree(self, graphviz_tree : graphviz.Digraph) -> None:
         if self.splitter is None:
             return
         splitter_name = self.parameter_space.parameter_name(self.splitter)
@@ -285,17 +320,17 @@ class PolicyTreeNode(paynt.synthesizer.search_node.SearchNode):
 
 class PolicyTree:
 
-    def __init__(self, parameter_space):
+    def __init__(self, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace):
         self.root = PolicyTreeNode(parameter_space)
-        self.policies = []
+        self.policies : list[Policy | None] = []
 
-    def new_policy(self, policy):
+    def new_policy(self, policy : list[int | None]) -> int:
         policy_index = len(self.policies)
         mask = [state for state,action in enumerate(policy) if action is not None]
         self.policies.append( (policy,mask) )
         return policy_index
 
-    def collect_all(self):
+    def collect_all(self) -> list[PolicyTreeNode]:
         node_queue = [self.root]
         all_nodes = []
         while node_queue:
@@ -304,7 +339,7 @@ class PolicyTree:
             node_queue += node.child_nodes
         return all_nodes
 
-    def collect_leaves(self):
+    def collect_leaves(self) -> list[PolicyTreeNode]:
         node_queue = [self.root]
         leaves = []
         while node_queue:
@@ -315,7 +350,7 @@ class PolicyTree:
                 node_queue = node_queue + node.child_nodes
         return leaves
 
-    def collect_nonleaves(self):
+    def collect_nonleaves(self) -> list[PolicyTreeNode]:
         node_queue = [self.root]
         nonleaves = []
         while node_queue:
@@ -325,7 +360,7 @@ class PolicyTree:
                 node_queue = node_queue + node.child_nodes
         return nonleaves
 
-    def collect_sat(self):
+    def collect_sat(self) -> list[PolicyTreeNode]:
         node_queue = [self.root]
         sat = []
         while node_queue:
@@ -337,7 +372,7 @@ class PolicyTree:
         return sat
 
 
-    def double_check(self, colored_mdp, prop):
+    def double_check(self, colored_mdp : paynt.family.colored_mdp.FamilyColoredMdp, prop : Property) -> None:
         leaves = self.collect_leaves()
         logger.info("double-checking {} parameter spaces...".format(len(leaves)))
         for leaf in leaves:
@@ -345,20 +380,7 @@ class PolicyTree:
         logger.info("all solutions are OK")
 
 
-    def count_diversity(self):
-        from collections import defaultdict
-        children_stats = defaultdict(int)
-        for node in self.collect_all():
-            if node.is_leaf:
-                continue
-            with_policy = len([node for node in node.child_nodes if node.sat])
-            with_none = len([node for node in node.child_nodes if node.policy is None])
-            with_false = len([node for node in node.child_nodes if node.policy==False])
-            children_stats[(with_policy,with_none,with_false)] += 1
-        return children_stats
-
-
-    def print_stats(self):
+    def print_stats(self) -> None:
         members_total = self.root.parameter_space.size
         num_policies = len(self.policies)
 
@@ -377,6 +399,8 @@ class PolicyTree:
         num_leaves = len(leaves)
         num_leaves_solvable = len(self.collect_sat())
         num_leaves_unsolvable = num_leaves-num_leaves_solvable
+        leaf_solvable_avg : float | str
+        leaf_unsolvable_avg : float | str
         if num_leaves_solvable > 0:
             leaf_solvable_avg = round(members_satisfied / num_leaves_solvable,1)
         else:
@@ -398,8 +422,8 @@ class PolicyTree:
 
         logger.info("--------------------")
 
-    def discard_unused_policies(self):
-        policy_old_to_new  = [None for _ in self.policies]
+    def discard_unused_policies(self) -> None:
+        policy_old_to_new : list[int | None] = [None for _ in self.policies]
         num_policies = 0
         for policy_index,policy in enumerate(self.policies):
             if policy is not None:
@@ -408,10 +432,11 @@ class PolicyTree:
         self.policies = [policy for policy in self.policies if policy is not None]
         assert num_policies == len(self.policies)
         for leaf in self.collect_sat():
+            assert leaf.policy_index is not None
             leaf.policy_index = policy_old_to_new[leaf.policy_index]
             assert leaf.policy_index is not None
 
-    def merge_compatible_policies(self, policy_indices):
+    def merge_compatible_policies(self, policy_indices : list[int]) -> list[int]:
         policy_old_to_new_map = [policy_index for policy_index,_ in enumerate(self.policies)]
 
         for policy1_index_index,policy1_index in enumerate(policy_indices):
@@ -434,7 +459,7 @@ class PolicyTree:
 
         return policy_old_to_new_map
 
-    def postprocess(self, colored_mdp, prop):
+    def postprocess(self, colored_mdp : paynt.family.colored_mdp.FamilyColoredMdp, prop : Property) -> int:
 
         postprocessing_timer = paynt.utils.timer.Timer()
         postprocessing_timer.start()
@@ -455,6 +480,7 @@ class PolicyTree:
         policy_indices = [index for index,_ in enumerate(self.policies)]
         policy_old_to_new_map = self.merge_compatible_policies(policy_indices)
         for leaf in self.collect_sat():
+            assert leaf.policy_index is not None
             leaf.policy_index = policy_old_to_new_map[leaf.policy_index]
         self.discard_unused_policies()
         policies_removed = policies_before - len(self.policies)
@@ -480,13 +506,14 @@ class PolicyTree:
         return time
 
 
-    def extract_policies(self, colored_mdp):
-        return {
-            f"p{policy_index}" : colored_mdp.policy_to_state_valuation_actions(policy)
-            for policy_index,policy in enumerate(self.policies)
-        }
+    def extract_policies(self, colored_mdp : paynt.family.colored_mdp.FamilyColoredMdp) -> dict[str, list[tuple[dict[str, Any], str]]]:
+        policies = {}
+        for policy_index,policy in enumerate(self.policies):
+            assert policy is not None
+            policies[f"p{policy_index}"] = colored_mdp.policy_to_state_valuation_actions(policy)
+        return policies
 
-    def extract_policy_tree(self, colored_mdp):
+    def extract_policy_tree(self, colored_mdp : paynt.family.colored_mdp.FamilyColoredMdp) -> graphviz.Digraph:
         logging.getLogger("graphviz").setLevel(logging.WARNING)
         logging.getLogger("graphviz.sources").setLevel(logging.ERROR)
         graphviz_tree = graphviz.Digraph(comment="policy_tree")

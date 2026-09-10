@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 import json
 
 class Fsc:
@@ -8,14 +12,14 @@ class Fsc:
         (action,memory) -> probability
     '''
 
-    def __init__(self, num_nodes, num_observations):
+    def __init__(self, num_nodes : int, num_observations : int):
         self.num_nodes = num_nodes
         self.num_observations = num_observations
-        self.transitions = [ [None]*num_observations for _ in range(num_nodes) ]
-        self.observation_labels = None
-        self.action_labels = None
+        self.transitions : list[list[Any]] = [ [None]*num_observations for _ in range(num_nodes) ]
+        self.observation_labels : list[str] | None = None
+        self.action_labels : list[str] | None = None
 
-    def check_transitions(self, observation_to_actions):
+    def check_transitions(self, observation_to_actions : list[list[int]]) -> None:
         assert len(self.transitions) == self.num_nodes, "FSC transition_function function is not defined for all memory nodes"
         for node in range(self.num_nodes):
             assert len(self.transitions[node]) == self.num_observations, \
@@ -25,7 +29,7 @@ class Fsc:
                     assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
                     assert 0 <= update and update < self.num_nodes, "invalid FSC memory update {}".format(update)
 
-    def check(self, observation_to_actions):
+    def check(self, observation_to_actions : list[list[int]]) -> None:
         ''' Check whether fields of FSC have been initialized appropriately. '''
         assert self.num_nodes > 0, "FSC must have at least 1 node"
         self.check_transitions(observation_to_actions)
@@ -41,62 +45,67 @@ class FscFactored:
     - deterministic posterior-unaware memory update delta: NxZ -> N
     '''
 
-    def __init__(self, num_nodes, num_observations, is_deterministic=False):
+    def __init__(self, num_nodes : int, num_observations : int, is_deterministic : bool = False):
         self.num_nodes = num_nodes
         self.num_observations = num_observations
         self.is_deterministic = is_deterministic
 
-        self.action_function = [ [None]*num_observations for _ in range(num_nodes) ]
-        self.update_function = [ [None]*num_observations for _ in range(num_nodes) ]
+        # each cell is an action index (int) when is_deterministic, or a dict[int,float] (action -> probability)
+        # otherwise -- kept as Any rather than a union, since which shape applies is a whole-FSC-wide
+        # invariant (self.is_deterministic) rather than something checked cell-by-cell
+        self.action_function : list[list[Any]] = [ [None]*num_observations for _ in range(num_nodes) ]
+        # similarly: an int (memory index) when deterministic, or a dict[int,float] otherwise
+        self.update_function : list[list[Any]] = [ [None]*num_observations for _ in range(num_nodes) ]
 
-        self.observation_labels = None
-        self.action_labels = None
+        self.observation_labels : list[str] | None = None
+        self.action_labels : list[str] | None = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return json.dumps(self.to_json(), indent=4)
 
-    def action_function_signature(self):
+    def action_function_signature(self) -> str:
         if self.is_deterministic:
             return " NxZ -> Act"
         else:
             return " NxZ -> Distr(Act)"
 
-    def to_json(self):
-        json = {}
-        json["num_nodes"] = self.num_nodes
-        json["num_observations"] = self.num_observations
-        json["__comment_action_function"] = "action function has signature {}".format(self.action_function_signature())
-        json["__comment_update_function"] = "update function has signature NxZ -> N"
+    def to_json(self) -> dict[str, Any]:
+        json_dict : dict[str, Any] = {}
+        json_dict["num_nodes"] = self.num_nodes
+        json_dict["num_observations"] = self.num_observations
+        json_dict["__comment_action_function"] = "action function has signature {}".format(self.action_function_signature())
+        json_dict["__comment_update_function"] = "update function has signature NxZ -> N"
 
-        json["action_function"] = self.action_function
-        json["update_function"] = self.update_function
+        json_dict["action_function"] = self.action_function
+        json_dict["update_function"] = self.update_function
 
         if self.action_labels is not None:
-            json["action_labels"] = self.action_labels
+            json_dict["action_labels"] = self.action_labels
         if self.observation_labels is not None:
-            json["observation_labels"] = self.observation_labels
+            json_dict["observation_labels"] = self.observation_labels
 
-        return json
+        return json_dict
 
     @classmethod
-    def from_json(cls, json):
-        num_nodes = json["num_nodes"]
-        num_observations = json["num_observations"]
+    def from_json(cls, json_dict : dict[str, Any]) -> "FscFactored":
+        num_nodes = json_dict["num_nodes"]
+        num_observations = json_dict["num_observations"]
         fsc = FscFactored(num_nodes,num_observations)
-        fsc.action_function = json["action_function"]
-        fsc.update_function = json["update_function"]
+        fsc.action_function = json_dict["action_function"]
+        fsc.update_function = json_dict["update_function"]
         return fsc
 
-    def reorder_nodes(self, node_old_to_new):
-        action_function = [None for node in range(self.num_nodes)]
-        update_function = [None for node in range(self.num_nodes)]
+    def reorder_nodes(self, node_old_to_new : list[int]) -> None:
+        action_function : list[Any] = [None for node in range(self.num_nodes)]
+        update_function : list[Any] = [None for node in range(self.num_nodes)]
         for node_old,node_new in enumerate(node_old_to_new):
             action_function[node_new] = self.action_function[node_old]
             update_function[node_new] = [node_old_to_new[node] for node in self.update_function[node_old]]
         self.action_function = action_function
         self.update_function = update_function
 
-    def reorder_actions(self, action_labels):
+    def reorder_actions(self, action_labels : list[str]) -> None:
+        assert self.action_labels is not None
         for node in range(self.num_nodes):
             for obs in range(self.num_observations):
                 if self.is_deterministic:
@@ -109,7 +118,7 @@ class FscFactored:
                     self.action_function[node][obs] = action_function
         self.action_labels = action_labels.copy()
 
-    def make_stochastic(self):
+    def make_stochastic(self) -> None:
         if not self.is_deterministic:
             return
         for node in range(self.num_nodes):
@@ -118,7 +127,7 @@ class FscFactored:
                 self.update_function[node][obs] = {self.update_function[node][obs] : 1.0}
         self.is_deterministic = False
 
-    def check_action_function(self, observation_to_actions):
+    def check_action_function(self, observation_to_actions : list[list[int]]) -> None:
         assert len(self.action_function) == self.num_nodes, "FSC action function is not defined for all memory nodes"
         for node in range(self.num_nodes):
             assert len(self.action_function[node]) == self.num_observations, \
@@ -134,7 +143,7 @@ class FscFactored:
                 for action in action_support:
                     assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
 
-    def check_update_function(self):
+    def check_update_function(self) -> None:
         assert len(self.update_function) == self.num_nodes, "FSC update function is not defined for all memory nodes"
         for node in range(self.num_nodes):
             assert len(self.update_function[node]) == self.num_observations, \
@@ -144,24 +153,24 @@ class FscFactored:
                 continue # skipping check due to inconsistency in our FSC definition
                 assert 0 <= update and update < self.num_nodes, "invalid FSC memory update {}".format(update)
 
-    def check(self, observation_to_actions):
+    def check(self, observation_to_actions : list[list[int]]) -> None:
         ''' Check whether fields of FSC have been initialized appropriately. '''
         assert self.num_nodes > 0, "FSC must have at least 1 node"
         self.check_action_function(observation_to_actions)
         self.check_update_function()
 
-    def fill_trivial_actions(self, observation_to_actions):
+    def fill_trivial_actions(self, observation_to_actions : list[list[int]]) -> None:
         ''' For each observation with 1 available action, set gamma(n,z) to that action. '''
         for obs,actions in enumerate(observation_to_actions):
             if len(actions) != 1:
                 continue
-            action = actions[0]
+            action : Any = actions[0]
             if not self.is_deterministic:
                 action = {action:1}
             for node in range(self.num_nodes):
                 self.action_function[node][obs] = action
 
-    def fill_trivial_updates(self, observation_to_actions):
+    def fill_trivial_updates(self, observation_to_actions : list[list[int]]) -> None:
         ''' For each observation with 1 available action, set delta(n,z) to n. '''
         for obs,actions in enumerate(observation_to_actions):
             if len(actions)>1:
@@ -169,11 +178,11 @@ class FscFactored:
             for node in range(self.num_nodes):
                 self.update_function[node][obs] = node
 
-    def fill_zero_updates(self):
+    def fill_zero_updates(self) -> None:
         for node in range(self.num_nodes):
             self.update_function[node] = [0] * self.num_observations
 
-    def fill_implicit_actions_and_updates(self):
+    def fill_implicit_actions_and_updates(self) -> None:
         '''
         For an FSC with an irregular memory model, make action and updates explicit.
         '''
@@ -183,7 +192,7 @@ class FscFactored:
                     self.action_function[node][obs] = self.action_function[0][obs]
                     self.update_function[node][obs] = self.update_function[0][obs]
 
-    def copy(self):
+    def copy(self) -> "FscFactored":
         fsc = FscFactored(self.num_nodes, self.num_observations, self.is_deterministic)
         fsc.action_function = [ [action for action in node] for node in self.action_function ]
         fsc.update_function = [ [update for update in node] for node in self.update_function ]

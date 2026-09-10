@@ -5,9 +5,14 @@ player's imperfect-information strategy is unfolded into an FSC template (see Po
 model must be verified as a game rather than as a plain MDP.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import stormpy
 
 import paynt.colored_mdp
+import paynt.parameter_space.parameter_space
 import paynt.underlying_model.underlying_model
 
 
@@ -15,13 +20,16 @@ class PosmgColoredMdp(paynt.colored_mdp.ColoredMdp):
 
     feature_kind = "posmg"
 
-    def __init__(self, underlying_mdp, parameter_space, coloring, use_exact, posmg_manager):
+    def __init__(
+        self, underlying_mdp : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, coloring : Any,
+        use_exact : bool, posmg_manager : Any
+    ):
         super().__init__(underlying_mdp, parameter_space, coloring, use_exact)
         # needed by create_smg_from_mdp to recover each state's player index -- the coloring/parameter_space
         # alone don't carry this
         self.posmg_manager = posmg_manager
 
-    def create_smg_from_mdp(self, mdp):
+    def create_smg_from_mdp(self, mdp : paynt.underlying_model.underlying_model.SubMdp) -> paynt.underlying_model.underlying_model.Smg:
         ''' Re-attach game (player-indication) structure to a restricted sub-MDP so it can be verified as a
         game rather than as a plain MDP. '''
         underlying_player_indications = self.posmg_manager.get_state_player_indications()
@@ -44,7 +52,7 @@ class PosmgColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return paynt.underlying_model.underlying_model.Smg(stormpy.storage.SparseSmg(components))
 
-    def scheduler_selection(self, mdp, scheduler):
+    def scheduler_selection(self, mdp : paynt.underlying_model.underlying_model.SubMdp, scheduler : Any) -> list[list[int]]:
         ''' Get parameter options involved in the scheduler selection. Unlike the base ColoredMdp, this
         keeps unreachable choices rather than discarding them. '''
         assert scheduler.memoryless and scheduler.deterministic

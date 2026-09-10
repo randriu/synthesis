@@ -5,11 +5,17 @@ policy/FSC/Q-value/belief methods that interpret a synthesized assignment back i
 POMDP (observations, memory nodes, beliefs) -- concerns specific to this representation, not to search.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import stormpy
 import stormpy.pomdp
 import collections
 
 import paynt.colored_mdp
+import paynt.parameter_space.parameter_space
+import paynt.specification.property
 from paynt.pomdp.fsc import FscFactored
 
 import logging
@@ -21,10 +27,10 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
     feature_kind = "pomdp"
 
     def __init__(
-        self, underlying_mdp, parameter_space, coloring, use_exact,
-        pomdp, pomdp_manager, observation_labels, actions_at_observation, action_labels_at_observation,
-        observation_states, observation_memory_size, observation_action_parameters, observation_memory_parameters,
-        parameter_option_to_actions, posterior_aware
+        self, underlying_mdp : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, coloring : Any, use_exact : bool,
+        pomdp : Any, pomdp_manager : Any, observation_labels : list[str], actions_at_observation : list[int], action_labels_at_observation : list[list[str]],
+        observation_states : list[int], observation_memory_size : list[int], observation_action_parameters : list[list[int]],
+        observation_memory_parameters : list[list[int]], parameter_option_to_actions : list[list[list[int]]], posterior_aware : bool
     ):
         super().__init__(underlying_mdp, parameter_space, coloring, use_exact)
         # the original (folded) POMDP and the manager used to unfold it
@@ -47,10 +53,10 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
         self.posterior_aware = posterior_aware
 
     @property
-    def observations(self):
+    def observations(self) -> int:
         return self.pomdp.nr_observations
 
-    def collect_policy(self, dtmc, mc_result, specification):
+    def collect_policy(self, dtmc : Any, mc_result : Any, specification : paynt.specification.property.Specification) -> list[list[dict[int, Any]]]:
         # TODO: move to a util file once SAYNT is reworked -- this interprets a model-checking result back
         # into a POMDP policy, it doesn't need to live on the representation itself
         # assuming single optimizing property
@@ -63,7 +69,7 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
         policy = []
         for obs in range(self.observations):
             mem_size = self.observation_memory_size[obs]
-            mem_info = [ {} for _ in range(mem_size) ]
+            mem_info : list[dict[int, Any]] = [ {} for _ in range(mem_size) ]
             policy.append(mem_info)
 
         for dtmc_state in range(dtmc.states):
@@ -78,14 +84,14 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return policy
 
-    def extract_policy(self, assignment, specification):
+    def extract_policy(self, assignment : paynt.parameter_space.parameter_space.ParameterSpace, specification : paynt.specification.property.Specification) -> list[list[dict[int, Any]]]:
         # TODO: move to a util file once SAYNT is reworked
         dtmc = self.build_assignment(assignment)
         mc_result = dtmc.check_specification(specification)
         policy = self.collect_policy(dtmc, mc_result, specification)
         return policy
 
-    def policy_size(self, assignment):
+    def policy_size(self, assignment : paynt.parameter_space.parameter_space.ParameterSpace) -> int:
         '''
         Compute how many natural numbers are needed to encode the mu-FSC under the current memory model mu.
         '''
@@ -105,7 +111,7 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
         # posterior-aware update selection
         # for each memory node and for each prior, collect a set of possible posteriors
         max_mem = max(self.observation_memory_size)
-        memory_prior_posteriors = [[set() for _ in range(self.observations)] for _ in range(max_mem)]
+        memory_prior_posteriors : list[list[set[int]]] = [[set() for _ in range(self.observations)] for _ in range(max_mem)]
         for state in range(dtmc.states):
             mdp_state = dtmc.underlying_mdp_state_map[state]
 
@@ -132,7 +138,7 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return size_gamma + size_delta
 
-    def get_parameter_space_pomdp(self, mdp):
+    def get_parameter_space_pomdp(self, mdp : Any) -> Any:
         '''
         Constructs POMDP from a sub-MDP which contains maps to the original underlying (PO)MDP. Used for computing POMDP abstraction bounds.
         '''
@@ -173,22 +179,22 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return pomdp
 
-    def assignment_to_fsc(self, assignment):
+    def assignment_to_fsc(self, assignment : paynt.parameter_space.parameter_space.ParameterSpace) -> FscFactored:
         assert assignment.size == 1, "expected parameter space of size 1"
         num_nodes = max(self.observation_memory_size)
         fsc = FscFactored(num_nodes, self.observations, is_deterministic=True)
         fsc.observation_labels = self.observation_labels
 
         # collect action labels
-        action_labels = set()
+        action_labels_set = set()
         for labels in self.action_labels_at_observation:
-            action_labels.update(labels)
-        action_labels = list(action_labels)
-        fsc.action_labels = action_labels
+            action_labels_set.update(labels)
+        all_action_labels = list(action_labels_set)
+        fsc.action_labels = all_action_labels
 
         # map observations to unique indices of available actions
-        action_label_indices = {label:index for index,label in enumerate(action_labels)}
-        observation_to_actions = [[] for obs in range(self.observations)]
+        action_label_indices = {label:index for index,label in enumerate(all_action_labels)}
+        observation_to_actions : list[list[int]] = [[] for obs in range(self.observations)]
         for obs,action_labels in enumerate(self.action_labels_at_observation):
             observation_to_actions[obs] = [action_label_indices[label] for label in action_labels]
 
@@ -211,7 +217,7 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
         fsc.check(observation_to_actions)
         return fsc
 
-    def get_induced_dtmc_from_fsc(self, fsc):
+    def get_induced_dtmc_from_fsc(self, fsc : FscFactored) -> Any:
         # TODO maybe make this into payntbind function if it's slow
         if fsc.is_deterministic:
             fsc_copy = fsc.copy()
@@ -221,9 +227,10 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
         action_function = fsc_copy.action_function
         update_function = fsc_copy.update_function
         action_labels = fsc_copy.action_labels
+        assert action_labels is not None
 
         # compute the state space for the induced dtmc
-        dtmc_states_map = {}
+        dtmc_states_map : dict[int, tuple[int, int]] = {}
         state_queue = [(self.pomdp.initial_states[0],0)]
         dtmc_states_map[len(dtmc_states_map)] = (self.pomdp.initial_states[0],0)
 
@@ -256,7 +263,7 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
         # construct the transition matrix
         num_dtmc_states = len(dtmc_states_map)
         dtmc_tm_builder = stormpy.SparseMatrixBuilder(num_dtmc_states, num_dtmc_states, force_dimensions=True)
-        state_action_rewards = {name:[] for name in self.pomdp.reward_models.keys()}
+        state_action_rewards : dict[str, list[Any]] = {name:[] for name in self.pomdp.reward_models.keys()}
         for dtmc_state, current_state_memory_pair in dtmc_states_map.items():
             current_obs = self.pomdp.observations[current_state_memory_pair[0]]
             selected_actions = action_function[current_state_memory_pair[1]][current_obs]
@@ -287,9 +294,9 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
                     for entry in self.pomdp.transition_matrix.get_row(choice_index):
                         next_state = entry.column
                         next_state_memory_pair = (next_state,selected_update)
-                        next_state_index = [index for index,state in dtmc_states_map.items() if state == next_state_memory_pair]
-                        assert len(next_state_index) == 1, "expected unique state for given state memory pair"
-                        next_state_index = next_state_index[0]
+                        next_state_index_candidates = [index for index,state in dtmc_states_map.items() if state == next_state_memory_pair]
+                        assert len(next_state_index_candidates) == 1, "expected unique state for given state memory pair"
+                        next_state_index = next_state_index_candidates[0]
                         next_state_prob_map[next_state_index] += entry.value()*action_prob*update_prob
 
             for reward_name in self.pomdp.reward_models.keys():
@@ -311,9 +318,12 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
                 dtmc_labeling.add_label_to_state(label, dtmc_state)
 
         # construct the reward structure
-        dtmc_reward_models = {}
+        dtmc_reward_models : dict[str, Any] = {}
         for reward_name in self.pomdp.reward_models.keys():
-            assert reward_model.has_state_action_rewards == True, "currently this implementation expects state action rewards"
+            # NOTE: this method has zero callers anywhere in the codebase; found via type-hint work that this
+            # line referenced an unbound name (reward_model) -- fixed to what was clearly intended, but left
+            # otherwise untouched since nothing currently exercises this code path to verify against
+            assert self.pomdp.reward_models[reward_name].has_state_action_rewards == True, "currently this implementation expects state action rewards"
             dtmc_reward_models[reward_name] = stormpy.SparseRewardModel(optional_state_action_reward_vector=state_action_rewards[reward_name])
 
         components = stormpy.SparseModelComponents(transition_matrix=dtmc_tm, state_labeling=dtmc_labeling, reward_models=dtmc_reward_models)
@@ -321,7 +331,7 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return induced_dtmc
 
-    def compute_qvalues(self, assignment, specification):
+    def compute_qvalues(self, assignment : paynt.parameter_space.parameter_space.ParameterSpace, specification : paynt.specification.property.Specification) -> list[list[Any]]:
         '''
         Given an MDP obtained after applying an FSC to a POMDP, compute for each state s, (reachable) memory node n
         the Q-value Q(s,n).
@@ -339,7 +349,7 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
         state_submdp_to_value = result.result.get_values()
 
         # map states of a sub-MDP to the states of the underlying MDP to the state-memory pairs of the POMDPxFSC
-        state_memory_value = collections.defaultdict(lambda: None)
+        state_memory_value : dict[tuple[int, int], Any] = collections.defaultdict(lambda: None)
         for submdp_state,value in enumerate(state_submdp_to_value):
             mdp_state = submdp.underlying_mdp_state_map[submdp_state]
             pomdp_state = self.pomdp_manager.state_prototype[mdp_state]
@@ -365,18 +375,17 @@ class PomdpColoredMdp(paynt.colored_mdp.ColoredMdp):
 
         return state_memory_value_total
 
-    def next_belief(self, belief, action_label, next_obs):
+    def next_belief(self, belief : dict[int, float], action_label : str, next_obs : int) -> dict[int, float]:
         any_belief_state = list(belief.keys())[0]
         obs = self.pomdp.observations[any_belief_state]
         action = self.action_labels_at_observation[obs].index(action_label)
-        new_belief = collections.defaultdict(float)
+        new_belief_acc : dict[int, float] = collections.defaultdict(float)
         ndi = self.pomdp.nondeterministic_choice_indices.copy()
         for state,state_prob in belief.items():
             choice = self.pomdp.get_choice_index(state,action)
             for entry in self.pomdp.transition_matrix.get_row(choice):
                 next_state = entry.column
                 if self.pomdp.observations[next_state] == next_obs:
-                    new_belief[next_state] += state_prob * entry.value()
-        prob_sum = sum(new_belief.values())
-        new_belief = {state:prob/prob_sum for state,prob in new_belief.items()}
-        return new_belief
+                    new_belief_acc[next_state] += state_prob * entry.value()
+        prob_sum = sum(new_belief_acc.values())
+        return {state:prob/prob_sum for state,prob in new_belief_acc.items()}

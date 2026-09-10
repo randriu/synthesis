@@ -6,6 +6,10 @@ methods are public entry points, not just __init__-time setup: each produces a f
 than mutating the previous one in place, and the caller reassigns.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import stormpy
 import stormpy.pomdp
 import payntbind
@@ -13,6 +17,7 @@ import payntbind
 import re
 
 import paynt.colored_mdp
+import paynt.pomdp.task
 import paynt.parameter_space.parameter_space
 from paynt.pomdp.colored_mdp import PomdpColoredMdp
 
@@ -22,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class PomdpColoredMdpFactory:
 
-    def __init__(self, pomdp, task, decpomdp_manager=None, use_exact=False):
+    def __init__(self, pomdp : Any, task : paynt.pomdp.task.PomdpTask, decpomdp_manager : Any = None, use_exact : bool = False):
         self.task = task
         self.use_exact = use_exact
         self.posterior_aware = task.posterior_aware
@@ -61,7 +66,7 @@ class PomdpColoredMdpFactory:
             self.actions_at_observation[obs] = self.pomdp.get_nr_available_actions(state)
 
         # collect labels of actions available at each observation
-        self.action_labels_at_observation = [[] for obs in range(self.observations)]
+        self.action_labels_at_observation : list[list[str]] = [[] for obs in range(self.observations)]
         for state in range(self.pomdp.nr_states):
             obs = state_obs[state]
             if self.action_labels_at_observation[obs] != []:
@@ -97,23 +102,23 @@ class PomdpColoredMdpFactory:
                 self.pomdp_manager = payntbind.synthesis.PomdpManagerAposteriori(self.pomdp)
 
         # number of memory states allocated to each observation, and the current unfolding
-        self.observation_memory_size = None
-        self.current_memory_size = None
+        self.observation_memory_size : list[int] | None = None
+        self.current_memory_size : int | None = None
 
         # do initial unfolding
         self.colored_mdp = self.set_imperfect_memory_size(task.memory_size)
         self.current_memory_size = task.memory_size
 
     @property
-    def observations(self):
+    def observations(self) -> int:
         return self.pomdp.nr_observations
 
-    def create_parameter_name(self, obs, mem, is_action_parameter):
+    def create_parameter_name(self, obs : int, mem : int, is_action_parameter : bool) -> str:
         category = "A" if is_action_parameter else "M"
         obs_label = self.observation_labels[obs]
         return "{}({},{})".format(category,obs_label,mem)
 
-    def create_parameter_name_aposteriori(self, is_action_parameter, mem, prior, posterior=None):
+    def create_parameter_name_aposteriori(self, is_action_parameter : bool, mem : int, prior : int, posterior : int | None = None) -> str:
         category = "A" if is_action_parameter else "M"
         prior_label = self.observation_labels[prior]
         if posterior is None:
@@ -122,8 +127,9 @@ class PomdpColoredMdpFactory:
             posterior_label = self.observation_labels[posterior]
             return "{}({},{},{})".format(category,mem,prior_label,posterior_label)
 
-    def decode_parameter_name(self, name):
+    def decode_parameter_name(self, name : str) -> tuple[bool, int | None, int]:
         result = re.search(r"([A|M])\((.*?),(\d+)\)", name)
+        assert result is not None
         is_action_parameter = result.group(1) == "A"
         observation_label = result.group(2)
         memory = int(result.group(3))
@@ -135,19 +141,20 @@ class PomdpColoredMdpFactory:
                 break
         return (is_action_parameter, observation, memory)
 
-    def set_manager_memory_vector(self):
+    def set_manager_memory_vector(self) -> None:
+        assert self.observation_memory_size is not None
         for obs in range(self.observations):
             mem = self.observation_memory_size[obs]
             self.pomdp_manager.set_observation_memory_size(obs,mem)
 
-    def set_global_memory_size(self, memory_size):
+    def set_global_memory_size(self, memory_size : int) -> PomdpColoredMdp:
         self.observation_memory_size = [memory_size] * self.observations
         self.set_manager_memory_vector()
         self.current_memory_size = memory_size
         self.colored_mdp = self._unfold_memory()
         return self.colored_mdp
 
-    def set_imperfect_memory_size(self, memory_size):
+    def set_imperfect_memory_size(self, memory_size : int) -> PomdpColoredMdp:
         ''' Set given memory size only to imperfect observations. '''
         self.observation_memory_size = [
             memory_size if self.observation_states[obs]>1 else 1
@@ -158,13 +165,14 @@ class PomdpColoredMdpFactory:
         self.colored_mdp = self._unfold_memory()
         return self.colored_mdp
 
-    def increase_memory_size(self, obs):
+    def increase_memory_size(self, obs : int) -> PomdpColoredMdp:
+        assert self.observation_memory_size is not None
         self.observation_memory_size[obs] += 1
         self.set_manager_memory_vector()
         self.colored_mdp = self._unfold_memory()
         return self.colored_mdp
 
-    def set_memory_from_dict(self, obs_memory_dict):
+    def set_memory_from_dict(self, obs_memory_dict : dict[int, int]) -> PomdpColoredMdp:
         memory_list = []
         for obs in range(self.observations):
             memory_list.append(obs_memory_dict[obs])
@@ -174,7 +182,8 @@ class PomdpColoredMdpFactory:
         self.colored_mdp = self._unfold_memory()
         return self.colored_mdp
 
-    def set_memory_from_result_new(self, obs_memory_dict, obs_memory_dict_cutoff, memory_limit):
+    def set_memory_from_result_new(self, obs_memory_dict : dict[int, int], obs_memory_dict_cutoff : dict[int, int], memory_limit : int) -> PomdpColoredMdp:
+        assert self.observation_memory_size is not None
         memory_list = []
         for obs in range(self.observations):
             if self.observation_states[obs] <= 1:
@@ -192,7 +201,10 @@ class PomdpColoredMdpFactory:
         self.colored_mdp = self._unfold_memory()
         return self.colored_mdp
 
-    def create_coloring(self, underlying_mdp):
+    def create_coloring(
+        self, underlying_mdp : Any
+    ) -> tuple[paynt.parameter_space.parameter_space.ParameterSpace, list[list[tuple[int,int]]], list[list[int]], list[list[int]]]:
+        assert self.observation_memory_size is not None
         if self.posterior_aware:
             return self.create_coloring_aposteriori(underlying_mdp)
 
@@ -245,14 +257,16 @@ class PomdpColoredMdpFactory:
 
         return parameter_space, choice_to_parameter_options, observation_action_parameters, observation_memory_parameters
 
-    def create_coloring_aposteriori(self, underlying_mdp):
+    def create_coloring_aposteriori(
+        self, underlying_mdp : Any
+    ) -> tuple[paynt.parameter_space.parameter_space.ParameterSpace, list[Any], list[list[int]], list[list[int]]]:
         # a posteriori unfolding
         choice_to_parameter_options = self.pomdp_manager.coloring
         parameter_num_options = self.pomdp_manager.hole_num_options
         action_parameters = self.pomdp_manager.action_holes
         update_parameters = self.pomdp_manager.update_holes
 
-        parameters = [None] * len(parameter_num_options)
+        parameters : list[tuple[str, list[str]] | None] = [None] * len(parameter_num_options)
 
         # action parameters
         for key,index in action_parameters.items():
@@ -276,7 +290,7 @@ class PomdpColoredMdpFactory:
 
         # filter out trivial parameters
         parameter_space = paynt.parameter_space.parameter_space.ParameterSpace()
-        old_to_new_indices = [None] * len(parameters)
+        old_to_new_indices : list[int | None] = [None] * len(parameters)
         for index,name_labels in enumerate(parameters):
             if name_labels is None:
                 continue
@@ -291,17 +305,18 @@ class PomdpColoredMdpFactory:
         choice_to_parameter_options = choice_to_parameter_options_new
 
         # creating this list to make it work with Paynt-Storm integration
-        observation_action_parameters = [[] for obs in range(self.observations)]
+        observation_action_parameters : list[list[int]] = [[] for obs in range(self.observations)]
         for key,index in action_parameters.items():
             _,prior = key
             new_index = old_to_new_indices[index]
             if new_index is not None:
                 observation_action_parameters[prior].append(new_index)
-        observation_memory_parameters = [[] for obs in range(self.observations)]
+        observation_memory_parameters : list[list[int]] = [[] for obs in range(self.observations)]
 
         return parameter_space, choice_to_parameter_options, observation_action_parameters, observation_memory_parameters
 
-    def _unfold_memory(self):
+    def _unfold_memory(self) -> PomdpColoredMdp:
+        assert self.observation_memory_size is not None
         logger.debug("unfolding {}-FSC template into POMDP...".format(max(self.observation_memory_size)))
         underlying_mdp = self.pomdp_manager.construct_mdp()
         logger.debug(f"constructed underlying MDP having {underlying_mdp.nr_states} states and {underlying_mdp.nr_choices} actions.")
@@ -311,7 +326,7 @@ class PomdpColoredMdpFactory:
             parameter_space.native, underlying_mdp.nondeterministic_choice_indices, choice_to_parameter_options)
 
         # to each parameter-option pair a list of actions colored by this combination
-        parameter_option_to_actions = [[] for parameter in range(parameter_space.num_parameters)]
+        parameter_option_to_actions : list[list[list[int]]] = [[] for parameter in range(parameter_space.num_parameters)]
         for parameter in range(parameter_space.num_parameters):
             parameter_option_to_actions[parameter] = [[] for option in parameter_space.parameter_options(parameter)]
         for choice in range(underlying_mdp.nr_choices):

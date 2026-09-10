@@ -2,9 +2,14 @@
 Colored MDP representing a family of POMDPs: adds observation-awareness on top of FamilyColoredMdp.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import payntbind
 
 import paynt.colored_mdp
+import paynt.parameter_space.parameter_space
 from paynt.family.colored_mdp import FamilyColoredMdp
 import paynt.pomdp.fsc
 import paynt.underlying_model.underlying_model
@@ -17,7 +22,7 @@ class SubPomdp:
     '''
     Simple container for a (sub-)POMDP created from the underlying model.
     '''
-    def __init__(self, model, underlying_mdp_state_map, underlying_mdp_choice_map):
+    def __init__(self, model : Any, underlying_mdp_state_map : list[int], underlying_mdp_choice_map : list[int]):
         # the Stormpy POMDP
         self.model = model
         # for each state of the POMDP, a state in the underlying model
@@ -30,29 +35,32 @@ class PomdpFamilyColoredMdp(FamilyColoredMdp):
 
     feature_kind = "pomdp_family"
 
-    def __init__(self, underlying_mdp, parameter_space, coloring, use_exact,
-                 num_actions, action_labels, choice_to_action, state_action_choices, state_to_actions,
-                 obs_evaluator, observation_to_actions):
+    def __init__(
+        self, underlying_mdp : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, coloring : Any, use_exact : bool,
+        num_actions : int, action_labels : list[str], choice_to_action : list[int],
+        state_action_choices : list[list[list[int]]], state_to_actions : list[list[int]],
+        obs_evaluator : Any, observation_to_actions : list[list[int]]
+    ):
         super().__init__(underlying_mdp, parameter_space, coloring, use_exact,
                           num_actions, action_labels, choice_to_action, state_action_choices, state_to_actions)
         self.obs_evaluator = obs_evaluator
         # for each observation, a list of actions (indices) available
         self.observation_to_actions = observation_to_actions
         # POMDP manager used for unfolding the memory model into the underlying POMDP
-        self.fsc_unfolder = None
+        self.fsc_unfolder : Any = None
 
     @property
-    def num_observations(self):
+    def num_observations(self) -> int:
         return self.obs_evaluator.num_obs_classes
 
     @property
-    def state_to_observation(self):
+    def state_to_observation(self) -> list[int]:
         return self.obs_evaluator.state_to_obs_class
 
-    def observation_is_trivial(self, obs):
+    def observation_is_trivial(self, obs : int) -> bool:
         return len(self.observation_to_actions[obs])==1
 
-    def build_pomdp(self, parameter_space):
+    def build_pomdp(self, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace) -> SubPomdp:
         ''' Construct the sub-POMDP from the given parameter assignment. '''
         assert parameter_space.size == 1, "expecting parameter space of size 1"
         choices = self.coloring.selectCompatibleChoices(parameter_space.native)
@@ -61,7 +69,7 @@ class PomdpFamilyColoredMdp(FamilyColoredMdp):
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
         return SubPomdp(pomdp,state_map,choice_map)
 
-    def build_dtmc_sketch(self, fsc):
+    def build_dtmc_sketch(self, fsc : paynt.pomdp.fsc.Fsc | paynt.pomdp.fsc.FscFactored) -> paynt.colored_mdp.ColoredMdp:
         '''
         Construct the family of DTMCs representing the execution of the given FSC in different environments.
         '''

@@ -1,16 +1,23 @@
+from __future__ import annotations
+
+from typing import Any
+
 import paynt.task
+import paynt.specification.property
 
 
 class PosmgTask(paynt.task.Task):
 
-    def __init__(self, properties, memory_size=1, **kwargs):
+    def __init__(self, properties : list[Any], memory_size : int = 1, **kwargs : Any):
         super().__init__(properties, **kwargs)
         # implicit initial size for FSC memory unfolding, consumed by PosmgColoredMdpFactory at
         # construction time
         self.memory_size = memory_size
 
     @classmethod
-    def from_specification(cls, specification, memory_size=1, **kwargs):
-        task = super().from_specification(specification, **kwargs)
+    def from_specification(  # type: ignore[override]
+        cls, specification : paynt.specification.property.Specification, memory_size : int = 1, **kwargs : Any
+    ) -> "PosmgTask":
+        task : PosmgTask = super().from_specification(specification, **kwargs)  # type: ignore[assignment]
         task.memory_size = memory_size
         return task

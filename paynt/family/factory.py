@@ -5,9 +5,15 @@ scratch (the parser already builds those for any PRISM-with-parameters sketch); 
 optionally unfolding scheduler memory on top of what it was given.
 '''
 
+from __future__ import annotations
+
+from typing import Any
+
 import payntbind
 
 import paynt.family.colored_mdp
+import paynt.family.task
+import paynt.parameter_space.parameter_space
 import paynt.underlying_model.underlying_model
 
 import logging
@@ -16,10 +22,13 @@ logger = logging.getLogger(__name__)
 
 class FamilyColoredMdpFactory:
 
-    def __init__(self, underlying_mdp, parameter_space, coloring, task, use_exact=False):
+    def __init__(
+        self, underlying_mdp : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, coloring : Any,
+        task : paynt.family.task.FamilyTask, use_exact : bool = False
+    ):
         self.task = task
         self.use_exact = use_exact
-        self.memory_unfolder = None
+        self.memory_unfolder : Any = None
 
         if self.task.memory_size > 1:
             underlying_mdp, parameter_space, coloring = self.unfold_scheduler_memory(underlying_mdp, parameter_space, coloring)
@@ -28,6 +37,8 @@ class FamilyColoredMdpFactory:
         self.parameter_space = parameter_space
         self.coloring = coloring
 
+        self.action_labels : list[str]
+        self.choice_to_action : list[int]
         self.action_labels, self.choice_to_action = payntbind.synthesis.extractActionLabels(underlying_mdp)
         self.num_actions = len(self.action_labels)
         self.state_action_choices = FamilyColoredMdpFactory.map_state_action_to_choices(
@@ -36,14 +47,16 @@ class FamilyColoredMdpFactory:
 
         self.colored_mdp = self._construct_colored_mdp()
 
-    def _construct_colored_mdp(self):
+    def _construct_colored_mdp(self) -> paynt.family.colored_mdp.FamilyColoredMdp:
         ''' Overridable so subclasses (e.g. PomdpFamilyColoredMdpFactory) can produce their own ColoredMdp
         subclass while reusing all of the construction above. '''
         return paynt.family.colored_mdp.FamilyColoredMdp(
             self.underlying_mdp, self.parameter_space, self.coloring, self.use_exact,
             self.num_actions, self.action_labels, self.choice_to_action, self.state_action_choices, self.state_to_actions)
 
-    def unfold_scheduler_memory(self, underlying_mdp, parameter_space, coloring):
+    def unfold_scheduler_memory(
+        self, underlying_mdp : Any, parameter_space : paynt.parameter_space.parameter_space.ParameterSpace, coloring : Any
+    ) -> tuple[Any, paynt.parameter_space.parameter_space.ParameterSpace, Any]:
         '''
         Unfold the scheduler memory of the underlying MDP to the initial_memory_size.
         :returns a new underlying MDP with unfolded scheduler memory
@@ -72,10 +85,10 @@ class FamilyColoredMdpFactory:
         return unfolded_mdp, parameter_space, new_coloring
 
     @staticmethod
-    def map_state_action_to_choices(mdp, num_actions, choice_to_action):
+    def map_state_action_to_choices(mdp : Any, num_actions : int, choice_to_action : list[int]) -> list[list[list[int]]]:
         state_action_choices = []
         for state in range(mdp.nr_states):
-            action_choices = [[] for action in range(num_actions)]
+            action_choices : list[list[int]] = [[] for action in range(num_actions)]
             for choice in mdp.transition_matrix.get_rows_for_group(state):
                 action = choice_to_action[choice]
                 action_choices[action].append(choice)
@@ -83,7 +96,7 @@ class FamilyColoredMdpFactory:
         return state_action_choices
 
     @staticmethod
-    def map_state_to_available_actions(state_action_choices):
+    def map_state_to_available_actions(state_action_choices : list[list[list[int]]]) -> list[list[int]]:
         state_to_actions = []
         for state,action_choices in enumerate(state_action_choices):
             available_actions = []
