@@ -30,10 +30,10 @@ class TestSearchNode:
         assert node.encoding is None
 
     def test_split_produces_children_with_incremented_refinement_depth_and_shared_parent_info(self):
-        ''' Regression-style check for the exact mechanism that replaces the old ParameterSpace.
+        """Regression-style check for the exact mechanism that replaces the old ParameterSpace.
         add_parent_info/collect_parent_info round trip: split() snapshots self via collect_parent_info once
         and hands that same ParentInfo to every child, matching the pre-refactor behavior where every
-        subspace produced by one split shared a single parent_info object. '''
+        subspace produced by one split shared a single parent_info object."""
         parent = paynt.synthesizer.search_node.SearchNode(_parameter_space_with_two_binary_parameters())
         parent.selected_choices = [True, False]
         parent.analysis_result = _FakeAnalysisResult()
@@ -53,9 +53,10 @@ class TestSearchNode:
         assert children[1].parameter_space.parameter_options(0) == [1]
 
     def test_split_produces_children_of_the_same_concrete_type(self):
-        ''' DtSearchNode/PolicyTreeNode rely on split() constructing children via type(self), not a
+        """DtSearchNode/PolicyTreeNode rely on split() constructing children via type(self), not a
         hardcoded SearchNode, so a subclass's own extra fields (e.g. scheduler_choices) get properly
-        initialized on every child without split() needing to know about them. '''
+        initialized on every child without split() needing to know about them."""
+
         class FakeSearchNode(paynt.synthesizer.search_node.SearchNode):
             def __init__(self, parameter_space, parent_info=None):
                 super().__init__(parameter_space, parent_info)

@@ -11,10 +11,10 @@ from helpers.helper import get_sketch_paths
 
 @pytest.fixture
 def colored_mdp_parameter_space_prop_result():
-    ''' A plain, non-specialized ColoredMdp built directly from a PRISM DTMC-with-parameters sketch (no FSC/tree
+    """A plain, non-specialized ColoredMdp built directly from a PRISM DTMC-with-parameters sketch (no FSC/tree
     unfolding) -- this is the "generic" case paynt.quotient.quotient.Quotient used to handle, before it was
     deleted once its last two callers (SynthesizerHybrid.split, this exact sketch.py construction site)
-    were migrated onto the shared ColoredMdp-based mechanisms. '''
+    were migrated onto the shared ColoredMdp-based mechanisms."""
     sketch_path, props_path = get_sketch_paths("archive/jair24-synthesis/maze")
     colored_mdp_factory, task = paynt.parser.sketch.Sketch.load_sketch(sketch_path, props_path)
     colored_mdp = colored_mdp_factory.colored_mdp
@@ -28,7 +28,7 @@ def colored_mdp_parameter_space_prop_result():
 class TestModelIndexScoring:
 
     def test_choice_values_matches_its_documented_formula(self, colored_mdp_parameter_space_prop_result):
-        '''
+        """
         Independent correctness check: hand-computes rew(c) + sum_s'[P(s,c,s')*mc(s')] directly from the raw
         transition matrix and reward model (the formula choice_values documents), for every choice, and
         compares against ModelIndex.choice_values's actual output. This used to compare against
@@ -36,7 +36,7 @@ class TestModelIndexScoring:
         from) as an oracle, but that class no longer exists -- and re-deriving the formula independently is
         arguably the better test anyway, since a duplicate-implementation comparison can't catch a bug both
         sides share.
-        '''
+        """
         colored_mdp, node, prop, result = colored_mdp_parameter_space_prop_result
         state_values = result.result.get_values()
         choice_values = paynt.underlying_model.underlying_model.ModelIndex.choice_values(node.mdp.model, prop, state_values)
@@ -50,7 +50,7 @@ class TestModelIndexScoring:
             for entry in tm.get_row(choice):
                 successor_value = state_values[entry.column]
                 if successor_value == math.inf:
-                    continue # infinite successors are averaged in by make_vector_defined, not summed directly
+                    continue  # infinite successors are averaged in by make_vector_defined, not summed directly
                 expected += entry.value() * successor_value
             assert choice_values[choice] == pytest.approx(expected, abs=1e-6)
 
@@ -67,15 +67,14 @@ class TestModelIndexScoring:
         assert visits[initial_state] >= 1
 
     def test_compute_expected_visits_respects_disable_flag(self, colored_mdp_parameter_space_prop_result):
-        ''' Regression test: the original Quotient.compute_expected_visits returned a vector sized to the
+        """Regression test: the original Quotient.compute_expected_visits returned a vector sized to the
         full underlying MDP's state count on this early-return path, which is wrong whenever `mdp` is a
         restricted sub-MDP with fewer states. ModelIndex sizes the vector to `mdp` itself instead.
         disable_expected_visits is a plain parameter (not a class attribute) precisely so two syntheses in
-        the same process can't leak this setting into each other -- see paynt.task.Task. '''
+        the same process can't leak this setting into each other -- see paynt.task.Task."""
         _, node, prop, result = colored_mdp_parameter_space_prop_result
         local_choices = result.result.scheduler.compute_action_support(node.mdp.model.nondeterministic_choice_indices)
-        visits = paynt.underlying_model.underlying_model.ModelIndex.compute_expected_visits(
-            node.mdp.model, prop, local_choices, disable_expected_visits=True)
+        visits = paynt.underlying_model.underlying_model.ModelIndex.compute_expected_visits(node.mdp.model, prop, local_choices, disable_expected_visits=True)
         assert visits == [1] * node.mdp.model.nr_states
 
     def test_make_vector_defined_replaces_infinities_with_average_of_finite_values(self):

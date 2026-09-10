@@ -15,6 +15,7 @@ import re
 import uuid
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,22 +23,21 @@ class PrismParser:
 
     @classmethod
     def read_prism(
-        cls, sketch_path : str, properties_path : str, relative_error : float, use_exact : bool = False
+        cls, sketch_path: str, properties_path: str, relative_error: float, use_exact: bool = False
     ) -> tuple[Any, Any, paynt.specification.property.Specification, paynt.parameter_space.parameter_space.ParameterSpace | None, Any, Any, Any]:
 
         # parse the program
         prism, parameter_definitions = PrismParser.load_sketch_prism(sketch_path)
         expression_parser = stormpy.storage.ExpressionParser(prism.expression_manager)
-        expression_parser.set_identifier_mapping(dict())
+        expression_parser.set_identifier_mapping({})
         prism_model_type = {
-            stormpy.storage.PrismModelType.DTMC:"DTMC",
-            stormpy.storage.PrismModelType.MDP:"MDP",
-            stormpy.storage.PrismModelType.POMDP:"POMDP"
+            stormpy.storage.PrismModelType.DTMC: "DTMC",
+            stormpy.storage.PrismModelType.MDP: "MDP",
+            stormpy.storage.PrismModelType.POMDP: "POMDP",
         }[prism.model_type]
         logger.debug("PRISM model type: " + prism_model_type)
 
         # parse constants
-        constant_map = None
 
         # parse parameter definitions
         parameter_expressions = None
@@ -54,13 +54,15 @@ class PrismParser:
         jani_unfolder = None
         obs_evaluator = None
         if parameter_space is not None:
-            assert prism_model_type in ["DTMC","MDP","POMDP"], "parameter detected, but the program is neither DTMC nor (PO)MDP"
+            assert prism_model_type in ["DTMC", "MDP", "POMDP"], "parameter detected, but the program is neither DTMC nor (PO)MDP"
             assert parameter_expressions is not None
             # unfold parameter options via Jani
             jani_unfolder = paynt.parser.jani.JaniUnfolder(prism, parameter_expressions, specification, parameter_space, use_exact=use_exact)
             specification = jani_unfolder.specification
             underlying_mdp = jani_unfolder.underlying_mdp
-            coloring = payntbind.synthesis.Coloring(parameter_space.native, underlying_mdp.nondeterministic_choice_indices, jani_unfolder.choice_to_parameter_options)
+            coloring = payntbind.synthesis.Coloring(
+                parameter_space.native, underlying_mdp.nondeterministic_choice_indices, jani_unfolder.choice_to_parameter_options
+            )
             if prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 obs_evaluator = payntbind.synthesis.ObservationEvaluator(prism, underlying_mdp)
             if use_exact:
@@ -72,15 +74,14 @@ class PrismParser:
 
         return prism, underlying_mdp, specification, parameter_space, coloring, jani_unfolder, obs_evaluator
 
-    
     @classmethod
-    def load_sketch_prism(cls, sketch_path : str) -> tuple[Any, list[tuple[str, str, str]]]:
+    def load_sketch_prism(cls, sketch_path: str) -> tuple[Any, list[tuple[str, str, str]]]:
         # read lines
         with open(sketch_path) as f:
             sketch_lines = f.readlines()
 
         # replace "hole" declarations (sketch template syntax) with constants
-        hole_re_brace = re.compile(r'^\s*hole\s+(.*?)\s+(.*?)\s+in\s+\{(.*?)\}\s*;')
+        hole_re_brace = re.compile(r"^\s*hole\s+(.*?)\s+(.*?)\s+in\s+\{(.*?)\}\s*;")
         # hole_re_bracket = re.compile(r'^\s*hole\s+(.*?)\s+(.*?)\s+in\s+[(.*?)]\s+;')
         sketch_output = []
         parameter_definitions = []
@@ -90,22 +91,21 @@ class PrismParser:
             # Treat observation definition via "observables" keyword
             if line.startswith("observables"):
                 observables_line = True
-                line = line.split('//')[0].strip()  # remove comments
+                line = line.split("//")[0].strip()  # remove comments
                 if len(line) > len("observables"):
-                    line = line[len("observables"):].strip()
+                    line = line[len("observables") :].strip()
                 else:
                     continue
             if observables_line:
                 if line.startswith("endobservables"):
                     observables_line = False
                     continue
-                line = line.split('//')[0].strip()  # remove comments
+                line = line.split("//")[0].strip()  # remove comments
                 observables = line.strip().split(",")
                 observables = [obs.strip() for obs in observables]
                 for obs in observables:
-                    sketch_output.append(f"observable \"{obs}\" = {obs};\n")
+                    sketch_output.append(f'observable "{obs}" = {obs};\n')
                 continue
-
 
             match = hole_re_brace.search(line)
             if match is None:
@@ -114,15 +114,14 @@ class PrismParser:
             parameter_type = match.group(1)
             parameter_name = match.group(2)
             parameter_options = match.group(3).replace(" ", "")
-            parameter_definitions.append( (parameter_name,parameter_type,parameter_options) )
+            parameter_definitions.append((parameter_name, parameter_type, parameter_options))
             sketch_output.append(f"const {parameter_type} {parameter_name};\n")
             sketch_output.append(f"const {parameter_type} {parameter_name}_MIN;\n")
             sketch_output.append(f"const {parameter_type} {parameter_name}_MAX;\n")
 
-
         # store modified sketch to a temporary file
         tmp_path = sketch_path + str(uuid.uuid4())
-        with open(tmp_path, 'w') as f:
+        with open(tmp_path, "w") as f:
             for line in sketch_output:
                 print(line, end="", file=f)
 
@@ -130,16 +129,15 @@ class PrismParser:
         try:
             prism = stormpy.parse_prism_program(tmp_path, prism_compat=True)
             os.remove(tmp_path)
-        except:
+        except Exception as e:
             os.remove(tmp_path)
-            raise SyntaxError
+            raise SyntaxError from e
 
         return prism, parameter_definitions
 
-
     @classmethod
     def parse_parameters(
-        cls, prism : Any, expression_parser : Any, parameter_definitions : list[tuple[str, str, str]]
+        cls, prism: Any, expression_parser: Any, parameter_definitions: list[tuple[str, str, str]]
     ) -> tuple[Any, list[list[Any]], paynt.parameter_space.parameter_space.ParameterSpace]:
 
         # parse parameter definitions
@@ -147,27 +145,29 @@ class PrismParser:
         parameter_expressions = []
         parameter_min = []
         parameter_max = []
-        for parameter_name,parameter_type,parameter_options in parameter_definitions:
+        for parameter_name, parameter_type, parameter_options in parameter_definitions:
             if ".." in parameter_options:
                 assert parameter_type == "int" or parameter_type == "double", "cannot use range-based definitions for non-integer of non-double parameter types"
                 if parameter_type == "double":
-                    assert ":" in parameter_options, "using range-based definition for double requires specifying the increment step range_start..range_end:step"
-                    range_start = float(parameter_options[0:parameter_options.find('..')])
-                    range_end = float(parameter_options[parameter_options.find('..')+2:parameter_options.find(':')].strip())
-                    increment_string = parameter_options.split(':')[-1].strip()
+                    assert (
+                        ":" in parameter_options
+                    ), "using range-based definition for double requires specifying the increment step range_start..range_end:step"
+                    range_start = float(parameter_options[0 : parameter_options.find("..")])
+                    range_end = float(parameter_options[parameter_options.find("..") + 2 : parameter_options.find(":")].strip())
+                    increment_string = parameter_options.split(":")[-1].strip()
                     increment = float(increment_string)
-                    increment_decimal_precision = len(increment_string.split('.')[-1])
+                    increment_decimal_precision = len(increment_string.split(".")[-1])
                     parameter_min.append(range_start)
                     parameter_max.append(range_end)
                     steps = (range_end - range_start) / increment
-                    options = ["{:.{n}f}".format(range_start + x * increment, n=increment_decimal_precision) for x in range(int(round(steps)+1))]
+                    options = ["{:.{n}f}".format(range_start + x * increment, n=increment_decimal_precision) for x in range(int(round(steps) + 1))]
                     if float(options[-1]) > range_end:
                         options = options[:-1]
                 else:
                     if ":" in parameter_options:
-                        range_start = int(parameter_options[0:parameter_options.find('..')])
-                        range_end = int(parameter_options[parameter_options.find('..')+2:parameter_options.find(':')].strip())
-                        increment = int(parameter_options.split(':')[-1].strip())
+                        range_start = int(parameter_options[0 : parameter_options.find("..")])
+                        range_end = int(parameter_options[parameter_options.find("..") + 2 : parameter_options.find(":")].strip())
+                        increment = int(parameter_options.split(":")[-1].strip())
                     else:
                         options = parameter_options.split("..")
                         range_start = int(options[0])
@@ -175,10 +175,10 @@ class PrismParser:
                         increment = 1
                     parameter_min.append(range_start)
                     parameter_max.append(range_end)
-                    options = [str(o) for o in range(range_start,range_end+1, increment)]
+                    options = [str(o) for o in range(range_start, range_end + 1, increment)]
             else:
                 options = parameter_options.split(",")
-                options_numerical : list[float]
+                options_numerical: list[float]
                 if parameter_type == "int":
                     options_numerical = [int(o) for o in options]
                 else:
@@ -209,42 +209,41 @@ class PrismParser:
 
         return prism, parameter_expressions, parameter_space
 
- 
     @classmethod
-    def parse_property(cls, line : str, prism : Any = None) -> Any:
-        '''
+    def parse_property(cls, line: str, prism: Any = None) -> Any:
+        """
         Parse a line containing a single PCTL property.
         @return the property or None if no property was detected
-        '''
+        """
         if prism is not None:
             props = stormpy.parse_properties_for_prism_program(line, prism)
         else:
             props = stormpy.parse_properties_without_context(line)
         if len(props) == 0:
             return None
-        if len(props)>1:
+        if len(props) > 1:
             logger.warning("multiple properties detected on one line, dropping all but the first one")
         return props[0]
 
     @classmethod
     def parse_specification(
-        cls, properties_path : str, relative_error : float = 0, prism : Any = None, use_exact : bool = False
+        cls, properties_path: str, relative_error: float = 0, prism: Any = None, use_exact: bool = False
     ) -> paynt.specification.property.Specification:
-        '''
+        """
         Expecting one property per line. The line may be terminated with a semicolon.
         Empty lines or comments are allowed.
-        '''
+        """
         if not os.path.isfile(properties_path):
             raise ValueError(f"the properties file {properties_path} does not exist")
         logger.info(f"loading properties from {properties_path} ...")
 
         with open(properties_path) as file:
-            lines = [line for line in file]
-        
+            lines = list(file)
+
         properties = []
 
         for line in lines:
-            formula = PrismParser.parse_property(line,prism)
+            formula = PrismParser.parse_property(line, prism)
             if formula is None:
                 continue
             prop = paynt.specification.property.construct_property(formula, relative_error, use_exact)

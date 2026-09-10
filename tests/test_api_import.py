@@ -1,5 +1,6 @@
 import paynt
 
+
 def test_api_import():
     # Test that API functions are available at package level
     assert hasattr(paynt, "get_version"), "get_version not found in paynt package"
@@ -9,6 +10,7 @@ def test_api_import():
     # hasattr/callable alone can't catch this, since the function exists and is callable either way
     assert isinstance(paynt.get_version(), str) and paynt.get_version() != ""
     print("paynt API import test passed.")
+
 
 if __name__ == "__main__":
     test_api_import()

@@ -27,11 +27,11 @@ class TestPomdpFamilyColoredMdpFactory:
 
 
 def _trivial_fsc(pomdp_family_colored_mdp, ambiguous_action):
-    ''' A single-node FSC: observations with only one legal action take it (fill_trivial_actions);
+    """A single-node FSC: observations with only one legal action take it (fill_trivial_actions);
     the two ambiguous, multi-action observations both take `ambiguous_action`. build_dtmc_sketch requires
     a stochastic-form FSC (its native FscUnfolder binding rejects the bare int/deterministic form even when
     FscFactored.is_deterministic is True), hence make_stochastic() below -- this was never exercised before
-    since build_dtmc_sketch had no callers anywhere in the codebase prior to this test. '''
+    since build_dtmc_sketch had no callers anywhere in the codebase prior to this test."""
     fsc = paynt.pomdp.fsc.FscFactored(1, pomdp_family_colored_mdp.num_observations, is_deterministic=True)
     fsc.fill_trivial_actions(pomdp_family_colored_mdp.observation_to_actions)
     for obs, actions in enumerate(pomdp_family_colored_mdp.observation_to_actions):
@@ -44,10 +44,10 @@ def _trivial_fsc(pomdp_family_colored_mdp, ambiguous_action):
 
 
 def _task_for_dtmc_sketch(pomdp_family_colored_mdp_factory):
-    ''' build_dtmc_sketch produces a bare (task-less) ColoredMdp -- since the same product can be reused
+    """build_dtmc_sketch produces a bare (task-less) ColoredMdp -- since the same product can be reused
     across different tasks, the caller supplies its own. Here we just carry over the original task's
     specification/timeout/use_exact unchanged (a copy, so synthesize()'s specification.reset() can't affect
-    the factory's own task). '''
+    the factory's own task)."""
     task = pomdp_family_colored_mdp_factory.task
     return paynt.task.Task.from_specification(
         task.specification.copy(),
@@ -59,23 +59,21 @@ def _task_for_dtmc_sketch(pomdp_family_colored_mdp_factory):
 class TestPomdpFamilyDtmcSketch:
 
     def test_build_dtmc_sketch_produces_a_plain_colored_mdp(self, pomdp_family_colored_mdp):
-        ''' build_dtmc_sketch's whole point is to hand the FSC-fixed family off to the *generic* AR/CEGIS
-        machinery -- so its output must be a plain, unspecialized ColoredMdp, not another PomdpFamilyColoredMdp. '''
+        """build_dtmc_sketch's whole point is to hand the FSC-fixed family off to the *generic* AR/CEGIS
+        machinery -- so its output must be a plain, unspecialized ColoredMdp, not another PomdpFamilyColoredMdp."""
         fsc = _trivial_fsc(pomdp_family_colored_mdp, ambiguous_action=7)
         dtmc_sketch = pomdp_family_colored_mdp.build_dtmc_sketch(fsc)
         assert type(dtmc_sketch) is paynt.colored_mdp.ColoredMdp
         assert dtmc_sketch.feature_kind == "generic"
         assert dtmc_sketch.parameter_space.size == pomdp_family_colored_mdp.parameter_space.size
 
-    def test_synthesize_over_the_fsc_fixed_family_finds_the_best_environment(
-        self, pomdp_family_colored_mdp, pomdp_family_colored_mdp_factory
-    ):
-        '''
+    def test_synthesize_over_the_fsc_fixed_family_finds_the_best_environment(self, pomdp_family_colored_mdp, pomdp_family_colored_mdp_factory):
+        """
         End-to-end regression test for the build_dtmc_sketch -> generic AR pipeline: fixing a memoryless FSC
         across all 64 environment variants turns the POMDP family into a plain family of DTMCs, and AR then
         searches over which environment (not which policy -- that's already fixed) best matches this FSC's
         objective. Synthesis is deterministic, so both the value and the winning environment are checked.
-        '''
+        """
         fsc = _trivial_fsc(pomdp_family_colored_mdp, ambiguous_action=7)
         dtmc_sketch = pomdp_family_colored_mdp.build_dtmc_sketch(fsc)
         task = _task_for_dtmc_sketch(pomdp_family_colored_mdp_factory)

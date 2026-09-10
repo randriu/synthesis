@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
 
 import paynt.colored_mdp
 import paynt.task
@@ -14,14 +13,15 @@ import paynt.parameter_space.smt
 import paynt.utils.timer
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
 class StageControl:
-    '''
+    """
     AR-CEGIS adaptivity: switch between ar/cegis, allocate more time to
     the more efficient method
-    '''
+    """
 
     # whether only AR is performed
     only_ar = False
@@ -30,19 +30,19 @@ class StageControl:
     # whether adaptive hybrid is enabled
     adaptive_hybrid = True
 
-    def __init__(self, parameter_space_size : int):
+    def __init__(self, parameter_space_size: int):
         # timings
         self.timer_ar = paynt.utils.timer.Timer()
         self.timer_cegis = paynt.utils.timer.Timer()
 
         self.parameter_space_size = parameter_space_size
-        self.pruned_ar : float = 0
-        self.pruned_cegis : float = 0
+        self.pruned_ar: float = 0
+        self.pruned_cegis: float = 0
 
         # multiplier to derive time allocated for cegis
         # time_ar * factor = time_cegis
         # =1 is fair, >1 favours cegis, <1 favours ar
-        self.cegis_efficiency : float = 1
+        self.cegis_efficiency: float = 1
 
     def start_ar(self) -> None:
         self.timer_cegis.stop()
@@ -52,17 +52,17 @@ class StageControl:
         self.timer_ar.stop()
         self.timer_cegis.start()
 
-    def prune_ar(self, pruned : int) -> None:
+    def prune_ar(self, pruned: int) -> None:
         self.pruned_ar += pruned / self.parameter_space_size
 
-    def prune_cegis(self, pruned : int) -> None:
+    def prune_cegis(self, pruned: int) -> None:
         self.pruned_cegis += pruned / self.parameter_space_size
 
     def cegis_has_time(self) -> bool:
         """
         :return True if cegis still has some time
         """
-        
+
         # whether only AR is performed
         if StageControl.only_ar:
             return False
@@ -89,7 +89,7 @@ class StageControl:
                 success_rate_cegis = self.pruned_cegis / self.timer_cegis.read()
                 success_rate_ar = self.pruned_ar / self.timer_ar.read()
                 self.cegis_efficiency = success_rate_cegis / success_rate_ar
-        
+
         return False
 
 
@@ -99,7 +99,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
     def method_name(self) -> str:
         return "hybrid"
 
-    def synthesize_one(self, node : paynt.synthesizer.search_node.SearchNode) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
+    def synthesize_one(self, node: paynt.synthesizer.search_node.SearchNode) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
 
         self.conflict_generator.initialize()
         smt_solver = paynt.parameter_space.smt.SmtSolver(self.colored_mdp.parameter_space)
@@ -122,7 +122,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
             self.verify_parameter_space(node)
             self.update_optimum(node)
             assert node.analysis_result is not None
-            if node.analysis_result.can_improve == False:
+            if not node.analysis_result.can_improve:
                 self.explore(node.parameter_space)
                 self.stage_control.prune_ar(node.parameter_space.size)
                 continue
@@ -143,14 +143,14 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
             while True:
 
                 if not self.stage_control.cegis_has_time():
-                    break   # CEGIS timeout
+                    break  # CEGIS timeout
 
                 node.encode(smt_solver)
                 # assignment = smt_solver.pick_assignment(node)
                 assignment = smt_solver.pick_assignment_priority(node, priority_node)
                 if assignment is None:
                     parameter_space_explored = True
-                    break   # explored whole parameter space
+                    break  # explored whole parameter space
 
                 conflicts, accepting_assignment = self.analyze_parameter_space_assignment_cegis(node, assignment)
                 pruned = smt_solver.exclude_conflicts(node, assignment, conflicts)

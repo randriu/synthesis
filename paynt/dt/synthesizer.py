@@ -15,28 +15,31 @@ from paynt.dt.synthesizer_ar_dt import SynthesizerARDt
 
 from ._utils import simplify_tree
 
-import stormpy
 import payntbind
 
 import os
 import json
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
-def _choose_solver_for_dt_task(paynt_task_dt : paynt.dt.task.DtTask) -> str:
+def _choose_solver_for_dt_task(paynt_task_dt: paynt.dt.task.DtTask) -> str:
     if paynt_task_dt.has_scheduler_to_map:
         return "dtmap"
     return "dtpaynt"
 
 
-def _run_dt_map_scheduler(cmdp_factory_dt : paynt.dt.factory.DtColoredMdpFactory, scheduler : Any, tree_depth : int) -> paynt.dt.result.DtResult:
+def _run_dt_map_scheduler(cmdp_factory_dt: paynt.dt.factory.DtColoredMdpFactory, scheduler: Any, tree_depth: int) -> paynt.dt.result.DtResult:
     """Helper function to map a scheduler to a decision tree using the DTMap algorithm. Returns a tuple (success, decision_tree)."""
 
-    state_to_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, cmdp_factory_dt.underlying_mdp, [x for x in range(cmdp_factory_dt.underlying_mdp.nr_choices)])
+    state_to_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(
+        scheduler, cmdp_factory_dt.underlying_mdp, list(range(cmdp_factory_dt.underlying_mdp.nr_choices))
+    )
     state_to_choice = paynt.underlying_model.underlying_model.ModelIndex.discard_unreachable_choices(
-        cmdp_factory_dt.underlying_mdp, cmdp_factory_dt.choice_destinations, state_to_choice)
+        cmdp_factory_dt.underlying_mdp, cmdp_factory_dt.choice_destinations, state_to_choice
+    )
     choices = paynt.underlying_model.underlying_model.ModelIndex.state_to_choice_to_choices(cmdp_factory_dt.underlying_mdp, state_to_choice)
 
     dt_synthesizer = DtSynthesizer(cmdp_factory_dt)
@@ -44,36 +47,28 @@ def _run_dt_map_scheduler(cmdp_factory_dt : paynt.dt.factory.DtColoredMdpFactory
 
     simplify_tree(dt_synthesizer.best_tree, dt_synthesizer.colored_mdp)
 
-    return paynt.dt.result.DtResult(
-        success = dt_synthesizer.best_tree is not None,
-        value = dt_synthesizer.best_tree_value,
-        tree = dt_synthesizer.best_tree
-    )
+    return paynt.dt.result.DtResult(success=dt_synthesizer.best_tree is not None, value=dt_synthesizer.best_tree_value, tree=dt_synthesizer.best_tree)
 
 
-def _run_dtpaynt(cmdp_factory_dt : paynt.dt.factory.DtColoredMdpFactory, tree_depth : int, timeout : int | None = None) -> paynt.dt.result.DtResult:
+def _run_dtpaynt(cmdp_factory_dt: paynt.dt.factory.DtColoredMdpFactory, tree_depth: int, timeout: int | None = None) -> paynt.dt.result.DtResult:
     dt_synthesizer = DtSynthesizer(cmdp_factory_dt)
     dt_synthesizer.synthesize_tree(tree_depth, timeout=timeout)
 
     simplify_tree(dt_synthesizer.best_tree, dt_synthesizer.colored_mdp)
 
-    return paynt.dt.result.DtResult(
-        success = dt_synthesizer.best_tree is not None,
-        value = dt_synthesizer.best_tree_value,
-        tree = dt_synthesizer.best_tree
-    )
+    return paynt.dt.result.DtResult(success=dt_synthesizer.best_tree is not None, value=dt_synthesizer.best_tree_value, tree=dt_synthesizer.best_tree)
 
 
 class DtSynthesizer:
-    '''
+    """
     Outer driver: repeatedly re-unfolds the decision tree at different depths (DtColoredMdpFactory.reset_tree
     tries a fresh depth/coloring each time, unlike the FSC-unfolding factories' memory-size growth) and runs
     SynthesizerARDt -- a fresh inner AR engine constructed for each depth -- against each unfolding, keeping
     the best tree found so far across depths. Mirrors the PomdpSynthesizer/SayntSynthesizer split from their
     own inner AR engine.
-    '''
+    """
 
-    def __init__(self, colored_mdp_factory : paynt.dt.factory.DtColoredMdpFactory):
+    def __init__(self, colored_mdp_factory: paynt.dt.factory.DtColoredMdpFactory):
         self.colored_mdp_factory = colored_mdp_factory
         self.colored_mdp = colored_mdp_factory.colored_mdp
         # factory.task is Optional at the type level (see DtColoredMdpFactory's own docstring: a factory can
@@ -84,38 +79,37 @@ class DtSynthesizer:
         # through synthesize_tree_sequence with an explicit max_depth, never touching those fields, despite
         # constructing the factory with a bare Task (see the type: ignore at that construction site instead)
         assert colored_mdp_factory.task is not None
-        self.task : paynt.dt.task.DtTask = colored_mdp_factory.task  # type: ignore[assignment]
-        self.best_tree : paynt.dt.decision_tree.DecisionTree | None = None
-        self.best_tree_value : Any = None
+        self.task: paynt.dt.task.DtTask = colored_mdp_factory.task  # type: ignore[assignment]
+        self.best_tree: paynt.dt.decision_tree.DecisionTree | None = None
+        self.best_tree_value: Any = None
 
     @property
     def method_name(self) -> str:
         return "AR (decision tree)"
 
-    def compute_normalized_value(self, value : float, opt : float, random : float) -> float:
-        return (value-random)/(opt-random) if opt-random != 0 else 1.0
+    def compute_normalized_value(self, value: float, opt: float, random: float) -> float:
+        return (value - random) / (opt - random) if opt - random != 0 else 1.0
 
-    def export_decision_tree(self, decision_tree : paynt.dt.decision_tree.DecisionTree, export_filename_base : str) -> None:
+    def export_decision_tree(self, decision_tree: paynt.dt.decision_tree.DecisionTree, export_filename_base: str) -> None:
         tree = decision_tree.to_graphviz()
         tree_filename = export_filename_base + ".dot"
         directory = os.path.dirname(tree_filename)
         if directory:
             os.makedirs(directory, exist_ok=True)
-        with open(tree_filename, 'w') as file:
+        with open(tree_filename, "w") as file:
             file.write(tree.source)
         logger.info(f"exported decision tree to {tree_filename}")
 
         tree_visualization_filename = export_filename_base + ".png"
-        tree.render(export_filename_base, format="png", cleanup=True) # using export_filename_base since graphviz appends .png by default
+        tree.render(export_filename_base, format="png", cleanup=True)  # using export_filename_base since graphviz appends .png by default
         logger.info(f"exported decision tree visualization to {tree_visualization_filename}")
 
         tree_string_filename = export_filename_base + ".txt"
-        with open(tree_string_filename, 'w') as file:
+        with open(tree_string_filename, "w") as file:
             file.write(decision_tree.to_string())
         logger.info(f"exported decision tree string to {tree_string_filename}")
 
-
-    def synthesize_tree(self, depth : int, timeout : int | None = None) -> None:
+    def synthesize_tree(self, depth: int, timeout: int | None = None) -> None:
         self.colored_mdp = self.colored_mdp_factory.reset_tree(depth)
         synthesizer = SynthesizerARDt(self.colored_mdp, self.task)
         synthesizer.synthesize(keep_optimum=True, timeout=timeout)
@@ -125,23 +119,26 @@ class DtSynthesizer:
             self.best_tree_value = synthesizer.best_assignment_value
 
     def synthesize_tree_sequence(
-        self, opt_result_value : float, overall_timeout : float | None = None, max_depth : int | None = None, break_if_found : bool = False
+        self, opt_result_value: float, overall_timeout: float | None = None, max_depth: int | None = None, break_if_found: bool = False
     ) -> None:
         self.best_tree = self.best_tree_value = None
 
         if max_depth is None:
-            max_depth = self.task.tree_depth+1
+            max_depth = self.task.tree_depth + 1
         if overall_timeout is None:
             assert paynt.utils.timer.GlobalTimer.global_timer is not None
             global_timeout = paynt.utils.timer.GlobalTimer.global_timer.time_limit_seconds
-            if global_timeout is None: global_timeout = 900 # TODO this should probably not be the deafult behaviour, we want to run the synthesis indefinitely if the user does not give us timeout
+            if global_timeout is None:
+                # TODO this should probably not be the default behaviour, we want to run the synthesis
+                # indefinitely if the user does not give us a timeout
+                global_timeout = 900
             overall_timeout = global_timeout
             tree_sequence_timer = None
         else:
             tree_sequence_timer = paynt.utils.timer.Timer(overall_timeout)
             tree_sequence_timer.start()
-        depth_timeout = overall_timeout / 2 / (max_depth-1) if max_depth > 1 else overall_timeout
-        best_assignment : Any = None
+        depth_timeout = overall_timeout / 2 / (max_depth - 1) if max_depth > 1 else overall_timeout
+        best_assignment: Any = None
         for depth in range(max_depth):
             self.colored_mdp = self.colored_mdp_factory.reset_tree(depth)
             synthesizer = SynthesizerARDt(self.colored_mdp, self.task)
@@ -152,15 +149,15 @@ class DtSynthesizer:
             synthesizer.explored = 0
             synthesizer.stat = paynt.synthesizer.statistic.Statistic(synthesizer)
             synthesizer.stat.start(parameter_space)
-            timeout = depth_timeout if depth < max_depth-1 else overall_timeout / 2 # second half of the time for the last depth
+            timeout = depth_timeout if depth < max_depth - 1 else overall_timeout / 2  # second half of the time for the last depth
             synthesizer.synthesis_timer = paynt.utils.timer.Timer(timeout)
             synthesizer.synthesis_timer.start()
             nodes = [node]
 
             if self.best_tree is not None:
                 parameter_subspace = parameter_space.copy()
-                self.colored_mdp.decision_tree.root.apply_hint(parameter_subspace,self.best_tree.root)
-                nodes = [synthesizer.search_node_type(parameter_subspace),node]
+                self.colored_mdp.decision_tree.root.apply_hint(parameter_subspace, self.best_tree.root)
+                nodes = [synthesizer.search_node_type(parameter_subspace), node]
 
             for n in nodes:
                 synthesizer.synthesize_one(n)
@@ -186,24 +183,28 @@ class DtSynthesizer:
                 self.best_tree.root.associate_assignment(best_assignment)
                 self.best_tree_value = synthesizer.best_assignment_value
 
-                if break_if_found or (opt_result_value != 0 and abs( (synthesizer.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-3) or (opt_result_value == 0 and synthesizer.best_assignment_value < 1e-3):
+                if (
+                    break_if_found
+                    or (opt_result_value != 0 and abs((synthesizer.best_assignment_value - opt_result_value) / opt_result_value) < 1e-3)
+                    or (opt_result_value == 0 and synthesizer.best_assignment_value < 1e-3)
+                ):
                     break
 
             if synthesizer.resource_limit_reached() or tree_sequence_timer is not None and tree_sequence_timer.time_limit_reached():
                 break
 
-    def map_scheduler(self, scheduler_choices : Any, tree_depth : int | None = None) -> None:
+    def map_scheduler(self, scheduler_choices: Any, tree_depth: int | None = None) -> None:
         if tree_depth is None:
             tree_depth = self.task.tree_depth
-        for depth in range(tree_depth+1):
-            self.colored_mdp = self.colored_mdp_factory.reset_tree(depth,enable_harmonization=False)
+        for depth in range(tree_depth + 1):
+            self.colored_mdp = self.colored_mdp_factory.reset_tree(depth, enable_harmonization=False)
             synthesizer = SynthesizerARDt(self.colored_mdp, self.task)
             node = synthesizer.search_node_type(self.colored_mdp.parameter_space.copy())
             node.analysis_result = synthesizer.build_unsat_result()
             node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space)
-            consistent,parameter_selection = self.colored_mdp.are_choices_consistent(scheduler_choices, node.parameter_space)
+            consistent, parameter_selection = self.colored_mdp.are_choices_consistent(scheduler_choices, node.parameter_space)
             if consistent:
-                synthesizer.verify_parameter_selection(node,parameter_selection)
+                synthesizer.verify_parameter_selection(node, parameter_selection)
                 if synthesizer.best_assignment is not None:
                     self.best_tree = self.colored_mdp.decision_tree
                     self.best_tree.root.associate_assignment(synthesizer.best_assignment)
@@ -213,16 +214,16 @@ class DtSynthesizer:
             if synthesizer.resource_limit_reached():
                 break
 
-    def run(self, optimum_threshold : Any = None) -> paynt.dt.result.DtResult:
+    def run(self, optimum_threshold: Any = None) -> paynt.dt.result.DtResult:
         scheduler_choices = None
         if self.task.scheduler_path is None:
             paynt_mdp = paynt.underlying_model.underlying_model.Mdp(self.colored_mdp.underlying_mdp)
             mc_result = paynt_mdp.model_check_property(self.task.get_property())
         else:
             opt_result_value = None
-            with open(self.task.scheduler_path, 'r') as f:
+            with open(self.task.scheduler_path) as f:
                 scheduler_json = json.load(f)
-            scheduler_choices,scheduler_json_relevant = self.colored_mdp.scheduler_json_to_choices(scheduler_json, discard_unreachable_states=True)
+            scheduler_choices, scheduler_json_relevant = self.colored_mdp.scheduler_json_to_choices(scheduler_json, discard_unreachable_states=True)
 
             submdp = self.colored_mdp.build_from_choice_mask(scheduler_choices)
             mc_result = submdp.model_check_property(self.task.get_property())
@@ -269,14 +270,16 @@ class DtSynthesizer:
             if self.task.specification.has_optimality:
                 logger.info(f"the synthesized tree has value {self.best_tree_value}")
                 if self.colored_mdp.DONT_CARE_ACTION_LABEL in self.colored_mdp.action_labels:
-                    logger.info(f"the synthesized tree has relative value: {self.compute_normalized_value(self.best_tree_value, opt_result_value, random_result_value)}")
-            logger.info(f"printing the synthesized tree below:")
+                    logger.info(
+                        f"the synthesized tree has relative value: {self.compute_normalized_value(self.best_tree_value, opt_result_value, random_result_value)}"
+                    )
+            logger.info("printing the synthesized tree below:")
             logger.info(f"\n{self.best_tree.to_string()}")
 
             if self.task.export_synthesis_filename_base is not None:
                 self.export_decision_tree(self.best_tree, self.task.export_synthesis_filename_base)
 
-        time_total = round(paynt.utils.timer.GlobalTimer.read(),2)
+        time_total = round(paynt.utils.timer.GlobalTimer.read(), 2)
         logger.info(f"synthesis finished after {time_total} seconds")
 
         return paynt.dt.result.DtResult(success=self.best_tree is not None, value=self.best_tree_value, tree=self.best_tree)

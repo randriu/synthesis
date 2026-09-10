@@ -64,7 +64,6 @@ test = [
 [tool.scikit-build]
 cmake.build-type = "Release"
 build-dir = "build/{wheel_tag}"
-# wheel.install-dir = "paynt"
 cmake.args = []
 wheel.packages = ["paynt", "payntbind/lib/payntbind"]
 sdist.include = [
@@ -101,25 +100,24 @@ repair-wheel-command = "delocate-listdeps -vv --depending --all {wheel} && DYLD_
 
 [tool.black]
 line-length = 160
+target-version = ["py310"]
 
 [tool.ruff]
 line-length = 160
+target-version = "py310"
 
 [tool.ruff.lint]
-# Narrowly scoped on purpose: E (pycodestyle) and F (pyflakes) catch real bugs (unused imports, undefined
-# names, etc.) with very few false positives on existing code. Ruff's full default rule set (adding
-# complexity/style categories) is not enabled -- nothing like it has ever run on this codebase before, so
-# starting narrow avoids an enormous first-pass diff/warning list unrelated to actual correctness.
-select = ["E", "F"]
+select = ["E", "F", "W", "B", "C4", "UP", "PIE", "RET"]
+
+[tool.ruff.lint.per-file-ignores]
+# __init__.py files across paynt/ are pure re-export surfaces (`from .foo import Bar`, some via `from .api
+# import *`) -- the imports are the point, not dead code.
+"__init__.py" = ["F401", "F403"]
 
 [project.scripts]
 paynt = "paynt.cli:main"
 
 [tool.mypy]
-# Gradual, non-blocking first pass, matching the ruff/black precedent (narrowly scoped rules, nothing has
-# ever been enforced on this codebase before): only check files that already carry hints, and don't force
-# every unannotated function in an otherwise-hinted file to also get one (that would just make the ongoing
-# backfill fail loudly file-by-file instead of accumulating cleanly).
 python_version = "3.10"
 check_untyped_defs = false
 disallow_untyped_defs = false

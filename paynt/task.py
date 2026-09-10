@@ -1,4 +1,4 @@
-'''
+"""
 A Task pairs an underlying PCTL specification with PAYNT-specific synthesis knobs. Feature-specific tasks
 subclass this to add their own knobs -- e.g. paynt.dt.task.DtTask adds tree_depth, paynt.pomdp.task.PomdpTask
 adds FSC memory size.
@@ -15,7 +15,7 @@ Task fixes that: each synthesis run gets its own Task, so its settings can no lo
 Constructing a Task is the one canonical way to turn a list of raw stormpy properties into a Specification;
 every parser should funnel through this (or paynt.specification.property.construct_specification directly)
 rather than constructing a Specification by hand.
-'''
+"""
 
 from __future__ import annotations
 
@@ -27,9 +27,15 @@ import paynt.specification.property
 class Task:
 
     def __init__(
-        self, properties : list[Any], timeout : int | None = None, use_exact : bool = False, relative_error : float = 0,
-        export_synthesis_filename_base : str | None = None, conflict_generator_type : str | None = None,
-        disable_expected_visits : bool = False, discard_unreachable_choices : bool = False
+        self,
+        properties: list[Any],
+        timeout: int | None = None,
+        use_exact: bool = False,
+        relative_error: float = 0,
+        export_synthesis_filename_base: str | None = None,
+        conflict_generator_type: str | None = None,
+        disable_expected_visits: bool = False,
+        discard_unreachable_choices: bool = False,
     ):
         self.specification = paynt.specification.property.construct_specification(properties, relative_error, use_exact)
         self.timeout = timeout
@@ -42,12 +48,17 @@ class Task:
 
     @classmethod
     def from_specification(
-        cls, specification : paynt.specification.property.Specification, timeout : int | None = None, use_exact : bool = False,
-        export_synthesis_filename_base : str | None = None, conflict_generator_type : str | None = None,
-        disable_expected_visits : bool = False, discard_unreachable_choices : bool = False,
-        **kwargs : Any
-    ) -> "Task":
-        '''
+        cls,
+        specification: paynt.specification.property.Specification,
+        timeout: int | None = None,
+        use_exact: bool = False,
+        export_synthesis_filename_base: str | None = None,
+        conflict_generator_type: str | None = None,
+        disable_expected_visits: bool = False,
+        discard_unreachable_choices: bool = False,
+        **kwargs: Any,
+    ) -> Task:
+        """
         Wrap an already-constructed Specification directly, bypassing property parsing. Used when a caller
         already has a (e.g. copied/negated) Specification in hand rather than a fresh list of raw properties,
         and by Sketch.load_sketch, which builds the Specification itself while parsing the sketch and only
@@ -59,7 +70,7 @@ class Task:
         keys irrelevant to that particular subclass. A subclass override picks out the keys it recognizes
         (with its own defaults) and forwards the rest up via super().from_specification(..., **kwargs), where
         they land here and are dropped.
-        '''
+        """
         task = cls.__new__(cls)
         task.specification = specification
         task.timeout = timeout

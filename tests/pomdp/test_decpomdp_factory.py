@@ -23,6 +23,6 @@ class TestDecPomdpColoredMdpFactory:
         assert decpomdp_colored_mdp_factory.current_memory_size == 2
 
     def test_set_agent_imperfect_memory_size_produces_a_fresh_colored_mdp(self, decpomdp_colored_mdp_factory):
-        ''' Per-agent memory sizing: distinct from set_imperfect_memory_size, which resizes every agent. '''
+        """Per-agent memory sizing: distinct from set_imperfect_memory_size, which resizes every agent."""
         reunfolded = decpomdp_colored_mdp_factory.set_agent_imperfect_memory_size(0, 2)
         assert isinstance(reunfolded, paynt.pomdp.decpomdp.DecPomdpColoredMdp)

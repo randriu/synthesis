@@ -9,6 +9,7 @@ import paynt.dt.dtnest.task
 def _reachability_properties():
     return stormpy.parse_properties_without_context('Pmax=? [F "goal"]')
 
+
 def _reward_properties():
     return stormpy.parse_properties_without_context('R{"steps"}min=? [F "goal"]')
 
@@ -29,11 +30,11 @@ class TestDtTask:
         assert task.has_scheduler_to_map
 
     def test_use_exact_is_no_longer_hardcoded_to_false(self):
-        '''
+        """
         Regression test: DtTask used to hardcode Property.initialize(False) regardless of the caller's
         use_exact, silently ignoring it. use_exact now flows through to construct_property (via the
         inherited Task.__init__) like every other Task, which rejects reward properties when use_exact=True.
-        '''
+        """
         with pytest.raises(ValueError):
             paynt.dt.task.DtTask(_reward_properties(), tree_depth=3, use_exact=True)
         # sanity: the same construction succeeds without use_exact

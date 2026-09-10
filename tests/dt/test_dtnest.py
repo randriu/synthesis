@@ -23,7 +23,7 @@ def _dtnest_factory(properties_string):
 
 
 class TestDtNestConstraintHandling:
-    '''
+    """
     DtNest has no mechanism to check a constraint directly -- it only ever approximates a single
     optimality-shaped numeric target within an epsilon-band (see synthesize_subtrees/
     classify_constraint_threshold). A specification with no optimality objective but exactly one constraint
@@ -32,11 +32,11 @@ class TestDtNestConstraintHandling:
     broken code path: it used to import a function (get_optimality_specification) that never existed
     anywhere in the paynt package (only in two long-deleted throwaway scripts), so every one of these cases
     used to crash with ImportError.
-    '''
+    """
 
     def test_constraint_between_random_and_optimal_is_treated_as_its_own_threshold(self):
-        ''' P>=0.55 sits strictly between random (~0.4845) and optimal (~0.6314): DtNest should search for
-        and find a tree clearing 0.55, not chase the unconstrained optimum. '''
+        """P>=0.55 sits strictly between random (~0.4845) and optimal (~0.6314): DtNest should search for
+        and find a tree clearing 0.55, not chase the unconstrained optimum."""
         properties, explicit_model = _dtnest_factory('P>=0.55 [F "goal"]')
         task = paynt.dt.dtnest.DtNestTask(properties, error_threshold=0.05, timeout=30)
         factory = paynt.dt.DtColoredMdpFactory(explicit_model, task)
@@ -45,8 +45,8 @@ class TestDtNestConstraintHandling:
         assert result.value >= 0.55
 
     def test_constraint_already_satisfied_by_random_returns_it_directly(self):
-        ''' P>=0.3 is already cleared by the random/don't-care scheduler alone (~0.4845): DtNest should
-        short-circuit to exactly the random scheduler's value without running any subtree search. '''
+        """P>=0.3 is already cleared by the random/don't-care scheduler alone (~0.4845): DtNest should
+        short-circuit to exactly the random scheduler's value without running any subtree search."""
         properties, explicit_model = _dtnest_factory('P>=0.3 [F "goal"]')
         task = paynt.dt.dtnest.DtNestTask(properties, error_threshold=0.05, timeout=30)
         factory = paynt.dt.DtColoredMdpFactory(explicit_model, task)
@@ -55,7 +55,7 @@ class TestDtNestConstraintHandling:
         assert result.value == pytest.approx(RANDOM, abs=1e-6)
 
     def test_constraint_above_optimal_is_unsatisfiable(self):
-        ''' P>=0.9 is stricter than even the true optimum (~0.6314): no admissible tree exists. '''
+        """P>=0.9 is stricter than even the true optimum (~0.6314): no admissible tree exists."""
         properties, explicit_model = _dtnest_factory('P>=0.9 [F "goal"]')
         task = paynt.dt.dtnest.DtNestTask(properties, error_threshold=0.05, timeout=30)
         factory = paynt.dt.DtColoredMdpFactory(explicit_model, task)
@@ -63,8 +63,8 @@ class TestDtNestConstraintHandling:
         assert not result.success
 
     def test_optimality_alongside_a_constraint_is_rejected(self):
-        ''' DtNest has no mechanism to enforce a constraint at all -- silently dropping it would be worse
-        than refusing outright. '''
+        """DtNest has no mechanism to enforce a constraint at all -- silently dropping it would be worse
+        than refusing outright."""
         properties, explicit_model = _dtnest_factory('Pmax=? [F "goal"]; P>=0.5 [F "goal"]')
         task = paynt.dt.dtnest.DtNestTask(properties, error_threshold=0.05, timeout=30)
         factory = paynt.dt.DtColoredMdpFactory(explicit_model, task)
@@ -72,7 +72,7 @@ class TestDtNestConstraintHandling:
             paynt.dt.dtnest.synthesize(factory, task)
 
     def test_multiple_constraints_without_optimality_is_rejected(self):
-        ''' No sensible single-value reduction exists for more than one bare constraint. '''
+        """No sensible single-value reduction exists for more than one bare constraint."""
         properties, explicit_model = _dtnest_factory('P>=0.5 [F "goal"]; P<=0.9 [F "goal"]')
         task = paynt.dt.dtnest.DtNestTask(properties, error_threshold=0.05, timeout=30)
         factory = paynt.dt.DtColoredMdpFactory(explicit_model, task)
@@ -88,7 +88,7 @@ def _node(identifier, old_identifier):
 
 
 class TestRemapNodeQueueAfterReplacement:
-    '''
+    """
     DtNest.synthesize_subtrees keeps a long-lived node_queue worklist that survives across many subtree
     replacements: after each replacement, every surviving entry's "id" (an identifier in the OLD tree) is
     translated to its counterpart in the new tree via old_identifier (set by
@@ -100,7 +100,7 @@ class TestRemapNodeQueueAfterReplacement:
     intervening nested replacement), in which case its subtree no longer exists in the new tree. See the
     PAYNT refactor plan file for the full root-cause writeup (confirmed via instrumented reproduction on
     models/tests/dt-orchard with --dtnest --dtnest-subtree-depth 3).
-    '''
+    """
 
     def test_matching_entry_is_remapped_to_the_new_identifier(self):
         tree = paynt.dt.decision_tree.DecisionTree([], [])
@@ -112,8 +112,8 @@ class TestRemapNodeQueueAfterReplacement:
         assert result[0]["extra"] == "kept"
 
     def test_entry_with_no_surviving_counterpart_is_dropped_not_raised(self):
-        ''' Reproduces the exact shape of the real (pre-fix) crash directly: a queued node made obsolete by
-        a later replacement has no node anywhere in the new tree with old_identifier equal to its id. '''
+        """Reproduces the exact shape of the real (pre-fix) crash directly: a queued node made obsolete by
+        a later replacement has no node anywhere in the new tree with old_identifier equal to its id."""
         tree = paynt.dt.decision_tree.DecisionTree([], [])
         tree.root = _node(identifier=0, old_identifier=0)
         node_queue = [{"id": 0}, {"id": 999}]
@@ -122,8 +122,8 @@ class TestRemapNodeQueueAfterReplacement:
         assert result[0]["id"] == 0
 
     def test_multiple_counterparts_raises(self):
-        ''' Should never happen in practice (assign_identifiers(keep_old=True) always yields unique
-        old_identifier values within one tree), but the defensive assert must still fire if it ever does. '''
+        """Should never happen in practice (assign_identifiers(keep_old=True) always yields unique
+        old_identifier values within one tree), but the defensive assert must still fire if it ever does."""
         root = _node(identifier=0, old_identifier=5)
         root.child_true = _node(identifier=1, old_identifier=5)
         root.child_false = _node(identifier=2, old_identifier=2)

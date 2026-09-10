@@ -10,7 +10,9 @@ from paynt.pomdp.saynt.control import StormPOMDPControl
 from time import sleep
 
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 # Abstraction Refinement + Storm splitting
 class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
@@ -20,17 +22,17 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     # buffer containing parameter subspaces to be checked after the main restricted parameter space -- plain
     # ParameterSpace values, set externally by SayntSynthesizer, wrapped into search nodes only on consumption
-    parameter_subspaces_buffer : list[paynt.parameter_space.parameter_space.ParameterSpace] | None = None
+    parameter_subspaces_buffer: list[paynt.parameter_space.parameter_space.ParameterSpace] | None = None
 
-    main_parameter_space : paynt.parameter_space.parameter_space.ParameterSpace | None = None
+    main_parameter_space: paynt.parameter_space.parameter_space.ParameterSpace | None = None
 
     # if True, Storm over-approximation will be run to help with parameter-space pruning
     storm_pruning = False
 
-    storm_control : StormPOMDPControl | None = None
-    s_queue : Any = None
+    storm_control: StormPOMDPControl | None = None
+    s_queue: Any = None
 
-    saynt_timer : Any = None
+    saynt_timer: Any = None
 
     @property
     def method_name(self) -> str:
@@ -39,15 +41,15 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     # performs splitting of the parameter space according to Storm result
     # main parameter spaces contain only those actions that were considered by best found Storm FSC
     def storm_split(
-        self, nodes : list[paynt.synthesizer.search_node.SearchNode]
+        self, nodes: list[paynt.synthesizer.search_node.SearchNode]
     ) -> tuple[list[paynt.synthesizer.search_node.SearchNode], list[paynt.parameter_space.parameter_space.ParameterSpace]]:
-        '''
+        """
         :param nodes the current active worklist (search nodes)
         :returns (main_nodes, parameter_subspaces) -- main_nodes are search nodes (the new active worklist,
             used immediately by the caller), parameter_subspaces are plain ParameterSpace values (stored into
             self.parameter_subspaces_buffer, matching the plain-value contract SayntSynthesizer itself uses
             when writing that buffer -- wrapped into nodes only once actually consumed, in synthesize_one)
-        '''
+        """
         assert self.storm_control is not None
         parameter_subspaces = []
         main_nodes = []
@@ -77,10 +79,7 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
         return main_nodes, parameter_subspaces
 
-
-
-
-    def verify_parameter_space(self, node : paynt.synthesizer.search_node.SearchNode) -> None:
+    def verify_parameter_space(self, node: paynt.synthesizer.search_node.SearchNode) -> None:
         assert self.storm_control is not None
         assert self.stat is not None
         node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space)
@@ -89,11 +88,15 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         assert node.analysis_result is not None
         assert self.task.specification.optimality is not None
         if node.analysis_result.improving_value is not None:
+            fsc_size = self.colored_mdp.policy_size(node.analysis_result.improving_assignment)  # type: ignore[attr-defined]
             if self.saynt_timer is not None:
-                print(f'-----------PAYNT----------- \
-                    \nValue = {node.analysis_result.improving_value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {self.colored_mdp.policy_size(node.analysis_result.improving_assignment)}\n', flush=True)  # type: ignore[attr-defined]
+                elapsed = round(self.saynt_timer.read(), 1)
+                print(
+                    f"-----------PAYNT----------- \n" f"Value = {node.analysis_result.improving_value} | Time elapsed = {elapsed}s | FSC size = {fsc_size}\n",
+                    flush=True,
+                )
             else:
-                self.stat.new_fsc_found(node.analysis_result.improving_value, node.analysis_result.improving_assignment, self.colored_mdp.policy_size(node.analysis_result.improving_assignment))  # type: ignore[attr-defined]
+                self.stat.new_fsc_found(node.analysis_result.improving_value, node.analysis_result.improving_assignment, fsc_size)
             self.task.specification.optimality.update_optimum(node.analysis_result.improving_value)
 
         # storm pruning runs Storm POMDP over-approximation analysis and on the sub-POMDP given by a parameter space
@@ -112,17 +115,21 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.task.specification.optimality.minimizing:
                 if self.task.specification.optimality.optimum <= storm_res.lower_bound:
                     node.analysis_result.can_improve = False
-                    logger.info(f"Used Storm result to prune a parameter space with Storm value: {storm_res.lower_bound} compared to current optimum {self.task.specification.optimality.optimum}. Underlying MDP value: {node.analysis_result.optimality_result.primary.value}")
+                    logger.info(
+                        f"Used Storm result to prune a parameter space with Storm value: {storm_res.lower_bound} compared to "
+                        f"current optimum {self.task.specification.optimality.optimum}. "
+                        f"Underlying MDP value: {node.analysis_result.optimality_result.primary.value}"
+                    )
             else:
                 if self.task.specification.optimality.optimum >= storm_res.upper_bound:
                     node.analysis_result.can_improve = False
-                    logger.info(f"Used Storm result to prune a parameter space with Storm value: {storm_res.upper_bound} compared to current optimum {self.task.specification.optimality.optimum}. Underlying MDP value: {node.analysis_result.optimality_result.primary.value}")
+                    logger.info(
+                        f"Used Storm result to prune a parameter space with Storm value: {storm_res.upper_bound} compared to "
+                        f"current optimum {self.task.specification.optimality.optimum}. "
+                        f"Underlying MDP value: {node.analysis_result.optimality_result.primary.value}"
+                    )
 
-
-
-    def synthesize_one(
-        self, node : paynt.synthesizer.search_node.SearchNode
-    ) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
+    def synthesize_one(self, node: paynt.synthesizer.search_node.SearchNode) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
         assert self.storm_control is not None
         assert self.stat is not None
 
@@ -163,9 +170,8 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                             if self.storm_control.is_memory_needed():
                                 logger.info("Additional memory needed")
                                 return self.best_assignment
-                            else:
-                                logger.info("Applying parameter-space split according to Storm results")
-                                nodes, self.parameter_subspaces_buffer = self.storm_split(nodes)
+                            logger.info("Applying parameter-space split according to Storm results")
+                            nodes, self.parameter_subspaces_buffer = self.storm_split(nodes)
                         # if Storm's result is not better continue with the synthesis normally
                         else:
                             logger.info("PAYNT's value is better. Prioritizing synthesis results")
@@ -188,7 +194,7 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if node.analysis_result.improving_assignment is not None:
                 self.best_assignment = node.analysis_result.improving_assignment
             # parameter space can be pruned
-            if node.analysis_result.can_improve == False:
+            if not node.analysis_result.can_improve:
                 self.explore(node.parameter_space)
                 # if there are no more parameter spaces in the main buffer continue the exploration in the subspaces
                 if not nodes and self.parameter_subspaces_buffer:

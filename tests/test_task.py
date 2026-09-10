@@ -7,6 +7,7 @@ import paynt.task
 def _reachability_properties():
     return stormpy.parse_properties_without_context('Pmax=? [F "goal"]')
 
+
 def _reward_properties():
     return stormpy.parse_properties_without_context('R{"steps"}min=? [F "goal"]')
 
@@ -34,8 +35,8 @@ class TestTask:
         assert wrapped.timeout == 99
 
     def test_use_exact_reaches_construct_property(self):
-        ''' use_exact must actually flow through Task -> construct_specification -> construct_property,
-        which rejects reward properties when use_exact=True. '''
+        """use_exact must actually flow through Task -> construct_specification -> construct_property,
+        which rejects reward properties when use_exact=True."""
         with pytest.raises(ValueError):
             paynt.task.Task(_reward_properties(), use_exact=True)
         # sanity: the same property without use_exact does not raise

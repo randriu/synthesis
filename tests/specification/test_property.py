@@ -18,11 +18,11 @@ class TestConstructSpecification:
 class TestSpecificationRewrap:
 
     def test_preserves_property_type_and_epsilon(self):
-        '''
+        """
         JaniUnfolder needs this: after translating PRISM to JANI, property atoms may change, so the
         specification's properties must be rebuilt from new raw stormpy formulas while preserving each
         property's paynt-level type (Property vs OptimalityProperty) and epsilon.
-        '''
+        """
         original = paynt.specification.property.construct_specification(_reachability_properties(), relative_error=0.1)
         assert original.has_optimality
         original_epsilon = original.optimality.epsilon
@@ -31,6 +31,6 @@ class TestSpecificationRewrap:
         new_raw_properties = [p.property for p in original.all_properties()]
         rewrapped = original.rewrap(new_raw_properties)
 
-        assert type(rewrapped.optimality) == type(original.optimality)
+        assert type(rewrapped.optimality) is type(original.optimality)
         assert rewrapped.optimality.epsilon == original_epsilon
         assert rewrapped.num_properties == original.num_properties

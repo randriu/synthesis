@@ -11,7 +11,7 @@ from helpers.helper import get_sketch_paths
 class TestDtSynthesis:
 
     def test_split_undecided_space_survives_a_multi_property_specification(self):
-        '''
+        """
         Regression test: scheduler_choices is only ever populated by DtColoredMdp.scheduler_is_consistent
         when the specification is single-property (see split_undecided_space/verify_parameter_space's guards) -- for any
         specification with more than one property (a constraint alongside the optimality objective, as
@@ -20,7 +20,7 @@ class TestDtSynthesis:
         iterate it unconditionally too, so the very first split of a multi-property parameter space raised
         AttributeError -- silently never caught because every DT sketch actually used elsewhere in this
         suite happens to be single-property.
-        '''
+        """
         sketch_path, _ = get_sketch_paths("tests/dt-orchard")
         prism = stormpy.parse_prism_program(sketch_path, prism_compat=True)
         # a trivially-true constraint alongside the real optimality objective: enough to make
@@ -38,7 +38,7 @@ class TestDtSynthesis:
         assert synthesizer.best_tree is not None
 
     def test_synthesize_finds_the_known_optimum(self, dt_colored_mdp_factory):
-        '''
+        """
         Regression test for DtSynthesizer.split_undecided_space/scheduler_scores (the search-policy methods moved
         off the factory during this migration). Kept at depth 0 deliberately: full AR-based tree synthesis
         is combinatorially expensive on this model at higher depths (which is exactly why get_dt_with_api.py
@@ -48,7 +48,7 @@ class TestDtSynthesis:
 
         Since synthesis is deterministic, the tree itself (not just its value) is checked too: at depth 0
         the only admissible tree is a single leaf, so its string form is a one-line action label.
-        '''
+        """
         synthesizer = paynt.dt.DtSynthesizer(dt_colored_mdp_factory)
         synthesizer.synthesize_tree(depth=0)
         assert synthesizer.best_tree is not None

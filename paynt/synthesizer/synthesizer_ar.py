@@ -12,33 +12,37 @@ import paynt.underlying_model.underlying_model
 import paynt.utils.scoring
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
 def scheduler_scores(
-    colored_mdp : paynt.colored_mdp.ColoredMdp, task : paynt.task.Task, mdp : Any, prop : Any, result : Any, selection : list[list[int]]
+    colored_mdp: paynt.colored_mdp.ColoredMdp, task: paynt.task.Task, mdp: Any, prop: Any, result: Any, selection: list[list[int]]
 ) -> dict[int, float] | None:
-    inconsistent_assignments = {parameter:options for parameter,options in enumerate(selection) if len(options) > 1}
+    inconsistent_assignments = {parameter: options for parameter, options in enumerate(selection) if len(options) > 1}
     choice_values = paynt.underlying_model.underlying_model.ModelIndex.choice_values(mdp.model, prop, result.get_values())
     choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
     expected_visits = paynt.underlying_model.underlying_model.ModelIndex.compute_expected_visits(
-        mdp.model, prop, choices, disable_expected_visits=task.disable_expected_visits)
+        mdp.model, prop, choices, disable_expected_visits=task.disable_expected_visits
+    )
     # POMDP has a specialized, hand-optimized scorer for the common posterior-unaware case; every other
     # colored-MDP variant (and posterior-aware POMDPs) uses the generic implementation. Dispatched by
     # feature_kind, not an isinstance check, so this module never needs to import paynt.pomdp.
     if colored_mdp.feature_kind == "pomdp" and not colored_mdp.posterior_aware:  # type: ignore[attr-defined]
         scores = paynt.utils.scoring.estimate_scheduler_difference_pomdp(
-            colored_mdp, mdp.model, mdp.underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits)
+            colored_mdp, mdp.model, mdp.underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits
+        )
     else:
         scores = paynt.utils.scoring.estimate_scheduler_difference(
-            colored_mdp, mdp.model, mdp.underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits)
+            colored_mdp, mdp.model, mdp.underlying_mdp_choice_map, inconsistent_assignments, choice_values, expected_visits
+        )
     return scores
 
 
 def split_parameter_space(
-    colored_mdp : paynt.colored_mdp.ColoredMdp, task : paynt.task.Task, node : paynt.synthesizer.search_node.SearchNode
+    colored_mdp: paynt.colored_mdp.ColoredMdp, task: paynt.task.Task, node: paynt.synthesizer.search_node.SearchNode
 ) -> list[paynt.synthesizer.search_node.SearchNode]:
-    '''
+    """
     AR splitting step: pick the highest-scoring inconsistent parameter and split node's parameter_space
     options for it into subspaces, wrapped as child search nodes. A free function rather than a ColoredMdp
     method, so it works uniformly across every colored-MDP variant without any of them carrying
@@ -47,7 +51,7 @@ def split_parameter_space(
     :param colored_mdp anything exposing .parameter_space/.coloring -- any ColoredMdp qualifies
     :param task the Task currently being solved (not read from colored_mdp -- it doesn't carry one)
     :param node the SearchNode currently being split
-    '''
+    """
     mdp = node.mdp
     assert mdp is not None
     assert not mdp.is_deterministic
@@ -58,12 +62,12 @@ def split_parameter_space(
     parameter_assignments = result.primary_selection
     scores = scheduler_scores(colored_mdp, task, mdp, result.prop, result.primary.result, result.primary_selection)
     if scores is None:
-        scores = {parameter:0 for parameter in range(mdp.parameter_space.num_parameters) if mdp.parameter_space.parameter_num_options(parameter) > 1}
+        scores = {parameter: 0 for parameter in range(mdp.parameter_space.num_parameters) if mdp.parameter_space.parameter_num_options(parameter) > 1}
 
     splitters = paynt.utils.scoring.parameters_with_max_score(scores)
     splitter = splitters[0]
     if len(parameter_assignments[splitter]) > 1:
-        core_suboptions,other_suboptions = mdp.parameter_space.suboptions_enumerate(splitter, parameter_assignments[splitter])
+        core_suboptions, other_suboptions = mdp.parameter_space.suboptions_enumerate(splitter, parameter_assignments[splitter])
     else:
         assert mdp.parameter_space.parameter_num_options(splitter) > 1
         core_suboptions = mdp.parameter_space.suboptions_half(splitter)
@@ -85,8 +89,8 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
     def method_name(self) -> str:
         return "AR"
 
-    def check_specification(self, node : paynt.synthesizer.search_node.SearchNode) -> None:
-        ''' Check specification for mdp or smg based on self.colored_mdp '''
+    def check_specification(self, node: paynt.synthesizer.search_node.SearchNode) -> None:
+        """Check specification for mdp or smg based on self.colored_mdp"""
         mdp = node.mdp
         assert mdp is not None
 
@@ -100,7 +104,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         spec = self.task.specification
         if node.constraint_indices is None:
             node.constraint_indices = list(spec.all_constraint_indices())
-        results : list[paynt.specification.property_result.MdpPropertyResult | None] = [None for _ in spec.constraints]
+        results: list[paynt.specification.property_result.MdpPropertyResult | None] = [None for _ in spec.constraints]
         for index in node.constraint_indices:
             constraint = spec.constraints[index]
             result = paynt.specification.property_result.MdpPropertyResult(constraint)
@@ -113,12 +117,12 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 break
 
             # check if the primary scheduler is consistent
-            result.primary_selection,consistent = self.colored_mdp.scheduler_is_consistent(mdp, node, result.primary.result, self.task.specification)
+            result.primary_selection, consistent = self.colored_mdp.scheduler_is_consistent(mdp, node, result.primary.result, self.task.specification)
             if consistent:
                 assignment = node.parameter_space.assume_options_copy(result.primary_selection)
                 dtmc = self.colored_mdp.build_assignment(assignment)
                 res = dtmc.check_specification(self.task.specification)
-                accepting,_ = res.accepting_dtmc(self.task.specification)
+                accepting, _ = res.accepting_dtmc(self.task.specification)
                 if accepting:
                     result.sat = True
                     admissible_assignment = assignment
@@ -135,7 +139,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         spec_result.constraints_result = paynt.specification.property_result.ConstraintsResult(results)
 
         # check optimality
-        if spec.optimality is not None and not spec_result.constraints_result.sat is False:
+        if spec.optimality is not None and spec_result.constraints_result.sat is not False:
             opt = spec.optimality
             result = paynt.specification.property_result.MdpOptimalityResult(opt)
 
@@ -146,7 +150,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 result.can_improve = False
             else:
                 # LB < OPT, check if LB is tight
-                result.primary_selection,consistent = self.colored_mdp.scheduler_is_consistent(mdp, node, result.primary.result, self.task.specification)
+                result.primary_selection, consistent = self.colored_mdp.scheduler_is_consistent(mdp, node, result.primary.result, self.task.specification)
                 result.can_improve = True
                 if consistent:
                     # LB < OPT and it's tight, double-check the constraints and the value on the DTMC
@@ -163,7 +167,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         spec_result.evaluate(node.parameter_space, admissible_assignment)
         node.analysis_result = spec_result
 
-    def verify_parameter_space(self, node : paynt.synthesizer.search_node.SearchNode) -> None:
+    def verify_parameter_space(self, node: paynt.synthesizer.search_node.SearchNode) -> None:
         node.mdp, node.selected_choices = self.colored_mdp.build(node.parameter_space)
         assert self.stat is not None
 
@@ -175,7 +179,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
         self.check_specification(node)
 
-    def update_optimum(self, node : paynt.synthesizer.search_node.SearchNode) -> None:
+    def update_optimum(self, node: paynt.synthesizer.search_node.SearchNode) -> None:
         assert node.analysis_result is not None
         ia = node.analysis_result.improving_assignment
         if ia is None:
@@ -195,7 +199,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             assert self.stat is not None
             self.stat.new_fsc_found(node.analysis_result.improving_value, ia, self.colored_mdp.policy_size(ia))  # type: ignore[attr-defined]
 
-    def synthesize_one(self, node : paynt.synthesizer.search_node.SearchNode) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
+    def synthesize_one(self, node: paynt.synthesizer.search_node.SearchNode) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
         nodes = [node]
         while nodes:
             if self.resource_limit_reached():
@@ -215,11 +219,11 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             nodes = nodes + child_nodes
         return self.best_assignment
 
-    def split_undecided_space(self, node : paynt.synthesizer.search_node.SearchNode) -> list[paynt.synthesizer.search_node.SearchNode]:
-        '''
+    def split_undecided_space(self, node: paynt.synthesizer.search_node.SearchNode) -> list[paynt.synthesizer.search_node.SearchNode]:
+        """
         Overridable hook: the default just delegates to the shared split_parameter_space free function.
         DtSynthesizer overrides this since decision-tree splitting classifies parameters by kind
         (action/decision/variable) rather than by scored inconsistency variance -- a genuinely different
         algorithm, not a performance variant of this one (unlike POMDP's scheduler_scores specialization).
-        '''
+        """
         return split_parameter_space(self.colored_mdp, self.task, node)

@@ -1,10 +1,10 @@
-'''
+"""
 Constructs a PosmgColoredMdp by unfolding the optimizing player's imperfect-information strategy into an
 FSC template of a given memory size. Unlike the family/ factories, this must support re-unfolding at a
 larger memory size after construction (PosmgSynthesizer.strategy_iterative increases it step by step), so
 set_imperfect_memory_size is a public entry point, not just __init__-time setup: it produces a fresh
 PosmgColoredMdp each time rather than mutating the previous one in place, and the caller reassigns.
-'''
+"""
 
 from __future__ import annotations
 
@@ -18,12 +18,13 @@ from paynt.posmg.colored_mdp import PosmgColoredMdp
 import paynt.parameter_space.parameter_space
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
 class PosmgColoredMdpFactory:
 
-    def __init__(self, posmg : Any, task : paynt.posmg.task.PosmgTask, use_exact : bool = False):
+    def __init__(self, posmg: Any, task: paynt.posmg.task.PosmgTask, use_exact: bool = False):
         self.posmg = posmg
         self.task = task
         self.use_exact = use_exact
@@ -40,12 +41,12 @@ class PosmgColoredMdpFactory:
             self.optimizing_player = specification.optimality.game_optimizing_player
 
         # POSMG manager used for unfolding the memory model into the underlying MDP
-        self.posmg_manager : Any = payntbind.synthesis.PosmgManager(self.posmg, self.optimizing_player)
+        self.posmg_manager: Any = payntbind.synthesis.PosmgManager(self.posmg, self.optimizing_player)
         # optimizing player observations
         self.opt_player_observations = self.posmg_manager.get_observation_mapping()
 
         # number of actions available at each optimizing player observation
-        self.actions_at_opt_player_observation : dict[int, int] = {obs:0 for obs in self.opt_player_observations}
+        self.actions_at_opt_player_observation: dict[int, int] = dict.fromkeys(self.opt_player_observations, 0)
         for state in range(self.posmg.nr_states):
             if state_players[state] == self.optimizing_player:
                 obs = state_obs[state]
@@ -55,7 +56,7 @@ class PosmgColoredMdpFactory:
                 self.actions_at_opt_player_observation[obs] = self.posmg.get_nr_available_actions(state)
 
         # labels of actions available at each posmg state
-        self.action_labels_at_posmg_state : list[list[str]] = [[] for state in range(self.posmg.nr_states)]
+        self.action_labels_at_posmg_state: list[list[str]] = [[] for state in range(self.posmg.nr_states)]
         for state in range(self.posmg.nr_states):
             if self.action_labels_at_posmg_state[state] != []:
                 continue
@@ -71,7 +72,7 @@ class PosmgColoredMdpFactory:
                 self.action_labels_at_posmg_state[state].append(label)
 
         # labels of actions available at each optimizing player observation
-        self.action_labels_at_opt_player_observation : dict[int, list[str]] = {}
+        self.action_labels_at_opt_player_observation: dict[int, list[str]] = {}
         for state in range(self.posmg.nr_states):
             if state_players[state] == self.optimizing_player:
                 obs = state_obs[state]
@@ -79,15 +80,15 @@ class PosmgColoredMdpFactory:
                 self.action_labels_at_opt_player_observation[obs] = labels
 
         # for each optimizing player observation, number of states associated with it
-        self.opt_player_observation_states : dict[int, int] = {obs:0 for obs in self.opt_player_observations}
+        self.opt_player_observation_states: dict[int, int] = dict.fromkeys(self.opt_player_observations, 0)
         for state in range(self.posmg.nr_states):
             if state_players[state] == self.optimizing_player:
                 obs = state_obs[state]
                 self.opt_player_observation_states[obs] += 1
 
         # number of memory states allocated to each optimizing player observation, and the current unfolding
-        self.opt_player_observation_memory_size : dict[int, int] | None = None
-        self.current_memory_size : int | None = None
+        self.opt_player_observation_memory_size: dict[int, int] | None = None
+        self.current_memory_size: int | None = None
         self.colored_mdp = self.set_imperfect_memory_size(task.memory_size)
 
     def set_manager_memory_vector(self) -> None:
@@ -95,26 +96,26 @@ class PosmgColoredMdpFactory:
         for obs, memory in self.opt_player_observation_memory_size.items():
             self.posmg_manager.set_observation_memory_size(obs, memory)
 
-    def set_imperfect_memory_size(self, memory_size : int) -> PosmgColoredMdp:
-        ''' (Re-)unfold the optimizing player's FSC template at the given memory size, producing a fresh
+    def set_imperfect_memory_size(self, memory_size: int) -> PosmgColoredMdp:
+        """(Re-)unfold the optimizing player's FSC template at the given memory size, producing a fresh
         PosmgColoredMdp -- callers reassign their reference (e.g. self.colored_mdp =
-        factory.set_imperfect_memory_size(k)) rather than relying on in-place mutation. '''
+        factory.set_imperfect_memory_size(k)) rather than relying on in-place mutation."""
         self.opt_player_observation_memory_size = {
-            obs:(memory_size if obs_states > 1 else 1) for obs, obs_states in self.opt_player_observation_states.items()}
+            obs: (memory_size if obs_states > 1 else 1) for obs, obs_states in self.opt_player_observation_states.items()
+        }
         self.set_manager_memory_vector()
         self.current_memory_size = memory_size
         self.colored_mdp = self._unfold_memory()
         return self.colored_mdp
 
-    def create_parameter_name(self, player : int, value : int, mem : int, is_action_parameter : bool) -> str:
+    def create_parameter_name(self, player: int, value: int, mem: int, is_action_parameter: bool) -> str:
         category = "A" if is_action_parameter else "M"
         if player == self.optimizing_player:
-            return "{}(P{},O{},M{})".format(category,player,value,mem)
-        else:
-            return "{}(P{},S{},M{})".format(category,player,value,mem)
+            return f"{category}(P{player},O{value},M{mem})"
+        return f"{category}(P{player},S{value},M{mem})"
 
-    def create_coloring(self, underlying_mdp : Any) -> tuple[paynt.parameter_space.parameter_space.ParameterSpace, list[list[tuple[int,int]]]]:
-        ''' version where each state of non-optimizing players has its own action parameter '''
+    def create_coloring(self, underlying_mdp: Any) -> tuple[paynt.parameter_space.parameter_space.ParameterSpace, list[list[tuple[int, int]]]]:
+        """version where each state of non-optimizing players has its own action parameter"""
         assert self.opt_player_observation_memory_size is not None
         parameter_space = paynt.parameter_space.parameter_space.ParameterSpace()
 
@@ -124,16 +125,16 @@ class PosmgColoredMdpFactory:
             if num_actions > 1:
                 option_labels = self.action_labels_at_opt_player_observation[opt_player_obs]
                 for mem in range(self.opt_player_observation_memory_size[opt_player_obs]):
-                    name = self.create_parameter_name(self.optimizing_player,opt_player_obs,mem,True)
-                    parameter_space.add_parameter(name,option_labels)
+                    name = self.create_parameter_name(self.optimizing_player, opt_player_obs, mem, True)
+                    parameter_space.add_parameter(name, option_labels)
 
             # memory parameters
             num_updates = self.posmg_manager.max_successor_memory_size[opt_player_obs]
             if num_updates > 1:
                 option_labels = [str(x) for x in range(num_updates)]
                 for mem in range(self.opt_player_observation_memory_size[opt_player_obs]):
-                    name = self.create_parameter_name(self.optimizing_player,opt_player_obs,mem,False)
-                    parameter_space.add_parameter(name,option_labels)
+                    name = self.create_parameter_name(self.optimizing_player, opt_player_obs, mem, False)
+                    parameter_space.add_parameter(name, option_labels)
 
         for state in range(underlying_mdp.nr_states):
             underlying_game_state_player_indication = self.posmg_manager.get_state_player_indications()
@@ -143,8 +144,8 @@ class PosmgColoredMdpFactory:
                     posmg_state = self.posmg_manager.state_prototype[state]
                     mem = self.posmg_manager.state_memory[state]
                     option_labels = self.action_labels_at_posmg_state[posmg_state]
-                    name = self.create_parameter_name(underlying_game_state_player_indication[state],posmg_state,mem,True)
-                    parameter_space.add_parameter(name,option_labels)
+                    name = self.create_parameter_name(underlying_game_state_player_indication[state], posmg_state, mem, True)
+                    parameter_space.add_parameter(name, option_labels)
 
         # create the coloring
         assert self.posmg_manager.num_holes == parameter_space.num_parameters
@@ -158,24 +159,21 @@ class PosmgColoredMdpFactory:
             parameter_options = []
             parameter = choice_action_parameter[choice]
             if parameter != num_parameters:
-                parameter_options.append( (parameter,choice_action_option[choice]) )
+                parameter_options.append((parameter, choice_action_option[choice]))
             parameter = choice_memory_parameter[choice]
             if parameter != num_parameters:
-                parameter_options.append( (parameter,choice_memory_option[choice]) )
+                parameter_options.append((parameter, choice_memory_option[choice]))
             choice_to_parameter_options.append(parameter_options)
 
         return parameter_space, choice_to_parameter_options
 
     def _unfold_memory(self) -> PosmgColoredMdp:
         assert self.opt_player_observation_memory_size is not None
-        logger.debug("unfolding {}-FSC template into one-sided POSMG...".format(max(self.opt_player_observation_memory_size.values())))
+        logger.debug(f"unfolding {max(self.opt_player_observation_memory_size.values())}-FSC template into one-sided POSMG...")
         underlying_mdp = self.posmg_manager.construct_mdp()
         logger.debug(f"constructed underlying MDP having {underlying_mdp.nr_states} states and {underlying_mdp.nr_choices} actions.")
 
         parameter_space, choice_to_parameter_options = self.create_coloring(underlying_mdp)
-        coloring = payntbind.synthesis.Coloring(
-            parameter_space.native, underlying_mdp.nondeterministic_choice_indices, choice_to_parameter_options)
+        coloring = payntbind.synthesis.Coloring(parameter_space.native, underlying_mdp.nondeterministic_choice_indices, choice_to_parameter_options)
 
-        colored_mdp = PosmgColoredMdp(
-            underlying_mdp, parameter_space, coloring, self.use_exact, self.posmg_manager)
-        return colored_mdp
+        return PosmgColoredMdp(underlying_mdp, parameter_space, coloring, self.use_exact, self.posmg_manager)

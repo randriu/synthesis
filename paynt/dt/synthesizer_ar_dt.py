@@ -4,6 +4,7 @@ import paynt.utils.scoring
 import paynt.specification.property_result
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,7 +18,7 @@ class DtSearchNode(paynt.synthesizer.search_node.SearchNode):
 
 
 class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
-    '''
+    """
     AR specialized for decision-tree synthesis: splits by parameter kind (action/decision/variable) rather
     than by scored inconsistency variance, and adds harmonization (retrying an inconsistent scheduler
     selection against both directions of one parameter before giving up) plus a "scheduler preserved across
@@ -25,7 +26,7 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     This is the inner search engine; the outer DtSynthesizer (paynt.dt.synthesizer) constructs a fresh
     instance of this class for every tree depth it tries, mirroring the SynthesizerARStorm/SayntSynthesizer
     split.
-    '''
+    """
 
     search_node_type = DtSearchNode
 
@@ -57,18 +58,17 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             node.analysis_result.can_improve = True
             self.update_optimum(node)
 
-
     def harmonize_inconsistent_scheduler(self, node):
         self.num_harmonizations += 1
-        mdp = node.mdp
         result = node.analysis_result.undecided_result()
         parameter_selection = result.primary_selection
-        harmonizing_parameter = [parameter for parameter,options in enumerate(parameter_selection) if len(options)>1][0]
-        selection_1 = parameter_selection.copy(); selection_1[harmonizing_parameter] = [selection_1[harmonizing_parameter][0]]
-        selection_2 = parameter_selection.copy(); selection_2[harmonizing_parameter] = [selection_2[harmonizing_parameter][1]]
-        for selection in [selection_1,selection_2]:
-            self.verify_parameter_selection(node,selection)
-
+        harmonizing_parameter = [parameter for parameter, options in enumerate(parameter_selection) if len(options) > 1][0]
+        selection_1 = parameter_selection.copy()
+        selection_1[harmonizing_parameter] = [selection_1[harmonizing_parameter][0]]
+        selection_2 = parameter_selection.copy()
+        selection_2[harmonizing_parameter] = [selection_2[harmonizing_parameter][1]]
+        for selection in [selection_1, selection_2]:
+            self.verify_parameter_selection(node, selection)
 
     def verify_parameter_space(self, node):
         self.num_parameter_spaces_considered += 1
@@ -89,7 +89,7 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.num_schedulers_preserved += 1
                 node.analysis_result = node.parent_info.analysis_result
                 node.scheduler_choices = node.parent_info.scheduler_choices
-                consistent,parameter_selection = self.colored_mdp.are_choices_consistent(node.scheduler_choices, node.parameter_space)
+                consistent, parameter_selection = self.colored_mdp.are_choices_consistent(node.scheduler_choices, node.parameter_space)
                 assert not consistent
                 if node.analysis_result.optimality_result is None:
                     for constraint_res in node.analysis_result.constraints_result.results:
@@ -113,14 +113,20 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         return spec_result
 
     def scheduler_scores(self, selection):
-        ''' Decision-tree splitting heuristic: classify inconsistent parameters by kind (action/decision/
+        """Decision-tree splitting heuristic: classify inconsistent parameters by kind (action/decision/
         variable) and pick one deterministically, rather than scoring by choice-value variance -- a
-        genuinely different algorithm from the shared AR default, not a performance variant of it. '''
-        inconsistent_assignments = {parameter:options for parameter,options in enumerate(selection) if len(options) > 1 }
+        genuinely different algorithm from the shared AR default, not a performance variant of it."""
+        inconsistent_assignments = {parameter: options for parameter, options in enumerate(selection) if len(options) > 1}
         assert len(inconsistent_assignments) > 0, f"obtained selection with no inconsistencies: {selection}"
-        inconsistent_action_parameters = [(parameter,options) for parameter,options in inconsistent_assignments.items() if self.colored_mdp.is_action_parameter[parameter]]
-        inconsistent_decision_parameters = [(parameter,options) for parameter,options in inconsistent_assignments.items() if self.colored_mdp.is_decision_parameter[parameter]]
-        inconsistent_variable_parameters = [(parameter,options) for parameter,options in inconsistent_assignments.items() if self.colored_mdp.is_variable_parameter[parameter]]
+        inconsistent_action_parameters = [
+            (parameter, options) for parameter, options in inconsistent_assignments.items() if self.colored_mdp.is_action_parameter[parameter]
+        ]
+        inconsistent_decision_parameters = [
+            (parameter, options) for parameter, options in inconsistent_assignments.items() if self.colored_mdp.is_decision_parameter[parameter]
+        ]
+        inconsistent_variable_parameters = [
+            (parameter, options) for parameter, options in inconsistent_assignments.items() if self.colored_mdp.is_variable_parameter[parameter]
+        ]
 
         # choose one splitter
         splitter = None
@@ -133,7 +139,7 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             splitter = inconsistent_variable_parameters[0][0]
         assert splitter is not None, "splitter not set"
         # force the score of the selected splitter
-        return {splitter:10}
+        return {splitter: 10}
 
     def split_undecided_space(self, node):
         mdp = node.mdp
@@ -148,7 +154,7 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         splitter = splitters[0]
         if self.colored_mdp.is_action_parameter[splitter] or self.colored_mdp.is_decision_parameter[splitter]:
             assert len(parameter_assignments[splitter]) > 1
-            core_suboptions,other_suboptions = mdp.parameter_space.suboptions_enumerate(splitter, parameter_assignments[splitter])
+            core_suboptions, other_suboptions = mdp.parameter_space.suboptions_enumerate(splitter, parameter_assignments[splitter])
         else:
             # split by inconsistent options
             splitter_options = node.parameter_space.parameter_options(splitter)
@@ -156,7 +162,8 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             index_split = splitter_options.index(option_2)
 
             core_suboptions = [splitter_options[:index_split], splitter_options[index_split:]]
-            for options in core_suboptions: assert len(options) > 0
+            for options in core_suboptions:
+                assert len(options) > 0
             other_suboptions = []
 
         if len(other_suboptions) == 0:
@@ -168,7 +175,7 @@ class SynthesizerARDt(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         # state and hands it, shared, to every freshly-split child); layer the DT-specific parent_info
         # fields on top -- these are now always real declared fields (ParentInfo.analysis_result/
         # scheduler_choices), never a dynamic bolt-on that could silently be absent
-        child_nodes = node.split(splitter,suboptions)
+        child_nodes = node.split(splitter, suboptions)
         assert node.parameter_space.size == sum([child.parameter_space.size for child in child_nodes])
         for child in child_nodes:
             child.parent_info.analysis_result = node.analysis_result

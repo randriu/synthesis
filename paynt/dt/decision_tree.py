@@ -1,18 +1,20 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any
 
 import graphviz
 
 import paynt.parameter_space.parameter_space
 
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 class DtVariable:
 
-    def __init__(self, name : str, domain : set[int]):
+    def __init__(self, name: str, domain: set[int]):
         self.name = name
         # conversion of boolean variables to integers
         domain_new = []
@@ -22,8 +24,8 @@ class DtVariable:
             elif value is False:
                 value = 0
             domain_new.append(value)
-        self.domain : list[int] = sorted(domain_new)
-        self.is_bool_var = self.domain == [0,1]
+        self.domain: list[int] = sorted(domain_new)
+        self.is_bool_var = self.domain == [0, 1]
 
     @property
     def domain_min(self) -> int:
@@ -35,9 +37,9 @@ class DtVariable:
 
     @property
     def parameter_domain(self) -> list[int]:
-        '''
+        """
         Parameter domain does not include the maximum value.
-        '''
+        """
         return self.domain[:-1]
 
     def __str__(self) -> str:
@@ -45,10 +47,8 @@ class DtVariable:
         return f"{self.name}:{domain}"
 
 
-
-
 class DecisionTreeNode:
-    '''
+    """
     A node is either terminal (is_terminal, child_true/child_false both None) -- carrying an action -- or
     internal -- carrying a variable/variable_bound (the branch predicate) and both children. All of
     variable/variable_bound/child_true/child_false/action are declared Optional since a node is genuinely
@@ -56,20 +56,20 @@ class DecisionTreeNode:
     state, which can change at runtime (e.g. simplify() merges same-action children back into a terminal) --
     every method below asserts the shape it actually needs immediately after checking is_terminal, rather
     than narrowing the fields to non-Optional, since both shapes are real and legitimate.
-    '''
+    """
 
-    def __init__(self, parent : Optional["DecisionTreeNode"]):
+    def __init__(self, parent: DecisionTreeNode | None):
         self.parent = parent
-        self.child_true : Optional["DecisionTreeNode"] = None
-        self.child_false : Optional["DecisionTreeNode"] = None
-        self.identifier : int | None = None
+        self.child_true: DecisionTreeNode | None = None
+        self.child_false: DecisionTreeNode | None = None
+        self.identifier: int | None = None
         # set only by assign_identifiers(keep_old=True); read externally by dtnest's node-requeueing logic
-        self.old_identifier : int | None = None
-        self.parameters : list[int] | None = None
+        self.old_identifier: int | None = None
+        self.parameters: list[int] | None = None
 
-        self.action : int | None = None
-        self.variable : int | None = None
-        self.variable_bound : int | None = None
+        self.action: int | None = None
+        self.variable: int | None = None
+        self.variable_bound: int | None = None
         self.is_bool_normalized = False
 
     @property
@@ -77,11 +77,11 @@ class DecisionTreeNode:
         return self.child_false is None and self.child_true is None
 
     @property
-    def child_nodes(self) -> list["DecisionTreeNode"]:
+    def child_nodes(self) -> list[DecisionTreeNode]:
         if self.is_terminal:
             return []
         assert self.child_true is not None and self.child_false is not None
-        return [self.child_true,self.child_false]
+        return [self.child_true, self.child_false]
 
     @property
     def is_true_child(self) -> bool:
@@ -98,7 +98,7 @@ class DecisionTreeNode:
             return 0
         return 1 + max([child.get_depth() for child in self.child_nodes])
 
-    def set_node_from_helper(self, tree_helper_node : dict, variable_names : list[str], variable_domains : list[list[int]], action_labels : list[str]) -> None:
+    def set_node_from_helper(self, tree_helper_node: dict, variable_names: list[str], variable_domains: list[list[int]], action_labels: list[str]) -> None:
         if tree_helper_node["leaf"]:
             self.action = action_labels.index(tree_helper_node["chosen"][0])
         else:
@@ -106,11 +106,11 @@ class DecisionTreeNode:
             # tree helper can contain values that are not necessarily in the domain, e.g. let's say our domain is [0,2,3]
             # and we want to split [0] and [2,3], tree helper can contain 0 or 1. We expect it will be 0 in this case.
             while tree_helper_node["chosen"][1] not in variable_domains[self.variable]:
-                tree_helper_node["chosen"] = (tree_helper_node["chosen"][0], tree_helper_node["chosen"][1]-1)
+                tree_helper_node["chosen"] = (tree_helper_node["chosen"][0], tree_helper_node["chosen"][1] - 1)
             self.variable_bound = variable_domains[self.variable].index(tree_helper_node["chosen"][1])
 
     def add_children_from_helper(
-        self, tree_helper : list[dict], helper_node : dict, variable_names : list[str], variable_domains : list[list[int]], action_labels : list[str]
+        self, tree_helper: list[dict], helper_node: dict, variable_names: list[str], variable_domains: list[list[int]], action_labels: list[str]
     ) -> None:
         assert self.is_terminal
         self.child_true = DecisionTreeNode(self)
@@ -125,31 +125,30 @@ class DecisionTreeNode:
             return 0
         return 1 + sum([child.get_number_of_descendants() for child in self.child_nodes])
 
-    def assign_identifiers(self, identifier : int = 0, keep_old : bool = False) -> int:
-        '''
+    def assign_identifiers(self, identifier: int = 0, keep_old: bool = False) -> int:
+        """
         Recursively assigns unique identifiers to each child node with pre-order traversal.
             If keep_old is True, the old identifier is stored in the old_identifier attribute before being overwritten.
-        '''
+        """
         if keep_old:
             self.old_identifier = self.identifier
         self.identifier = identifier
         if self.is_terminal:
             return identifier
         assert self.child_true is not None and self.child_false is not None
-        identifier = self.child_true.assign_identifiers(identifier+1, keep_old=keep_old)
-        identifier = self.child_false.assign_identifiers(identifier+1, keep_old=keep_old)
-        return identifier
+        identifier = self.child_true.assign_identifiers(identifier + 1, keep_old=keep_old)
+        return self.child_false.assign_identifiers(identifier + 1, keep_old=keep_old)
 
-    def associate_parameters(self, node_parameter_info : list[list[tuple[int,str,str]]]) -> None:
+    def associate_parameters(self, node_parameter_info: list[list[tuple[int, str, str]]]) -> None:
         assert self.identifier is not None
-        self.parameters = [parameter for parameter,_,_ in node_parameter_info[self.identifier]]
+        self.parameters = [parameter for parameter, _, _ in node_parameter_info[self.identifier]]
         if self.is_terminal:
             return
         assert self.child_true is not None and self.child_false is not None
         self.child_true.associate_parameters(node_parameter_info)
         self.child_false.associate_parameters(node_parameter_info)
 
-    def associate_assignment(self, assignment : paynt.parameter_space.parameter_space.ParameterSpace) -> None:
+    def associate_assignment(self, assignment: paynt.parameter_space.parameter_space.ParameterSpace) -> None:
         assert self.parameters is not None
         parameter_assignment = [assignment.parameter_options(parameter)[0] for parameter in self.parameters]
         if self.is_terminal:
@@ -157,38 +156,39 @@ class DecisionTreeNode:
             return
 
         self.variable = parameter_assignment[0]
-        self.variable_bound = parameter_assignment[self.variable+1]
+        self.variable_bound = parameter_assignment[self.variable + 1]
 
         assert self.child_true is not None and self.child_false is not None
         self.child_true.associate_assignment(assignment)
         self.child_false.associate_assignment(assignment)
 
-    def apply_hint(self, parameter_subspace : paynt.parameter_space.parameter_space.ParameterSpace, tree_hint : "DecisionTreeNode") -> None:
+    def apply_hint(self, parameter_subspace: paynt.parameter_space.parameter_space.ParameterSpace, tree_hint: DecisionTreeNode) -> None:
         if self.is_terminal or tree_hint.is_terminal:
             return
 
         assert self.parameters is not None
         variable_hint = tree_hint.variable
         assert variable_hint is not None and tree_hint.variable_bound is not None
-        parameter_subspace.parameter_set_options(self.parameters[0],[variable_hint])
-        parameter_subspace.parameter_set_options(self.parameters[variable_hint+1],[tree_hint.variable_bound])
+        parameter_subspace.parameter_set_options(self.parameters[0], [variable_hint])
+        parameter_subspace.parameter_set_options(self.parameters[variable_hint + 1], [tree_hint.variable_bound])
         assert self.child_true is not None and self.child_false is not None
         assert tree_hint.child_true is not None and tree_hint.child_false is not None
-        self.child_true.apply_hint(parameter_subspace,tree_hint.child_true)
-        self.child_false.apply_hint(parameter_subspace,tree_hint.child_false)
+        self.child_true.apply_hint(parameter_subspace, tree_hint.child_true)
+        self.child_false.apply_hint(parameter_subspace, tree_hint.child_false)
 
-    def simplify(self, variables : list["DtVariable"], state_valuations : list[list[int]]) -> None:
-        '''
-        Recursively simplifies the decision tree by removing nodes that have only one child due to the given state valuations, and by merging terminal nodes with the same action.
-        '''
+    def simplify(self, variables: list[DtVariable], state_valuations: list[list[int]]) -> None:
+        """
+        Recursively simplifies the decision tree by removing nodes that have only one child due to the given
+        state valuations, and by merging terminal nodes with the same action.
+        """
         if self.is_terminal:
             return
 
         assert self.variable is not None and self.variable_bound is not None
         assert self.child_true is not None and self.child_false is not None
         bound = variables[self.variable].domain[self.variable_bound]
-        state_valuations_true =  [valuation for valuation in state_valuations if valuation[self.variable] <= bound]
-        state_valuations_false = [valuation for valuation in state_valuations if valuation[self.variable]  > bound]
+        state_valuations_true = [valuation for valuation in state_valuations if valuation[self.variable] <= bound]
+        state_valuations_false = [valuation for valuation in state_valuations if valuation[self.variable] > bound]
         child_skip = None
         if len(state_valuations_true) == 0:
             child_skip = self.child_false
@@ -200,7 +200,7 @@ class DecisionTreeNode:
             self.action = child_skip.action
             self.child_true = child_skip.child_true
             self.child_false = child_skip.child_false
-            self.simplify(variables,state_valuations)
+            self.simplify(variables, state_valuations)
             return
 
         self.child_true.simplify(variables, state_valuations_true)
@@ -210,24 +210,23 @@ class DecisionTreeNode:
             self.action = self.child_true.action
             self.child_true = self.child_false = None
 
-    def branch_expression(self, variables : list["DtVariable"], true_branch : bool = True) -> str:
+    def branch_expression(self, variables: list[DtVariable], true_branch: bool = True) -> str:
         assert self.variable is not None and self.variable_bound is not None
         var = variables[self.variable]
         if true_branch:
             if var.is_bool_var:
                 return f"{var.name}"
             return f"{var.name}<={var.domain[self.variable_bound]}"
-        else:
-            if var.is_bool_var:
-                return f"!({var.name})"
-            return f"{var.name}>{var.domain[self.variable_bound]}"
+        if var.is_bool_var:
+            return f"!({var.name})"
+        return f"{var.name}>{var.domain[self.variable_bound]}"
 
-    def path_expression(self, variables : list["DtVariable"]) -> list[str]:
+    def path_expression(self, variables: list[DtVariable]) -> list[str]:
         if self.parent is None:
             return []
-        return self.parent.path_expression(variables) + [self.parent.branch_expression(variables,true_branch=self.is_true_child)]
+        return self.parent.path_expression(variables) + [self.parent.branch_expression(variables, true_branch=self.is_true_child)]
 
-    def copy(self, parent : Optional["DecisionTreeNode"]) -> "DecisionTreeNode":
+    def copy(self, parent: DecisionTreeNode | None) -> DecisionTreeNode:
         node_copy = DecisionTreeNode(parent)
         node_copy.identifier = self.identifier
         node_copy.parameters = self.parameters
@@ -242,7 +241,7 @@ class DecisionTreeNode:
             node_copy.child_false = self.child_false.copy(node_copy)
         return node_copy
 
-    def node_label(self, variables : list["DtVariable"], action_labels : list[str]) -> str:
+    def node_label(self, variables: list[DtVariable], action_labels: list[str]) -> str:
         if self.is_terminal:
             assert self.action is not None
             return action_labels[self.action]
@@ -252,17 +251,17 @@ class DecisionTreeNode:
             return f"{var.name}"
         return f"{var.name}<={var.domain[self.variable_bound]}"
 
-    def to_string(self, variables : list["DtVariable"], action_labels : list[str], indent_level : int = 0, indent_size : int = 2) -> str:
-        indent = " "*indent_level*indent_size
+    def to_string(self, variables: list[DtVariable], action_labels: list[str], indent_level: int = 0, indent_size: int = 2) -> str:
+        indent = " " * indent_level * indent_size
         if self.is_terminal:
             assert self.action is not None
             return indent + f"{action_labels[self.action]}" + "\n"
         assert self.child_true is not None and self.child_false is not None
         s = ""
         s += indent + f"if {self.branch_expression(variables)}:" + "\n"
-        s += self.child_true.to_string(variables,action_labels,indent_level+1)
-        s += indent + f"else:" + "\n"
-        s += self.child_false.to_string(variables,action_labels,indent_level+1)
+        s += self.child_true.to_string(variables, action_labels, indent_level + 1)
+        s += indent + "else:" + "\n"
+        s += self.child_false.to_string(variables, action_labels, indent_level + 1)
         return s
 
     @property
@@ -270,11 +269,13 @@ class DecisionTreeNode:
         return str(self.identifier)
 
     def to_graphviz(
-        self, graphviz_tree : graphviz.Digraph, variables : list["DtVariable"], action_labels : list[str], highlight_nodes : list[int] = []
+        self, graphviz_tree: graphviz.Digraph, variables: list[DtVariable], action_labels: list[str], highlight_nodes: list[int] | None = None
     ) -> None:
+        if highlight_nodes is None:
+            highlight_nodes = []
         if not self.is_terminal:
             for child in self.child_nodes:
-                child.to_graphviz(graphviz_tree,variables,action_labels,highlight_nodes)
+                child.to_graphviz(graphviz_tree, variables, action_labels, highlight_nodes)
 
         node_label = self.node_label(variables, action_labels)
 
@@ -284,14 +285,13 @@ class DecisionTreeNode:
             graphviz_tree.node(self.graphviz_id, label=node_label, shape="box", style="rounded", margin="0.05,0.05")
         if not self.is_terminal:
             assert self.child_true is not None and self.child_false is not None
-            graphviz_tree.edge(self.graphviz_id,self.child_true.graphviz_id,label="T")
-            graphviz_tree.edge(self.graphviz_id,self.child_false.graphviz_id,label="F")
-
+            graphviz_tree.edge(self.graphviz_id, self.child_true.graphviz_id, label="T")
+            graphviz_tree.edge(self.graphviz_id, self.child_false.graphviz_id, label="F")
 
     # in dtNest the tree nodes contain reference indeces to objects from subtree_colored_mdp
     # this needs to be fixed to match the references in the original colored MDP
     def fix_with_respect_to_colored_mdp(
-        self, action_labels : list[str], new_action_labels : list[str], variables : list["DtVariable"], new_variables : list["DtVariable"]
+        self, action_labels: list[str], new_action_labels: list[str], variables: list[DtVariable], new_variables: list[DtVariable]
     ) -> None:
         if self.is_terminal:
             assert self.action is not None
@@ -304,7 +304,7 @@ class DecisionTreeNode:
         var = variables[self.variable]
         var_name = var.name
         var_bound = var.domain[self.variable_bound]
-        for var_id, new_var in enumerate(new_variables):
+        for var_id, new_var in enumerate(new_variables):  # noqa: B007 -- var_id used below
             if new_var.name == var_name:
                 break
         bound_id = new_var.domain.index(var_bound)
@@ -314,7 +314,7 @@ class DecisionTreeNode:
         self.child_true.fix_with_respect_to_colored_mdp(action_labels, new_action_labels, variables, new_variables)
         self.child_false.fix_with_respect_to_colored_mdp(action_labels, new_action_labels, variables, new_variables)
 
-    def normalize_boolean_variable_nodes_for_output(self, variables : list["DtVariable"]) -> None:
+    def normalize_boolean_variable_nodes_for_output(self, variables: list[DtVariable]) -> None:
         if self.is_terminal:
             return
         assert self.variable is not None
@@ -331,10 +331,9 @@ class DecisionTreeNode:
         self.child_false.normalize_boolean_variable_nodes_for_output(variables)
 
 
-
 class DecisionTree:
 
-    def __init__(self, action_labels : list[str], variables : list["DtVariable"]):
+    def __init__(self, action_labels: list[str], variables: list[DtVariable]):
         self.action_labels = action_labels
         self.variables = variables
         self.reset()
@@ -346,14 +345,14 @@ class DecisionTree:
         self.root = DecisionTreeNode(None)
         self.root.action = self.action_labels.index("__random__")
 
-    def copy(self) -> "DecisionTree":
+    def copy(self) -> DecisionTree:
         new_tree = DecisionTree(self.action_labels, self.variables)
         new_tree.root = self.root.copy(None)
         return new_tree
 
-    def set_depth(self, depth : int) -> None:
+    def set_depth(self, depth: int) -> None:
         self.reset()
-        for level in range(depth):
+        for _level in range(depth):
             for node in self.collect_terminals():
                 node.add_children()
         self.root.assign_identifiers()
@@ -361,9 +360,9 @@ class DecisionTree:
     def get_depth(self) -> int:
         return self.root.get_depth()
 
-    def build_from_tree_helper(self, tree_helper : list[dict]) -> None:
+    def build_from_tree_helper(self, tree_helper: list[dict]) -> None:
         self.reset()
-        node_stack : list[tuple[int, DecisionTreeNode]] = [(0, self.root)]
+        node_stack: list[tuple[int, DecisionTreeNode]] = [(0, self.root)]
         var_names = [v.name for v in self.variables]
         var_domains = [v.domain for v in self.variables]
         self.root.set_node_from_helper(tree_helper[0], var_names, var_domains, self.action_labels)
@@ -382,15 +381,22 @@ class DecisionTree:
         nodes = self.collect_nodes()
         for node_id, node in enumerate(nodes):
             assert node.identifier is not None
-            assert node.is_terminal == tree_helper[node.identifier]["leaf"], f"node {node_id} is terminal: {node.is_terminal}, expected: {tree_helper[node_id]['leaf']}"
-            assert node.identifier == tree_helper[node.identifier]["id"], f"node {node_id} has identifier {node.identifier}, expected: {tree_helper[node_id]['id']}"
+            assert (
+                node.is_terminal == tree_helper[node.identifier]["leaf"]
+            ), f"node {node_id} is terminal: {node.is_terminal}, expected: {tree_helper[node_id]['leaf']}"
+            assert (
+                node.identifier == tree_helper[node.identifier]["id"]
+            ), f"node {node_id} has identifier {node.identifier}, expected: {tree_helper[node_id]['id']}"
 
-    def collect_nodes(self, node_condition : Callable[[DecisionTreeNode], bool] | None = None) -> list[DecisionTreeNode]:
-        '''
+    def collect_nodes(self, node_condition: Callable[[DecisionTreeNode], bool] | None = None) -> list[DecisionTreeNode]:
+        """
         Returns a list of nodes in the tree that satisfy the given node_condition. If node_condition is None, returns all nodes in the tree.
-        '''
+        """
         if node_condition is None:
-            node_condition = lambda node : True
+
+            def node_condition(node):
+                return True
+
         node_queue = [self.root]
         output_nodes = []
         while node_queue:
@@ -401,19 +407,19 @@ class DecisionTree:
         return output_nodes
 
     def collect_terminals(self) -> list[DecisionTreeNode]:
-        return self.collect_nodes(lambda node : node.is_terminal)
+        return self.collect_nodes(lambda node: node.is_terminal)
 
     def collect_nonterminals(self) -> list[DecisionTreeNode]:
-        return self.collect_nodes(lambda node : not node.is_terminal)
+        return self.collect_nodes(lambda node: not node.is_terminal)
 
-    def to_list(self) -> list[tuple[int,int,int]]:
+    def to_list(self) -> list[tuple[int, int, int]]:
         num_nodes = len(self.collect_nodes())
-        node_info : list[tuple[int,int,int] | None] = [ None for node in range(num_nodes) ]
+        node_info: list[tuple[int, int, int] | None] = [None for node in range(num_nodes)]
         for node in self.collect_nodes():
             parent = num_nodes if node.parent is None else node.parent.identifier
             assert parent is not None
-            child_true : int | None
-            child_false : int | None
+            child_true: int | None
+            child_false: int | None
             if node.is_terminal:
                 child_true = child_false = num_nodes
             else:
@@ -422,11 +428,11 @@ class DecisionTree:
                 child_false = node.child_false.identifier
                 assert child_true is not None and child_false is not None
             assert node.identifier is not None
-            node_info[node.identifier] = (parent,child_true,child_false)
+            node_info[node.identifier] = (parent, child_true, child_false)
         assert all(info is not None for info in node_info)
         return node_info  # type: ignore[return-value]
 
-    def simplify(self, state_valuations : list[list[int]]) -> None:
+    def simplify(self, state_valuations: list[list[int]]) -> None:
         self.root.simplify(self.variables, state_valuations)
 
     def normalize_boolean_variable_nodes_for_output(self) -> None:
@@ -437,10 +443,10 @@ class DecisionTree:
         output_tree.normalize_boolean_variable_nodes_for_output()
         return output_tree.root.to_string(output_tree.variables, output_tree.action_labels)
 
-    def to_prism(self, indent_size : int = 2) -> str:
+    def to_prism(self, indent_size: int = 2) -> str:
         output_tree = self.copy()
         output_tree.normalize_boolean_variable_nodes_for_output()
-        indent = " "*indent_size
+        indent = " " * indent_size
         s = ""
         s += "module scheduler\n"
         for terminal in output_tree.collect_terminals():
@@ -457,22 +463,24 @@ class DecisionTree:
         s += "endmodule\n"
         return s
 
-    def to_graphviz(self, highlight_nodes : list[int] = []) -> graphviz.Digraph:
+    def to_graphviz(self, highlight_nodes: list[int] | None = None) -> graphviz.Digraph:
+        if highlight_nodes is None:
+            highlight_nodes = []
         output_tree = self.copy()
         output_tree.normalize_boolean_variable_nodes_for_output()
         logging.getLogger("graphviz").setLevel(logging.WARNING)
         logging.getLogger("graphviz.sources").setLevel(logging.ERROR)
         graphviz_tree = graphviz.Digraph(comment="decision tree")
-        output_tree.root.to_graphviz(graphviz_tree,output_tree.variables,output_tree.action_labels, highlight_nodes)
+        output_tree.root.to_graphviz(graphviz_tree, output_tree.variables, output_tree.action_labels, highlight_nodes)
         return graphviz_tree
-    
-    def append_tree_as_subtree(self, new_subtree : "DecisionTree", subtree_root_node_id : int, subtree_colored_mdp : Any) -> None:
-        matching_nodes = self.collect_nodes(lambda node : node.identifier == subtree_root_node_id)
+
+    def append_tree_as_subtree(self, new_subtree: DecisionTree, subtree_root_node_id: int, subtree_colored_mdp: Any) -> None:
+        matching_nodes = self.collect_nodes(lambda node: node.identifier == subtree_root_node_id)
         assert len(matching_nodes) == 1, f"subtree root node id {subtree_root_node_id} not found in decision tree"
         subtree_root_node = matching_nodes[0]
 
         all_current_nodes = self.collect_nodes()
-        new_subtree.root.assign_identifiers(identifier=len(all_current_nodes)+1)
+        new_subtree.root.assign_identifiers(identifier=len(all_current_nodes) + 1)
         new_subtree.root.fix_with_respect_to_colored_mdp(subtree_colored_mdp.action_labels, self.action_labels, subtree_colored_mdp.variables, self.variables)
 
         parent = subtree_root_node.parent

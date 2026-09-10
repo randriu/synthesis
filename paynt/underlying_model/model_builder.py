@@ -6,10 +6,11 @@ import stormpy
 from paynt.parser.drn_parser import DrnParser
 import paynt.specification.property
 
+
 class ModelBuilder:
 
     @classmethod
-    def default_builder_options(cls, specification : paynt.specification.property.Specification | None = None) -> Any:
+    def default_builder_options(cls, specification: paynt.specification.property.Specification | None = None) -> Any:
         # builder options
         if specification is not None:
             formulae = specification.stormpy_formulae()
@@ -27,7 +28,7 @@ class ModelBuilder:
         return builder_options
 
     @classmethod
-    def from_jani(cls, program : Any, specification : paynt.specification.property.Specification | None = None, use_exact : bool = False) -> Any:
+    def from_jani(cls, program: Any, specification: paynt.specification.property.Specification | None = None, use_exact: bool = False) -> Any:
         builder_options = cls.default_builder_options(specification)
         builder_options.set_build_choice_labels(False)
         if use_exact:
@@ -37,7 +38,7 @@ class ModelBuilder:
         return model
 
     @classmethod
-    def from_prism(cls, program : Any, specification : paynt.specification.property.Specification | None = None, use_exact : bool = False) -> Any:
+    def from_prism(cls, program: Any, specification: paynt.specification.property.Specification | None = None, use_exact: bool = False) -> Any:
         assert program.model_type in [stormpy.storage.PrismModelType.MDP, stormpy.storage.PrismModelType.POMDP]
         builder_options = cls.default_builder_options(specification)
         if use_exact:
@@ -47,5 +48,5 @@ class ModelBuilder:
         return model
 
     @classmethod
-    def from_drn(cls, drn_path : str, use_exact : bool = False) -> Any:
+    def from_drn(cls, drn_path: str, use_exact: bool = False) -> Any:
         return DrnParser.parse_drn(drn_path, use_exact)

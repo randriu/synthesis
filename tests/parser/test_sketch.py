@@ -1,7 +1,8 @@
 import paynt.parser.sketch as sketch
 import paynt.colored_mdp
 
-from helpers.helper import get_stormpy_example_path, get_sketch_paths
+from helpers.helper import get_sketch_paths
+
 
 class TestSketch:
 

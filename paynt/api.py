@@ -17,10 +17,8 @@ def get_version() -> str:
     return version()
 
 
-def get_synthesizer(
-    colored_mdp_factory : Any, method : str = "ar", fsc_synthesis : bool = False, storm_control : Any = None, dtnest : bool = False
-) -> Any:
-    '''
+def get_synthesizer(colored_mdp_factory: Any, method: str = "ar", fsc_synthesis: bool = False, storm_control: Any = None, dtnest: bool = False) -> Any:
+    """
     The one canonical synthesis dispatcher: reads colored_mdp_factory.colored_mdp.feature_kind and routes to
     the right synthesizer, so callers (paynt.cli, library users) never need to isinstance-check or import a
     specific feature package themselves.
@@ -37,8 +35,9 @@ def get_synthesizer(
         of plain PAYNT POMDP synthesis
     :param dtnest for decision trees, use the dtnest synthesizer instead of plain AR
     :return a synthesizer ready to .run()/.synthesize()/.evaluate()
-    '''
+    """
     import paynt.synthesizer.synthesizer
+
     colored_mdp = colored_mdp_factory.colored_mdp
     task = colored_mdp_factory.task
     feature_kind = colored_mdp.feature_kind
@@ -47,32 +46,38 @@ def get_synthesizer(
         # a family-of-POMDPs sketch isn't run through a Synthesizer at all (see e.g.
         # PomdpFamilyColoredMdp.build_dtmc_sketch instead)
         import logging
+
         logging.getLogger(__name__).info("nothing to do with the POMDP sketch, aborting...")
         exit(0)
 
     if feature_kind == "dt":
         from paynt.dt import DtSynthesizer
         from paynt.dt.dtnest import DtNest
+
         return DtNest(colored_mdp_factory) if dtnest else DtSynthesizer(colored_mdp_factory)
 
     if feature_kind == "pomdp" and fsc_synthesis:
         import paynt.pomdp
+
         if storm_control is not None:
             return paynt.pomdp.saynt.SayntSynthesizer(colored_mdp_factory, method, storm_control)
         return paynt.pomdp.PomdpSynthesizer(colored_mdp_factory, method)
 
     if feature_kind == "decpomdp" and fsc_synthesis:
         import paynt.pomdp
+
         return paynt.pomdp.decpomdp.DecPomdpSynthesizer(colored_mdp_factory)
 
     if feature_kind == "family":
         if method == "onebyone":
             return paynt.synthesizer.synthesizer.Synthesizer.for_method(colored_mdp, task, method)
         import paynt.family
+
         return paynt.family.PolicyTreeSynthesizer(colored_mdp, task)
 
     if feature_kind == "posmg" and fsc_synthesis:
         import paynt.posmg
+
         return paynt.posmg.PosmgSynthesizer(colored_mdp_factory)
 
     return paynt.synthesizer.synthesizer.Synthesizer.for_method(colored_mdp, task, method)
