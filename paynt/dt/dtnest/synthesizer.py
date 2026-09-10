@@ -132,7 +132,34 @@ class DtNest(DtSynthesizer):
             helper_node_stats = sorted(helper_node_stats, key=lambda x : x["states"].number_of_set_bits()/x["nodes"])
 
         return helper_node_stats
-    
+
+
+    @staticmethod
+    def remap_node_queue_after_replacement(node_queue : list[dict[str, Any]], new_tree : DecisionTree) -> list[dict[str, Any]]:
+        '''
+        After a subtree replacement, every surviving node_queue entry's "id" (an identifier in the OLD tree)
+        must be translated to its counterpart in new_tree (whose nodes carry old_identifier == their
+        identifier in the OLD tree, set by DecisionTreeNode.assign_identifiers(keep_old=True) right after
+        the replacement). A queued entry can have no counterpart at all: node_queue is a long-lived worklist
+        that keeps accumulating entries across many replacements, so a still-queued node can end up
+        (structurally, not just by id) nested inside a later replacement's target without ever being popped
+        itself -- e.g. it was enqueued while the target's own subtree was still small, and the target grew
+        to enclose it via an intervening nested replacement before its own turn came up. Its subtree no
+        longer exists in new_tree, so there's nothing left to process for it -- it is dropped here rather
+        than raising.
+        '''
+        remapped_node_queue = []
+        for node in node_queue:
+            nodes = new_tree.collect_nodes(lambda x : x.old_identifier == node["id"])
+            if len(nodes) == 0:
+                logger.info(f"node {node['id']} was made obsolete by this replacement, dropping it from the queue")
+                continue
+            assert len(nodes) == 1, f'expected at most one node with old_identifier equal to {node["id"]}, found {len(nodes)}'
+            new_node = nodes[0]
+            node["id"] = new_node.identifier
+            remapped_node_queue.append(node)
+        return remapped_node_queue
+
 
     def synthesize_subtrees(
         self, opt_result_value : float, random_result_value : float | None = None,
@@ -300,11 +327,7 @@ class DtNest(DtSynthesizer):
                         self.dtpaynt_successes_smaller += 1
                         tree_helper_tree = dtpaynt_subtree_helper_tree_copy
                         self.colored_mdp.tree_helper_tree = tree_helper_tree
-                        for node in node_queue:
-                            nodes = self.colored_mdp.tree_helper_tree.collect_nodes(lambda x : x.old_identifier == node["id"])
-                            assert len(nodes) == 1, f'only one node should have the old_identifier equal to {node["id"]}'
-                            new_node = nodes[0]
-                            node["id"] = new_node.identifier
+                        node_queue = self.remap_node_queue_after_replacement(node_queue, tree_helper_tree)
                         new_nodes = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth, nodes_to_skip=[node["id"] for node in node_queue], use_states_for_node_priority=self.use_states_for_node_priority)
                         node_queue += new_nodes
 

@@ -2,6 +2,7 @@ import pytest
 import stormpy
 
 import paynt.dt
+import paynt.dt.decision_tree
 import paynt.dt.dtnest
 import paynt.underlying_model.model_builder
 
@@ -77,3 +78,57 @@ class TestDtNestConstraintHandling:
         factory = paynt.dt.DtColoredMdpFactory(explicit_model, task)
         with pytest.raises(ValueError):
             paynt.dt.dtnest.synthesize(factory, task)
+
+
+def _node(identifier, old_identifier):
+    node = paynt.dt.decision_tree.DecisionTreeNode(None)
+    node.identifier = identifier
+    node.old_identifier = old_identifier
+    return node
+
+
+class TestRemapNodeQueueAfterReplacement:
+    '''
+    DtNest.synthesize_subtrees keeps a long-lived node_queue worklist that survives across many subtree
+    replacements: after each replacement, every surviving entry's "id" (an identifier in the OLD tree) is
+    translated to its counterpart in the new tree via old_identifier (set by
+    DecisionTreeNode.assign_identifiers(keep_old=True) right after the replacement). This used to assert
+    exactly one match and crash (AssertionError: only one node should have the old_identifier equal to X)
+    whenever a queued node had no counterpart at all -- which happens for real: a still-queued node can end
+    up structurally nested inside a later replacement's target before its own turn comes up (e.g. it was
+    enqueued while the target's subtree was still small, and the target grew to enclose it via an
+    intervening nested replacement), in which case its subtree no longer exists in the new tree. See the
+    PAYNT refactor plan file for the full root-cause writeup (confirmed via instrumented reproduction on
+    models/tests/dt-orchard with --dtnest --dtnest-subtree-depth 3).
+    '''
+
+    def test_matching_entry_is_remapped_to_the_new_identifier(self):
+        tree = paynt.dt.decision_tree.DecisionTree([], [])
+        tree.root = _node(identifier=10, old_identifier=3)
+        node_queue = [{"id": 3, "extra": "kept"}]
+        result = paynt.dt.dtnest.DtNest.remap_node_queue_after_replacement(node_queue, tree)
+        assert len(result) == 1
+        assert result[0]["id"] == 10
+        assert result[0]["extra"] == "kept"
+
+    def test_entry_with_no_surviving_counterpart_is_dropped_not_raised(self):
+        ''' Reproduces the exact shape of the real (pre-fix) crash directly: a queued node made obsolete by
+        a later replacement has no node anywhere in the new tree with old_identifier equal to its id. '''
+        tree = paynt.dt.decision_tree.DecisionTree([], [])
+        tree.root = _node(identifier=0, old_identifier=0)
+        node_queue = [{"id": 0}, {"id": 999}]
+        result = paynt.dt.dtnest.DtNest.remap_node_queue_after_replacement(node_queue, tree)
+        assert len(result) == 1
+        assert result[0]["id"] == 0
+
+    def test_multiple_counterparts_raises(self):
+        ''' Should never happen in practice (assign_identifiers(keep_old=True) always yields unique
+        old_identifier values within one tree), but the defensive assert must still fire if it ever does. '''
+        root = _node(identifier=0, old_identifier=5)
+        root.child_true = _node(identifier=1, old_identifier=5)
+        root.child_false = _node(identifier=2, old_identifier=2)
+        tree = paynt.dt.decision_tree.DecisionTree([], [])
+        tree.root = root
+        node_queue = [{"id": 5}]
+        with pytest.raises(AssertionError):
+            paynt.dt.dtnest.DtNest.remap_node_queue_after_replacement(node_queue, tree)
