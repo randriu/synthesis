@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <memory>
 #include <queue>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -143,6 +144,21 @@ public:
      *   parameter); otherwise B is empty (an empty list per parameter).
      */
     std::pair<bool,std::vector<std::vector<uint64_t>>> areChoicesConsistent(BitVector const& choices, Family const& family);
+
+    /**
+     * The node table the coloring was built from, as the constructor takes it: (node_op, node_a, node_b, node_c, option_sets). Read-only access for rebuilding
+     * the formula of a choice outside the engine, together with getChoiceColor (see paynt/utils/coloring.py).
+     */
+    std::tuple<std::vector<uint8_t>, std::vector<int64_t>, std::vector<int32_t>, std::vector<int32_t>, std::vector<std::vector<uint64_t>>> getNodeTable() const;
+
+    /**
+     * What the color of a choice is made of: (root, state_row, choice_row, state_is_relevant, is_first_of_state).
+     * root is the formula node of the color in the node table, or -1 if the choice is uncolored. state_row and choice_row are the data rows (the columns
+     * that the formula reads) of the choice's state and of the choice itself. selectCompatibleChoices evaluates the color only at a relevant state; at an
+     * irrelevant one it enables the first choice only, which is_first_of_state tells apart.
+     * @throws std::out_of_range if there is no such choice
+     */
+    std::tuple<int32_t, std::vector<int64_t>, std::vector<int64_t>, bool, bool> getChoiceColor(uint64_t choice) const;
 
 protected:
 

@@ -204,7 +204,11 @@ class TestAStateLeftWithoutAChoice:
 
     @pytest.mark.parametrize("method", ["onebyone", "smpmc"])
     def test_an_engine_reports_it(self, method):
-        colored_mdp, task, _options = incomplete_maze((2,), all_actions=True)
+        """The engine is given the option that leaves the state without a choice and no other: an engine that searches does not have to try an option on its own
+        if it can rule it out together with others, and whether SMPMC does depends on the order of the decisions of Z3, which depends on what Z3 has done before
+        in the process."""
+        colored_mdp, task, options = incomplete_maze((2,), all_actions=True)
+        colored_mdp.parameter_space.parameter_set_options(0, [options.index("place")])
         with pytest.raises(ValueError, match="the coloring enables no choice in state"):
             paynt.synthesizer.synthesizer.Synthesizer.for_method(colored_mdp, task, method).run()
 

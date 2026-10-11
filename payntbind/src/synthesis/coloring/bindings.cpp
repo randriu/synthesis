@@ -426,5 +426,7 @@ void bindings_coloring(py::module& m) {
         .def("getStateToHoles", &synthesis::ColoringGeneral::getStateToHoles)
         .def("relevantParameters", &synthesis::ColoringGeneral::relevantParameters)
         .def("areChoicesConsistent", &synthesis::ColoringGeneral::areChoicesConsistent)
+        .def("getNodeTable", &synthesis::ColoringGeneral::getNodeTable)
+        .def("getChoiceColor", &synthesis::ColoringGeneral::getChoiceColor)
         ;
 }

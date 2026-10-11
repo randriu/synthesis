@@ -5,6 +5,8 @@
 
 #include <algorithm>
 #include <map>
+#include <stdexcept>
+#include <string>
 
 namespace synthesis {
 
@@ -221,6 +223,25 @@ void ColoringGeneral::visitChoice(uint64_t choice, BitVector& state_reached, std
 
 std::vector<BitVector> const& ColoringGeneral::getStateToHoles() const {
     return state_to_holes_;
+}
+
+std::tuple<std::vector<uint8_t>, std::vector<int64_t>, std::vector<int32_t>, std::vector<int32_t>, std::vector<std::vector<uint64_t>>>
+ColoringGeneral::getNodeTable() const {
+    std::vector<uint8_t> ops;
+    ops.reserve(node_op.size());
+    for(auto op: node_op) {
+        ops.push_back(static_cast<uint8_t>(op));
+    }
+    return {ops, node_a, node_b, node_c, option_sets};
+}
+
+std::tuple<int32_t, std::vector<int64_t>, std::vector<int64_t>, bool, bool> ColoringGeneral::getChoiceColor(uint64_t choice) const {
+    if(choice >= numChoices()) {
+        throw std::out_of_range("choice " + std::to_string(choice) + " is out of range: the coloring has " + std::to_string(numChoices()) + " choices");
+    }
+    // the state is the last one whose first choice is not above the choice (so, of the states without choices, never one of them)
+    uint64_t state = std::upper_bound(row_groups.begin(),row_groups.end(),choice) - row_groups.begin() - 1;
+    return {choice_root[choice], state_data[state], choice_data[choice], state_is_relevant[state], choice == row_groups[state]};
 }
 
 // ==================================================================================================================
