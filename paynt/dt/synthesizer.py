@@ -94,7 +94,7 @@ class DtSynthesizer:
         self.build_task: paynt.dt.task.DtTask = colored_mdp_factory.build_task
         if self.build_task.scheduler_path is not None or self.build_task.has_scheduler_to_map:
             paynt.utils.error_handling.require_method_ar(method, "mapping a scheduler to a tree")
-        
+
         self.colored_mdp = colored_mdp_factory.reset_tree(initial_depth if initial_depth is not None else self.build_task.tree_depth, general=(method != "ar"))
         self.best_tree: paynt.dt.decision_tree.DecisionTree | None = None
         self.best_tree_value: Any = None

@@ -1,5 +1,4 @@
-"""SynthesizerSMPMC: SMT-based synthesis over colored MDPs (arXiv:2511.08078).
-"""
+"""SynthesizerSMPMC: SMT-based synthesis over colored MDPs (arXiv:2511.08078)."""
 
 from __future__ import annotations
 
@@ -164,8 +163,7 @@ class SynthesizerSMPMC(paynt.synthesizer.synthesizer.Synthesizer):
         return remaining is not None and remaining <= 0
 
     def _limit_solver_time(self, solver: Any) -> None:
-        """Make the next solver.check() give up, answering unknown, once the time limit is reached.
-        """
+        """Make the next solver.check() give up, answering unknown, once the time limit is reached."""
         remaining = self.time_remaining()
         if remaining is not None:
             solver.set("timeout", min(max(math.ceil(remaining * 1000), 1), _MAX_Z3_TIMEOUT_MS))
@@ -177,8 +175,7 @@ class SynthesizerSMPMC(paynt.synthesizer.synthesizer.Synthesizer):
         policy_parameters: list[int],
         optimality: paynt.specification.property.OptimalityProperty,
     ) -> tuple[Any, bool]:
-        """The worst case over the environments of the policy robust_assignment fixes, and whether it is exact rather than a bound.
-        """
+        """The worst case over the environments of the policy robust_assignment fixes, and whether it is exact rather than a bound."""
         policy = {parameter: robust_assignment.parameter_options(parameter)[0] for parameter in policy_parameters}
         bound = theory.worst_case_bound(policy)
         if bound is not None and optimality.improves_optimum(bound.value):

@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 #: relative error between the value-iteration and the policy-iteration value above which value iteration counts as not converged. A capped, non-converged result
 #: is off by orders of magnitude, so the threshold can be generous.
-#TODO once Storm has a new release we should be able to check for convergence
+# TODO once Storm has a new release we should be able to check for convergence
 _REWARD_CONVERGENCE_RELATIVE_TOLERANCE = 0.01
 
 #: sub-MDP size (in states) from which the policy-iteration cross-check is skipped: one call is too expensive on a very large sub-MDP whatever the iteration

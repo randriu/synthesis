@@ -36,7 +36,7 @@ class ProbGoalConstraint(Constraint):
         assert len(model.initial_states) == 1, "ProbGoalConstraint only supports a single initial state"
         initial_state = model.initial_states[0]
 
-        # this constraint is tied to one specific reachability target, 
+        # this constraint is tied to one specific reachability target,
         # so it only makes sense against a single-property specification
         prop = ctx.task.get_property()
         target_states = paynt.model.model.ModelIndex.identify_target_states(model, prop)

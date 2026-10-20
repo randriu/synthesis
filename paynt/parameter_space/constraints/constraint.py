@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ConstraintContext:
-    """Everything a Constraint needs to emit Z3 clauses.
-    """
+    """Everything a Constraint needs to emit Z3 clauses."""
 
     colored_mdp: paynt.colored_mdp.ColoredMdp
     parameter_space: paynt.parameter_space.parameter_space.ParameterSpace
