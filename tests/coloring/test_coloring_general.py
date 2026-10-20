@@ -1,8 +1,8 @@
-"""Phase 1 differential tests for ColoringGeneral (payntbind.synthesis.ColoringGeneral): lift several tracked "generic"/"family" fixtures' plain Coloring via
+"""Differential tests for ColoringGeneral (payntbind.synthesis.ColoringGeneral): lift several tracked "generic"/"family" fixtures' plain Coloring via
 fromColoring and check it agrees with the original Coloring, then check the generic engines (CEGIS/OneByOne/SMPMC) reach the same feasibility answer on the
 lifted colored MDP.
 
-Lifting a plain Coloring is not meant to compete with Coloring on performance -- these tests check correctness only, on fixtures that don't themselves need
+Lifting a plain Coloring is not meant to compete with Coloring on performance: these tests check correctness only, on fixtures that do not themselves need
 generality.
 """
 

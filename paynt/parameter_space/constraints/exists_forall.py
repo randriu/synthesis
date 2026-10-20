@@ -1,7 +1,5 @@
 """ExistsForallConstraint: robust synthesis (arXiv:2511.08078, Section 4.4) -- exists a choice of the non-quantified parameters such that viable(...) holds for
 every in-range choice of ctx.forall_parameters. Z3 decides this via MBQI; the theory solver needs nothing quantifier-specific.
-
-Ported from molehill's constraints/exists_forall.py (https://github.com/linusheck/molehill, GPL-3.0).
 """
 
 from __future__ import annotations
@@ -24,8 +22,7 @@ class ExistsForallConstraint(Constraint):
         forall_variables = [ctx.variables[parameter] for parameter in ctx.forall_parameters]
         in_range = ctx.in_range()
         clauses = [in_range, z3.ForAll(forall_variables, z3.Implies(in_range, viable(*ctx.variables)))]
-        # MBQI only instantiates quantifiers with values occurring in ground terms of the formula, so put every
-        # value the variables can take in scope (molehill does the same)
+        # MBQI only instantiates quantifiers with values occurring in ground terms of the formula, so put every value the variables can take in scope
         for value in range(2**ctx.width):
             clauses.append(z3.BitVec(f"__forall_value_{value}", ctx.width) == ctx.value(value))
         return clauses

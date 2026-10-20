@@ -1,22 +1,10 @@
 """The Z3 theory-solver plugin: a z3.UserPropagateBase subclass that turns Z3's own CDCL search into the CDCL(T) integration described in Section 4.2-4.3 of
 arXiv:2511.08078.
 
-Ported from molehill's plugins/search.py:SearchMarkovChain (https://github.com/linusheck/molehill,
-GPL-3.0), with one correctness fix found empirically during this port and worth calling out explicitly:
-
-Z3's preprocessor eagerly constant-folds a `viable(...)` argument into a numeral whenever that argument
-is pinned by a simple equality -- not only for a literal constant written in the source formula, but for
-*any* variable Z3 can already prove has exactly one possible value. In particular, every single-option
-parameter (a hole whose in_range clause collapses to one equality) triggers this on the very first
-`created` callback, for every query. An argument handled this way never appears in a `fixed` callback at
-all, since it was never a live variable to begin with -- so a naive implementation that only tracks
-*variable* arguments (as molehill's own bare-name-keyed dict implicitly does, and as an early draft of
-this module did) silently drops that parameter from every `fixed` dict it builds. Silently, because the
-solver still finds a model -- just one the theory was never actually asked about, since the theory's own
-completeness argument depends on `fixed` reflecting every relevant parameter, constant-folded or not.
-The fix is to track each `viable(...)` argument by its *position* (which is also its parameter index,
-since it is always called as viable(*variables_in_parameter_index_order), see synthesizer.py) and record
-constant-folded arguments directly, rather than only arguments that later arrive via `fixed`.
+Z3's preprocessor constant-folds a `viable(...)` argument into a numeral whenever it can prove that the argument has exactly one possible value, e.g. for every
+single-option parameter (a hole whose in_range clause collapses to one equality). Such an argument never appears in a `fixed` callback, yet the theory's
+completeness argument needs `fixed` to reflect every parameter. So each `viable(...)` argument is tracked by its position, which is also its parameter index
+(viable is always called as viable(*variables_in_parameter_index_order), see synthesizer.py), and constant-folded arguments are recorded directly.
 """
 
 from __future__ import annotations
@@ -71,9 +59,8 @@ class SmpmcPropagator(z3.UserPropagateBase):
 
     @staticmethod
     def _key(ast: Any) -> str:
-        """A cheap, stable key for a Z3 AST node -- the Z3 APIs for structural identity are too slow to call on this hot path (molehill's own comment on the
-        equivalent code), so this uses the printed s-expression for an application (distinguishing e.g. different viable(...) argument tuples) and the
-        declaration name for a plain variable."""
+        """A cheap, stable key for a Z3 AST node (Z3's own structural-identity APIs are too slow for this hot path): the printed s-expression for an
+        application, which distinguishes e.g. different viable(...) argument tuples, and the declaration name for a plain variable."""
         text = ast.sexpr()
         return text if text.startswith("(") else ast.decl().name()
 
@@ -134,9 +121,8 @@ class SmpmcPropagator(z3.UserPropagateBase):
             self.scope_states.append(None)
             return
         mark = len(self.trail)
-        # Nothing fixed since the enclosing push, whose analysis found no conflict, and the theory unchanged since, also by
-        # the fresh() propagators sharing it: analysing again would ask the same queries and get the same answers.
-        # molehill skips on the first condition alone, which also skips pruning newly enabled by the shared theory.
+        # Nothing fixed since the enclosing push, whose analysis found no conflict, and the theory unchanged since (also by the fresh() propagators sharing it):
+        # analysing again would ask the same queries and get the same answers.
         redundant = bool(self.scopes) and self.scopes[-1] == mark and self.scope_states[-1] == self._theory_state()
         self.scopes.append(mark)
         if redundant:
@@ -163,34 +149,13 @@ class SmpmcPropagator(z3.UserPropagateBase):
 
         :returns: whether a conflict was pushed
 
-        Deliberately does NOT wait for every argument of viable(...) to be fixed before consulting the
-        theory -- Algorithm 1 in the paper is explicit that it works over whatever partial model K
-        currently holds ("for all literals k in K do ... eta <- {theta | theta satisfies K \\ {v}}"), not
-        just a complete one. An earlier version of this method required every parameter to be fixed first,
-        which is a correctness-preserving but severely performance-destroying simplification: since
-        viable(...) is asserted over every parameter, "wait for all of them" means the theory is *never*
-        consulted until Z3 has already committed to one fully concrete candidate, degenerating the whole
-        search into one-candidate-at-a-time enumeration with no early pruning from partial information --
-        exactly the CEGIS-like behavior SMPMC is meant to avoid, confirmed empirically (see the
-        conversation this was found in: a controlled comparison on a small synthetic instance showed a
-        4x reduction in total theory calls -- most of them genuinely partial -- once this requirement was
-        removed, with identical sat/unsat answers either way). Parameters not yet fixed are simply left
-        out of `fixed`; checker.py's eta construction already treats an unmentioned parameter as "still
-        fully open" and reasons about the induced sub-MDP accordingly.
+        Partial assignments are consulted too, as in Algorithm 1, which works over whatever partial model K currently holds: a parameter that is not fixed yet
+        is left out of `fixed`, and checker.py treats it as still fully open. Waiting for every parameter to be fixed would degenerate the search into
+        enumerating one candidate at a time, without early pruning.
 
-        One exception, ported from molehill's own Mole.partial_model_consistent (its "magic trick" that
-        checks a DTMC first): a *partial* (non-empty, not-fully-fixed) query is skipped entirely --
-        reported inconclusive without ever calling the theory -- until at least one fully-fixed assignment
-        has been checked. This isn't in tension with the paragraph above; it's a different failure mode
-        the partial-consultation fix doesn't address on its own. Partial consultation pays off when a
-        partial query can be *refuted*, pruning a whole region for free -- but on a property that's easy
-        to satisfy (found on a real 1.65M-state DTMC-with-holes model, arXiv:2511.08078's own benchmark
-        suite: a reward threshold so generous that virtually every completion satisfies it), no partial
-        query is ever refutable, so every one of them is pure, expensive overhead: an 8-second VI call on
-        a barely-smaller sub-MDP, paid once per parameter Z3 fixes on the way to its first candidate, for
-        no pruning benefit at all. Deferring partial checks until Z3 has found *some* concrete candidate
-        first sidesteps this without giving up early pruning altogether -- it only delays it until pruning
-        has a chance to actually pay for itself.
+        One exception: a partial (non-empty, not fully fixed) query is skipped, reported inconclusive without consulting the theory, until a fully fixed
+        assignment has been checked. When a property is easy to satisfy no partial query is ever refutable, so each is pure overhead (a model check per
+        parameter that Z3 fixes on the way to its first candidate); deferring them keeps the early pruning where it can pay off.
         """
         for key, value in list(self.partial_model.items()):
             if not isinstance(value, bool):
@@ -205,7 +170,7 @@ class SmpmcPropagator(z3.UserPropagateBase):
                     fixed[parameter] = payload
                 elif payload in self.partial_model:
                     fixed[parameter] = self.partial_model[payload]
-                # else: this parameter isn't fixed yet -- leave it out of `fixed`, don't abort the analysis
+                # else: not fixed yet, leave it out of `fixed`
 
             is_full_assignment = len(fixed) == len(arg_specs)
             if not is_full_assignment and fixed and not self.theory.first_full_assignment_checked:

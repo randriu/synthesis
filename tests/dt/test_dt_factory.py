@@ -22,8 +22,8 @@ class TestDtColoredMdpFactory:
 
     @pytest.mark.parametrize("depth", [0, 2])
     def test_build_produces_a_tree_at_build_tasks_configured_depth(self, dt_colored_mdp_factory, depth):
-        """Build() must honor build_task.tree_depth, not silently default to 0 (dt-orchard's fixture goes through DtNestTask, since Sketch.load_sketch doesn't
-        yet know whether the caller wants dtnest)."""
+        """The factory's build() honors build_task.tree_depth (the dt-orchard fixture goes through DtNestTask, since Sketch.load_sketch does not know whether
+        the caller wants dtnest)."""
         assert dt_colored_mdp_factory.build_task is not None
         dt_colored_mdp_factory.build_task.tree_depth = depth
         colored_mdp = dt_colored_mdp_factory.build()

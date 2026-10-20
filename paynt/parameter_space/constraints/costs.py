@@ -1,11 +1,5 @@
 """CostsConstraint: bound the total cost of the chosen parameter options by a threshold, where per- (parameter, option) costs are read from a sketch.costs
 sidecar file.
-
-Ported from molehill's constraints/costs.py (https://github.com/linusheck/molehill, GPL-3.0). The sidecar
-format is unchanged: one "parameter_name option_index cost" line per (parameter, option) pair, enumerated
-in the same order as `for parameter in range(num_parameters): for option in range(num_options(parameter))`
--- molehill's own strict line-by-line assertions are kept, since a silently-misaligned costs file would
-otherwise produce a constraint that looks fine but bounds the wrong thing.
 """
 
 from __future__ import annotations

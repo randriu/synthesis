@@ -1,7 +1,7 @@
 """Name -> Constraint class lookup.
 
-Each engine decides its own default when task.constraint_name is unset: SMPMC always needs *some* constraint (it's what supplies the viable(...) clause), so it
-defaults to "exists"; CEGIS's pre-existing behavior is no constraint at all, so it only builds one when the user explicitly asks for it.
+Each engine decides its own default when task.constraint_name is unset: SMPMC always needs a constraint, as it supplies the viable(...) clause, so it defaults
+to "exists"; CEGIS defaults to none and only builds one when the user asks for it.
 """
 
 from __future__ import annotations

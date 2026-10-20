@@ -89,8 +89,7 @@ class TestRefutedSubsetSubsumption:
 
 
 class TestRefutedCompaction:
-    """Inserting a smaller (more general) refutation should retire any existing larger, now-redundant cached entry it subsumes -- mirrors molehill's own insert-
-    time trie compaction."""
+    """Inserting a smaller (more general) refutation retires any existing larger, now-redundant cached entry that it subsumes."""
 
     def test_inserting_a_subset_conflict_retires_a_previously_cached_superset(self):
         cache = PartialModelCache()
@@ -184,14 +183,14 @@ class TestCrossPolaritySubsumption:
 
 
 class TestSetTrieBackedStructure:
-    """The cache keeps its sets in payntbind's own set tries, not in the mercury-settrie of the reference implementation."""
+    """The cache keeps its sets in payntbind's own set tries."""
 
     def test_the_tries_are_payntbind_set_tries(self):
         cache = PartialModelCache()
         assert all(isinstance(trie, payntbind.synthesis.SetTrie) for trie in (*cache._refuted, *cache._inconclusive))
 
     def test_the_smpmc_package_does_not_need_mercury_settrie(self):
-        """That package only comes as a source distribution that has to be compiled with setuptools, which PAYNT's build does without: nothing imports it."""
+        """The external settrie package, which has to be compiled from a source distribution, is not needed: blocking its import changes nothing."""
         script = "import sys; sys.modules['settrie'] = None; import paynt.api, paynt.synthesizer.smpmc, paynt.synthesizer.smpmc.cache"
         result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, timeout=120)
         assert result.returncode == 0, result.stderr

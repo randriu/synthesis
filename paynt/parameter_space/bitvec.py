@@ -1,8 +1,5 @@
 """Shared Z3 BitVec construction for parameter spaces.
 
-Used both by SynthesizerSMPMC's theory-solver encoding (paynt/synthesizer/smpmc/encoding.py) and by CEGIS's SmtSolver (paynt/parameter_space/smt.py), so the two
-engines' custom-constraint framework (paynt/parameter_space/constraints/) only has to deal with one variable sort.
-
 BitVec, not Int: z3.UserPropagateBase's `fixed` callback does not fire for Int-sorted variables registered via `.add()`, only for Boolean literals -- SMPMC's
 theory-solver integration requires BitVec. CEGIS does not use UserPropagateBase and would work equally well with Int, but shares this module anyway so both
 engines speak the same sort to the constraint framework.

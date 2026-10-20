@@ -70,12 +70,11 @@ def _run_dtpaynt(
 
 
 class DtSynthesizer:
-    """Outer driver: repeatedly re-unfolds the decision tree at different depths (DtColoredMdpFactory.reset_tree tries a fresh depth/coloring each time, unlike
-    the FSC-unfolding factories' memory-size growth) and runs an inner search engine -- a fresh instance constructed for each depth -- against each unfolding,
-    keeping the best tree found so far across depths.
+    """Outer driver: repeatedly re-unfolds the decision tree at different depths (DtColoredMdpFactory.reset_tree builds a fresh unfolding and coloring each
+    time) and runs an inner search engine, a fresh instance for each depth, against each unfolding, keeping the best tree found so far across depths.
 
-    :param method: the inner engine -- "ar" (default), SynthesizerARDt over ColoringSmt, dtpaynt's own unchanged default path; or "smpmc", SynthesizerSMPMC over
-        the tree's ColoringGeneral (see paynt.dt.coloring_general). Mapping a scheduler (map_scheduler) supports only "ar".
+    :param method: the inner engine -- "ar" (default), SynthesizerARDt over ColoringSmt; or "smpmc", SynthesizerSMPMC over the tree's ColoringGeneral (see
+        paynt.dt.coloring_general). Mapping a scheduler (map_scheduler) supports only "ar".
     """
 
     def __init__(
@@ -90,16 +89,12 @@ class DtSynthesizer:
         self.task = task
         self.method = method
         # build_task is Optional at the type level (a factory can be constructed before its DtTask is known),
-        # but DtSynthesizer always needs one already attached by construction time; cached here since
-        # run()/synthesize_tree_sequence read DT-specific fields constantly.
+        # but DtSynthesizer always needs one already attached by construction time.
         assert colored_mdp_factory.build_task is not None
         self.build_task: paynt.dt.task.DtTask = colored_mdp_factory.build_task
         if self.build_task.scheduler_path is not None or self.build_task.has_scheduler_to_map:
             paynt.utils.error_handling.require_method_ar(method, "mapping a scheduler to a tree")
-        # the factory never builds automatically -- request the initial tree explicitly. Defaults to
-        # build_task's own depth; callers only needing cheap, depth-invariant inspection (e.g. DtNest's
-        # subtree recursion) pass initial_depth=0 to avoid building at a larger, more expensive depth than
-        # necessary -- whatever gets built here is discarded and rebuilt from depth 0 once synthesis runs.
+        
         self.colored_mdp = colored_mdp_factory.reset_tree(initial_depth if initial_depth is not None else self.build_task.tree_depth, general=(method != "ar"))
         self.best_tree: paynt.dt.decision_tree.DecisionTree | None = None
         self.best_tree_value: Any = None
@@ -189,9 +184,7 @@ class DtSynthesizer:
             synthesizer.synthesis_timer = None
 
             best_assignment = synthesizer.best_assignment
-            # best_assignment != best_assignment_old alone used to also fire when this depth found nothing
-            # (best_assignment flipping from a real ParameterSpace to None), which then crashed below trying
-            # to associate a None assignment onto self.best_tree (stale from an earlier, better depth)
+
             new_assignment_synthesized = best_assignment is not None and best_assignment != best_assignment_old
             if new_assignment_synthesized:
                 logger.info("printing synthesized assignment below:")
@@ -289,9 +282,7 @@ class DtSynthesizer:
                 self.synthesize_tree_sequence(opt_result_value)
 
         logger.info(f"the optimal scheduler has value: {opt_result_value}")
-        # self.colored_mdp may have been reassigned by map_scheduler/synthesize_tree(_sequence) above, so
-        # re-fetch info -- action_labels/relevant_state_valuations/state_is_relevant_bv are the same MDP
-        # identity across every reset_tree() call regardless, but re-fetching avoids relying on that
+
         info = cast(paynt.dt._utils.DtInfo, self.colored_mdp.feature_info)
         if paynt.dt._utils.DONT_CARE_ACTION_LABEL in info.action_labels:
             logger.info(f"the random scheduler has value: {random_result_value}")

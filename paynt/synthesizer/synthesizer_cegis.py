@@ -29,8 +29,7 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
             "Cannot use CEGIS for maximizing reward formulae -- consider using AR or hybrid methods."
         )
 
-        # unlike SynthesizerSMPMC, CEGIS's pre-existing behavior (no constraint at all) is the default --
-        # a constraint is only built when the user explicitly asks for one via --constraint
+        # no constraint unless one is requested via --constraint
         self.constraint = paynt.parameter_space.constraints.build_constraint(task.constraint_name) if task.constraint_name else None
 
     def choose_conflict_generator(

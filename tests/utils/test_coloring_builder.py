@@ -1,9 +1,11 @@
-"""Unit tests for ColoringBuilder's z3py-to-node-table walker, exercising formula shapes fromColoring never produces (Or, Not, Implies, Ite, in_bits, arithmetic
-comparisons) directly against the compiled coloring's selectCompatibleChoices/check_definition, on synthetic row_groups
-(selectCompatibleChoices/getStateToHoles/ relevantParameters/areChoicesConsistent only need the coloring and row_groups, not a real transition matrix -- so a
-real stormpy model isn't needed here).
+"""Unit tests of ColoringBuilder: the z3py-to-node-table walker (formula shapes that fromColoring never produces: Or, Not, Implies, If, in_bits, arithmetic
+comparisons), the choice that build() makes between the standard Coloring and a ColoringGeneral, data columns and their int64 range, share_action and
+check_definition.
 
-End-to-end synthesis on such colorings is exercised via the DT template (see tests/dt), the first real client of these formula shapes.
+Most tests run on synthetic row_groups: selectCompatibleChoices and getChoiceToAssignment only need the coloring and row_groups, not a real transition matrix.
+Two tests rebuild the colorings of real fixtures.
+
+End-to-end synthesis on such colorings is exercised via the DT template (see tests/dt), the first real client of these formula shapes, and in tests/coloring.
 """
 
 from __future__ import annotations

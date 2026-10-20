@@ -54,12 +54,8 @@ class TestSmpmcOnOptimalityProperty:
         assert result.value == pytest.approx(1.0)
 
     def test_a_seed_already_at_the_optimum_reports_no_improvement(self, smpmc_tiny_optimality_colored_mdp, smpmc_tiny_optimality_task, caplog):
-        """Regression test for a real point of confusion: --optimum-threshold means "confirm you can beat this", not "confirm this is achievable" -- seeded with
-        the known optimum (1.0, itself the maximum possible probability, so nothing can beat it), the search correctly finds nothing, and used to do so in total
-        silence.
-
-        See Synthesizer.synthesize's elif branch.
-        """
+        """--optimum-threshold means "confirm you can beat this", not "confirm this is achievable": seeded with the known optimum (1.0, itself the maximum
+        possible probability, so nothing can beat it), the search finds nothing and says so in a log line. See Synthesizer.synthesize's elif branch."""
         with caplog.at_level(logging.INFO, logger="paynt.synthesizer.synthesizer"):
             synthesizer = paynt.synthesizer.smpmc.SynthesizerSMPMC(smpmc_tiny_optimality_colored_mdp, smpmc_tiny_optimality_task)
             result = synthesizer.run(optimum_threshold=1.0)
@@ -69,8 +65,8 @@ class TestSmpmcOnOptimalityProperty:
 
 
 class TestOptimumThresholdSeedLoggingIsEngineAgnostic:
-    """The new log line lives in the generic Synthesizer.synthesize() driver, not in SMPMC's own code -- confirm AR (which only overrides synthesize_one, same
-    as SMPMC) gets it too, on the same fixture."""
+    """The log line lives in the generic Synthesizer.synthesize() driver, not in SMPMC's own code, so AR (which only overrides synthesize_one, like SMPMC) gets
+    it too, on the same fixture."""
 
     def test_ar_also_reports_no_improvement_on_the_same_seed(self, smpmc_tiny_optimality_colored_mdp, smpmc_tiny_optimality_task, caplog):
         with caplog.at_level(logging.INFO, logger="paynt.synthesizer.synthesizer"):
@@ -81,10 +77,8 @@ class TestOptimumThresholdSeedLoggingIsEngineAgnostic:
 
 class TestSmpmcOnFamilyModel:
     """Mdp-family-avoid-8-2-easy is a feature_kind=="family" sketch: --method ar on it routes to PolicyTreeSynthesizer (a robust-by-construction game-
-
-    abstraction algorithm solving a *different* problem), not plain existential search -- so the correct cross-check for Phase 1's plain-exists SMPMC is
-    --method onebyone, which api.py also routes through the generic Synthesizer.for_method path.
-    """
+    abstraction algorithm solving a *different* problem), not plain existential search, so the cross-check for plain-exists SMPMC is --method onebyone, which
+    api.py routes through the generic Synthesizer.for_method path."""
 
     def test_agrees_with_onebyone_on_feasibility(self, mdp_family_colored_mdp, mdp_family_task):
         smpmc_result = paynt.synthesizer.smpmc.SynthesizerSMPMC(mdp_family_colored_mdp, mdp_family_task).run()
@@ -242,15 +236,15 @@ class TestSmpmcTimeLimit:
 
     @staticmethod
     def maze_synthesizer():
-        """SMPMC on the decision trees of depth 2 of tests/dt-maze (Rmin): the optimum, 20.948..., takes some 20 000 theory calls to find and prove, a first
+        """SMPMC on the decision trees of depth 2 of tests/dt-maze (Rmin): the optimum, 20.948..., takes thousands of theory calls to find and prove, a first
         tree only a couple."""
         sketch_path, props_path = get_sketch_paths("tests/dt-maze")
         factory, task = paynt.parser.sketch.Sketch.load_sketch(sketch_path, props_path)
         return paynt.synthesizer.smpmc.SynthesizerSMPMC(factory.reset_tree(2, general=True), task)
 
     def test_the_limit_ends_a_single_check_that_would_run_for_much_longer(self, caplog):
-        """Seeded just below the optimum, nothing is left to find and the whole search is one solver.check() ending in unsat: some 9 500 theory calls, half a
-        minute here without the limit."""
+        """Seeded just below the optimum, nothing is left to find and the whole search is one solver.check() ending in unsat, which takes thousands of theory
+        calls without the limit."""
         synthesizer = self.maze_synthesizer()
         started = time.perf_counter()
         with caplog.at_level(logging.INFO):
@@ -285,7 +279,7 @@ class TestSmpmcTimeLimit:
         assert synthesizer.best_assignment_value > 20.95
 
     def test_a_robust_search_is_stopped_by_the_limit_too(self, rocks_colored_mdp, rocks_task):
-        """There Z3 also runs the theory in quantifier-instantiation sub-contexts, and starts over with a new solver after each improvement."""
+        """There Z3 also runs the theory in quantifier-instantiation sub-contexts."""
         rocks_task.constraint_name = "exists_forall"
         rocks_task.forall_pattern = None
         rocks_task.verify_robust = False

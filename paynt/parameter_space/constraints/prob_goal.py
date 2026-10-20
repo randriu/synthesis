@@ -1,17 +1,7 @@
 """ProbGoalConstraint: constrain the probability of reaching the specification's target to be either
 strictly positive ("prob0" -- some way of resolving any leftover nondeterminism reaches it) or almost-sure
 ("prob1" -- every way of resolving leftover nondeterminism reaches it), encoded directly as Z3 assertions
-over per-state reachability/min-step variables rather than via a Storm model-check call. This is a
-*structural* property of the colored MDP itself, independent of any specific scheduler: even a fully
-fixed parameter assignment can leave a state with more than one available action (an unlabelled/uncolored
-choice is always available regardless of parameter values, alongside any colored ones -- see
-payntbind/src/synthesis/coloring/Coloring.h's selectCompatibleChoices), so "every action makes progress"
-(prob1) and "some action makes progress" (prob0) remain genuinely different constraints even after every
-parameter is pinned down. That is exactly what the z3.And/z3.Or choice below distinguishes.
-
-Ported from molehill's constraints/prob_goal.py (https://github.com/linusheck/molehill, GPL-3.0). The
-prob=0 and prob=1 cases were two near-duplicate ~50-line code paths differing only in that one z3.And/
-z3.Or swap on the final assertion per state; collapsed here into one parameterized implementation.
+over per-state reachability/min-step variables rather than via a Storm model-check call.
 """
 
 from __future__ import annotations
@@ -46,8 +36,8 @@ class ProbGoalConstraint(Constraint):
         assert len(model.initial_states) == 1, "ProbGoalConstraint only supports a single initial state"
         initial_state = model.initial_states[0]
 
-        # this constraint is tied to one specific reachability target, so (like SynthesizerSMPMC itself)
-        # it only makes sense against a single-property specification
+        # this constraint is tied to one specific reachability target, 
+        # so it only makes sense against a single-property specification
         prop = ctx.task.get_property()
         target_states = paynt.model.model.ModelIndex.identify_target_states(model, prop)
 
@@ -55,8 +45,6 @@ class ProbGoalConstraint(Constraint):
         reach = [z3.Bool(f"__prob_goal_reach_{state}") for state in range(num_states)]
         min_step = [z3.Int(f"__prob_goal_min_step_{state}") for state in range(num_states)]
 
-        # "every action must make progress" (prob=1, almost sure) vs "some action suffices" (prob=0,
-        # possible) -- see this module's docstring for why these differ even once every parameter is fixed
         combine = z3.And if self.prob == 1 else z3.Or
 
         assertions: list[Any] = [step_var >= 0 for step_var in min_step]

@@ -1,8 +1,5 @@
 """Turn a family ColoredMdp (feature_kind "family": the sketch's parameters pick the environment, the agent's policy stays nondeterministic) into a generic one
 where the policy is explicit parameters too -- so robust synthesis can quantify existentially over the policy and universally over the environment.
-
-Ported from molehill's run() (https://github.com/linusheck/molehill, GPL-3.0): one policy parameter per state
-with more than one available action, whose options are that state's actions.
 """
 
 from __future__ import annotations
@@ -24,7 +21,7 @@ def _state_names(mdp: Any) -> list[str]:
     names = []
     for state in range(mdp.nr_states):
         valuation = json.loads(str(mdp.state_valuations.get_json(state)))
-        # int(): print booleans as 0/1, matching molehill's naming
+        # int(): print booleans as 0/1
         names.append("&".join(f"{var}={int(value)}" for var, value in valuation.items() if not var.startswith("_loc_prism2jani")))
     return names
 

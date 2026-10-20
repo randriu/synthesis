@@ -1,36 +1,8 @@
-"""Decision trees as a general coloring (see paynt/utils/coloring_builder.py): the same formula ColoringSmt encodes as a
-dedicated, DT-specialized Z3 tree walk, reproduced here as an ordinary z3py template over ColoringBuilder --
-so SMPMC (and CEGIS/OneByOne) can run directly on decision-tree synthesis. ColoringSmt itself is untouched: this is
-an alternative coloring for the same DtColoredMdpFactory/DtInfo/ParameterSpace shape (opted into per depth via
-reset_tree(general=True)), never a replacement for it.
+"""Decision trees as a general coloring (see paynt/utils/coloring_builder.py).
+It is an alternative to ColoringSmt for the same DtColoredMdpFactory/DtInfo/ParameterSpace shape,
+selected per depth with reset_tree(general=True).
 
-Parameter layout matches ColoringSmt's own (see ColoringSmt.getFamilyInfo/TreeNode::createHoles) exactly, so
-DtColoredMdpFactory.reset_tree can reuse its existing parameter-space/DtInfo reconstruction unchanged: per inner
-node, V_<id> (the decision variable: one option per tree variable) then <var>_<id> per variable (the threshold:
-options = that variable's domain except its own maximum, see DtVariable.parameter_domain); per leaf, A_<id> (the
-action, one option per action label). Node identifiers -- and so parameter order -- follow DecisionTree's own
-pre-order, true-child-first traversal (DecisionTreeNode.assign_identifiers).
-
-Color, for a relevant state s and a choice c with action a = choice_to_action[c] (positive form, which ColoringGeneral's
-three-valued evaluation decides exactly, since the steps along one path use disjoint parameters):
-
-    Or_{leaf p} ( taken_p(x_s) AND ( A_p == a OR (a == dont_care AND in_bits(A_p, unavailable_s)) ) )
-
-where unavailable_s is the bitmask of actions not available at s (so the don't-care choice is also enabled when a
-leaf's action doesn't exist at s, as in ColoringSmt).
-
-taken_p is the AND, over each inner node n on p's root-to-leaf path, of that node's *step*:
-
-    true step:  Or_v ( V_n == v AND x_{s,v} <= T_{n,v} )
-    false step: Or_v ( V_n == v AND x_{s,v} >  T_{n,v} )
-
-(x_s and T are both plain option indices into that variable's own domain, exactly as ColoringSmt stores them. No
-boundary special-casing is needed, unlike ColoringSmt.cpp's own encoding: comparing a state's single data value against
-a threshold parameter's domain is already exact for the contiguous threshold domains tree synthesis produces, and
-equalities against a bare parameter (V_n == v, A_p == a) are exact for any domain.)
-
-Irrelevant states are handled by the engine itself (ColoringGeneral's state_is_relevant, "enable the first choice
-in base_choices"), exactly like ColoringSmt -- this template says nothing about them.
+For info about the coloring refer to https://arxiv.org/abs/2501.10126
 """
 
 from __future__ import annotations
@@ -54,11 +26,9 @@ _MAX_UNAVAILABLE_ACTION_INDEX = 62
 def _state_option_indices(
     relevant_state_valuations: list[list[int]], state_is_relevant_bv: Any, variables: list[paynt.dt.decision_tree.DtVariable]
 ) -> list[list[int]]:
-    """Convert each state's raw variable valuation into option indices (its position in that variable's own domain), matching ColoringSmt's own internal
-    conversion (ColoringSmt.cpp's state_valuation array).
+    """Convert each state's raw variable valuation into option indices (its position in that variable's own domain).
 
-    Irrelevant states get an all-zero placeholder: never read (state_is_relevant gates evaluation), and their raw
-    valuation may not even appear in a domain built only from relevant states (see DtColoredMdpFactory.__init__).
+    Irrelevant states get an all-zero placeholder.
     """
     value_to_index = [{value: index for index, value in enumerate(variable.domain)} for variable in variables]
     num_variables = len(variables)
@@ -81,12 +51,9 @@ def decision_tree_coloring(
     state_is_relevant_bv: Any,
     decision_tree: paynt.dt.decision_tree.DecisionTree,
 ) -> tuple[Any, list[tuple[int, str, str]]]:
-    """Build a ColoringGeneral for decision_tree, over the same underlying MDP DtColoredMdpFactory.reset_tree builds ColoringSmt from -- same inputs (see
-    reset_tree), so both colorings see identical data.
+    """Build a ColoringGeneral for decision_tree.
 
-    :returns: (coloring, parameter_info) -- parameter_info in ColoringSmt.getFamilyInfo()'s own format (one (node_identifier, parameter_name, parameter_type)
-        tuple per parameter, parameter_type one of "__decision__"/"__action__"/a variable's own name), so reset_tree's existing parameter-space reconstruction
-        applies completely unchanged.
+    :returns: (coloring, parameter_info) -- parameter_info in ColoringSmt.getFamilyInfo()'s own format.
     """
     num_states = len(row_groups) - 1
     num_actions = len(action_labels)
@@ -114,10 +81,8 @@ def decision_tree_coloring(
                 "unavailable at some state: use --method ar for this model"
             )
 
-    # Parameters are allocated in the exact order ColoringSmt's createHoles assigns hole ids: a pre-order,
-    # true-child-first walk of the tree, allocating (decision, then one threshold per variable) at an inner node, or
-    # (one action parameter) at a leaf. This is a pure tree walk -- independent of ColoringBuilder -- so the
-    # resulting parameter count is known before the builder (which needs it up front) is even constructed.
+    # Parameters are allocated in the order in which ColoringSmt's createHoles assigns hole ids: a pre-order, true-child-first walk of the tree.
+    # A pure tree walk, independent of ColoringBuilder, so the parameter count is known before the builder, which needs it up front, is constructed.
     parameter_info: list[tuple[int, str, str]] = []
 
     def allocate(count: int, identifier: int, name: str, kind: str) -> list[int]:
@@ -179,11 +144,9 @@ def decision_tree_coloring(
 
     root_leaf_paths = leaf_paths(decision_tree.root, [])
 
-    # A SINGLE template for every relevant state's every choice: state_valuation/action_col/is_dont_care_col/
-    # unavailable_col are column *references* (StateColTerm/ChoiceColTerm node ids), not per-state/per-choice
-    # constants -- ColoringGeneral resolves them against the current state/choice row at evaluation time, so the
-    # same compiled formula is correct for every (state, choice) it's attached to; building it once (rather than
-    # once per state) keeps compilation O(tree size), not O(states * tree size).
+    # A single template serves every choice of every relevant state: state_valuation/action_col/is_dont_care_col/unavailable_col are column references
+    # (StateColTerm/ChoiceColTerm), which ColoringGeneral resolves against the current state/choice row at evaluation time, so compiling it costs O(tree size),
+    # not O(states * tree size).
     state_valuation = state_valuation_cols
     disjuncts = []
     for leaf_identifier, path in root_leaf_paths:

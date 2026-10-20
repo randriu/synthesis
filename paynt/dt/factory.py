@@ -101,9 +101,8 @@ class DtColoredMdpFactory:
             reads that split; a caller that merely wants the verdict (mapping a scheduler) turns it off, which spares the coloring the work of computing it. The
             general coloring never proposes one, so it ignores this.
         :param general: if True, build the tree's coloring as a payntbind.synthesis.ColoringGeneral (see paynt.dt.coloring_general.decision_tree_coloring)
-            instead of the default ColoringSmt. Everything else about the produced ColoredMdp -- its ParameterSpace, DtInfo, feature_kind -- is unaffected: the
-            two colorings are built from identical inputs and expose an identical parameter layout (see decision_tree_coloring's own docstring), so dtpaynt's
-            default (general=False) path and behavior are completely untouched by this option.
+            instead of the default ColoringSmt. The produced ColoredMdp (its ParameterSpace, DtInfo, feature_kind) is the same either way: both colorings are
+            built from identical inputs and expose an identical parameter layout.
         """
         num_actions = len(self.action_labels)
         dont_care_action = num_actions

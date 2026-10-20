@@ -1,9 +1,9 @@
-"""Integration tests of robust synthesis (--constraint exists_forall), each result checked independently with
-verify_robust -- AR on the negated specification, a port of molehill's tests/test_robust.py.
+"""Integration tests of robust synthesis (--constraint exists_forall).
 
-smpmc-tiny (see tests/parameter_space/constraints/test_costs.py) has exactly 3 satisfying assignments:
-(x1=1,x2=4), (x1=4,x2=3) and (x1=4,x2=4), with x1 in {1..4} and x2 in {3,4}. So "exists x1 forall x2" holds with
-x1=4, while "exists x2 forall x1" does not hold at all.
+smpmc-tiny (see tests/parameter_space/constraints/test_costs.py) has exactly 3 satisfying assignments: (x1=1,x2=4), (x1=4,x2=3) and (x1=4,x2=4), with x1 in
+{1..4} and x2 in {3,4}. So "exists x1 forall x2" holds with x1=4, while "exists x2 forall x1" does not hold at all.
+
+Where a test says so, the result is checked independently with verify_robust: AR on the negated specification, a port of molehill's tests/test_robust.py.
 """
 
 from __future__ import annotations

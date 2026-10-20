@@ -1,9 +1,8 @@
-"""Phase 3: SynthesizerSMPMC as DtSynthesizer's inner engine (over the tree's ColoringGeneral), instead of the default SynthesizerARDt (over ColoringSmt) -- see
+"""SynthesizerSMPMC as DtSynthesizer's inner engine (over the tree's ColoringGeneral), instead of the default SynthesizerARDt (over ColoringSmt); see
 paynt.dt._utils and DtColoredMdpFactory.reset_tree.
 
-Depth 0 is compared against SynthesizerARDt directly. Deeper trees are compared against optima pinned from SynthesizerARDt over ColoringSmt (see
-tests/dt/test_dt_coloring_general.py's docstring on why running the AR engine over the general coloring is not a fair comparison there), and only became
-feasible for SMPMC once its conflicts are minimized with ColoringGeneral.relevantParameters.
+Depth 0 is compared against SynthesizerARDt directly. Deeper trees are compared against optima pinned from SynthesizerARDt over ColoringSmt, an independent
+engine; they are feasible for SMPMC thanks to conflicts minimized with ColoringGeneral.relevantParameters.
 """
 
 from __future__ import annotations
@@ -98,8 +97,7 @@ class TestApiRouting:
             paynt.api.get_synthesizer(factory, task, method="onebyone")
 
     def test_default_method_ar_is_unaffected(self):
-        """Regression guard: get_synthesizer's default routing for "dt" (no explicit --method) must still build a ColoringSmt-backed DtSynthesizer, exactly as
-        before this feature existed."""
+        """get_synthesizer's default routing for "dt" (no explicit --method) builds a ColoringSmt-backed DtSynthesizer."""
         sketch_path, props_path = get_sketch_paths("tests/dt-orchard")
         factory, task = paynt.parser.sketch.Sketch.load_sketch(sketch_path, props_path)
         synthesizer = paynt.api.get_synthesizer(factory, task)
@@ -111,8 +109,8 @@ class TestApiRouting:
 class TestSmpmcOnDeeperTrees:
     """Optima pinned from SynthesizerARDt over ColoringSmt; SMPMC proves optimality, so agreeing with that independent engine is the check.
 
-    With the static per-state supports (every tree parameter, for every state) SMPMC's conflicts never shrink: dt-orchard depth 1 took minutes instead of
-    seconds.
+    This needs ColoringGeneral.relevantParameters: with the static per-state supports (every tree parameter, for every state) the conflicts never shrink and the
+    search is far slower (dt-orchard depth 1).
     """
 
     @pytest.mark.parametrize(
@@ -205,7 +203,7 @@ class TestDtSynthesizerRun:
     @pytest.mark.parametrize("method", ["ar", "smpmc"])
     def test_the_result_carries_the_tree_and_its_value(self, method):
         sketch_path, props_path = get_sketch_paths("tests/dt-orchard")
-        # the depth is a task option: the command line defaults it to 0, a library call to the (much deeper) default of the task
+        # the depth is a task option: a library call sets it explicitly, as the command line does with --tree-depth
         factory, task = paynt.parser.sketch.Sketch.load_sketch(sketch_path, props_path, task_kwargs={"tree_depth": 0})
         result = paynt.dt.synthesizer.DtSynthesizer(factory, task, method=method).run()
         assert isinstance(result, paynt.dt.result.DtResult)

@@ -73,21 +73,16 @@ void define_helpers(py::module& m) {
     m.def("set_max_iterations_minmax", [](storm::MinMaxSolverEnvironment& nsenv, uint64_t value) {
         nsenv.setMaximalNumberOfIterations(value);
     });
-    // MinMaxSolverEnvironment's own iteration cap (above) bounds the *outer* policy-improvement loop of
-    // policy iteration, but each outer iteration evaluates the current policy via an inner linear
-    // equation solve -- gmmxx by default -- which has its own, separate iteration cap unaffected by the
-    // one above. On a large model that inner solve can dominate wall-clock time by itself (confirmed:
-    // "GmmxxLinearEquationSolver did not converge" observed on a 1.65M-state model even with the outer
-    // minmax cap set to 1), so it needs capping too for the same reason the outer one does.
+    // MinMaxSolverEnvironment's own iteration cap bounds the *outer* policy-improvement loop of policy iteration, but
+    // each outer iteration evaluates the current policy via an inner linear equation solve (gmmxx by default), which
+    // has its own iteration cap. On a large model that inner solve can dominate the running time by itself, so it needs
+    // capping too.
     m.def("set_max_iterations_gmmxx", [](storm::SolverEnvironment& senv, uint64_t value) {
         senv.gmmxx().setMaximalNumberOfIterations(value);
     });
-    // Confirmed the above alone is not sufficient: gmmxx's default method (GMRES) restarts its Krylov
-    // subspace every getRestartThreshold() iterations (see GmmxxLinearEquationSolver.cpp's gmm::gmres
-    // call), a *separate* limit from setMaximalNumberOfIterations -- observed directly: raising the
-    // iteration cap from 1 to 10000 did nothing, but the solver still reported "did not converge within
-    // 22 iteration(s)" every time, exactly matching the (small, matrix-size-derived) default restart
-    // threshold rather than the cap.
+    // gmmxx's default method (GMRES) also restarts its Krylov subspace every getRestartThreshold() iterations (see
+    // GmmxxLinearEquationSolver.cpp's gmm::gmres call), a limit separate from setMaximalNumberOfIterations, so raising
+    // the iteration cap alone does not stop a solve that ends at the restart threshold.
     m.def("set_restart_threshold_gmmxx", [](storm::SolverEnvironment& senv, uint64_t value) {
         senv.gmmxx().setRestartThreshold(value);
     });

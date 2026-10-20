@@ -337,12 +337,9 @@ class ColoringBuilder:
     ) -> None:
         """
         :param row_groups: nondeterministic choice indices of the underlying quotient MDP (as on ColoredMdp.underlying_mdp)
-        :param num_parameters: number of parameters colors are formulas over -- deliberately just a count, not a
-            full ParameterSpace: a coloring built from a template (e.g. a decision tree, see paynt/dt/coloring_general.py)
-            determines its own parameter *layout* (names, option counts) only from the coloring it just built, so a
-            ParameterSpace is reconstructed by the caller only afterwards, never available to the builder itself
-        :param state_is_relevant: optional stormpy/payntbind BitVector -- irrelevant states are never evaluated
-            (see ColoringGeneral); every state is relevant by default
+        :param num_parameters: number of parameters that the colors are formulas over; just a count, see the module docstring
+        :param state_is_relevant: optional stormpy/payntbind BitVector; irrelevant states are never evaluated (see ColoringGeneral).
+            Every state is relevant by default
         """
         self.row_groups = list(row_groups)
         self.num_states = len(self.row_groups) - 1

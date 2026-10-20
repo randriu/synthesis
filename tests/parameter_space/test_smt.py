@@ -1,8 +1,5 @@
-"""Backfill for paynt.parameter_space.smt (SmtSolver/ParameterSpaceEncoding), previously untested.
-
-Written while migrating SmtSolver from z3.Int to z3.BitVec (see paynt/parameter_space/bitvec.py) and adding the shared custom-constraint hook
-(paynt/parameter_space/constraints/).
-"""
+"""Tests of paynt.parameter_space.smt (SmtSolver/ParameterSpaceEncoding): the BitVec encoding of a parameter space (see paynt/parameter_space/bitvec.py) and the
+shared custom-constraint hook (paynt/parameter_space/constraints/)."""
 
 from __future__ import annotations
 
@@ -94,8 +91,7 @@ class TestSmtSolverConstraintHook:
             assert assignment.parameter_options(0) == [2]
 
     def test_no_constraint_behaves_exactly_as_before(self):
-        """Regression guard: SmtSolver's pre-Phase-2 call shape (positional parameter_space only) must keep working, since CEGIS/Hybrid predate the constraint
-        parameter."""
+        """SmtSolver can be built from the parameter space alone, as CEGIS and Hybrid do: the constraint parameter is optional."""
         parameter_space = _parameter_space(3)
         solver = paynt.parameter_space.smt.SmtSolver(parameter_space)
         encoding = paynt.parameter_space.smt.ParameterSpaceEncoding(solver, parameter_space)

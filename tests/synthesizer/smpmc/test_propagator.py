@@ -1,12 +1,12 @@
 """Pure unit tests of SmpmcPropagator against a fake theory -- no Storm, no real colored MDP.
 
-This is deliberately the cheapest and most direct test of the Z3 UserPropagateBase integration itself, isolated from whether Storm/model-checking is doing the
-right thing (see test_theory.py for that).
+This is the cheapest and most direct test of the Z3 UserPropagateBase integration itself, isolated from whether Storm is doing the right thing (see
+test_theory.py for that).
 
-The FakeTheory below models `viable(p0, p1, p2)` as "p0 + p1 + p2 >= 3" -- simple enough to reason about by hand, but with three parameters (not two)
-specifically because the bug this test suite is built to catch (see theory.py's module docstring) only shows up once at least one parameter is not a live Z3
-variable at `created` time. That happens for the real engine's `--forall`-free single-option holes and, here, whenever a domain constraint pins a parameter to
-one value before the propagator inspects the viable(...) term -- both are exercised below.
+The FakeTheory below models `viable(p0, p1, p2)` as "p0 + p1 + p2 >= 3": simple enough to reason about by hand, with three parameters because the case of a
+constant folded by Z3 that theory.py's module docstring describes needs at least one parameter that is not a live Z3 variable at `created` time. That happens
+for holes with a single option in the real engine and, here, whenever a domain constraint pins a parameter to one value before the propagator inspects the
+viable(...) term; both are exercised below.
 """
 
 from __future__ import annotations
@@ -77,12 +77,9 @@ class TestExistentialSearch:
         assert len(theory.calls) > 0, "expected the theory to actually be consulted before concluding unsat"
 
     def test_constant_folded_parameter_still_participates_in_theory_checks(self):
-        """Regression test for the bug this module's docstring describes: p2 is pinned to 0 via a plain equality, so Z3 constant-folds it into viable(p0, p1, 0)
-        before `created` fires.
-
-        A propagator that only tracks live-variable arguments would build `fixed` dicts missing parameter 2 entirely, so FakeTheory.check (which requires
-        len(fixed) == 3) would never actually run -- silently returning `sat` for a non-viable witness. This asserts both the specific failure mode and its
-        absence.
+        """A parameter pinned to a value by a plain equality (here p2 = 0) is constant-folded by Z3 into viable(p0, p1, 0) before `created` fires, and the
+        propagator still has to hand it to the theory: FakeTheory.check requires len(fixed) == 3, so a propagator that tracked only live-variable arguments
+        would never reach a real check and would silently return `sat` for a non-viable witness.
         """
         solver, (p0, p1, p2), theory = _build_solver(width=3, p0_max=1, p1_max=0, p2_max=0, force_p2_to_zero=True)
         result = solver.check()
@@ -140,12 +137,7 @@ class TestTimeIsUp:
 
 
 class TestChecksAFullAssignmentFirst:
-    """Regression coverage for the "check a full assignment first" heuristic ported from molehill's own Mole.partial_model_consistent (its "magic trick"): a
-    genuinely partial query (some but not all parameters fixed) must never reach the theory before at least one fully-fixed one has.
-
-    Found necessary on a real 1.65M-state model where a threshold so generous that no partial query is ever refutable turned this into pure overhead -- an
-    expensive model check paid once per parameter Z3 fixes on the way to its first candidate, for no pruning benefit. See theory.py's module docstring.
-    """
+    """A genuinely partial query (some but not all parameters fixed) never reaches the theory before a fully fixed one has (see _analyse in theory.py)."""
 
     def test_no_partial_query_reaches_the_theory_before_the_first_full_one(self):
         solver, _vars, theory = _build_solver(width=3, p0_max=3, p1_max=1, p2_max=0)
@@ -225,10 +217,10 @@ class TestPushSkipsRedundantAnalyses:
 
 
 class RobustFakeTheory:
-    """Viable(x0, x1, y0) iff x0 + x1 >= y0 -- a different predicate from FakeTheory above (deliberately:
+    """Viable(x0, x1, y0) iff x0 + x1 >= y0.
 
-    this is what exercises the forall-quantified/MBQI path meaningfully, since it depends on the third argument, whereas the plain-existential tests above never
-    vary the "environment" argument).
+    Unlike FakeTheory's predicate it depends on the third argument, the "environment" y0, which the plain existential tests above never vary, so it exercises
+    the forall-quantified (MBQI) path.
     """
 
     def __init__(self):
@@ -251,10 +243,7 @@ class RobustFakeTheory:
 
 
 class TestRobustSearch:
-    """The forall-quantified (MBQI) path: exists x0,x1 .
-
-    forall y0 in [0,y_max] . viable(x0,x1,y0).
-    """
+    """The forall-quantified (MBQI) path: there are x0, x1 such that viable(x0, x1, y0) holds for all y0 in [0, y_max]."""
 
     def _build_robust_solver(self, width, x_max, y_max):
         solver = z3.Solver()

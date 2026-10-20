@@ -27,9 +27,9 @@ using BitVector = storm::storage::BitVector;
  * formula (an entry in a small, hash-consed node table, built once by the caller -- see
  * paynt/utils/coloring_builder.py) can color arbitrarily many choices without one Z3-sized formula per choice.
  *
- * Unlike ColoringSmt (specialized and tuned for decision-tree synthesis; must not change), this class is
- * deliberately generic: it knows nothing about trees or any other coloring kind, and never needs touching to
- * support a new one -- new colorings are authored entirely in Python against the node-table format below.
+ * Unlike ColoringSmt (specialized for decision-tree synthesis), this class is generic: it knows nothing about
+ * trees or any other coloring kind, and a new coloring is authored entirely in Python against the node-table
+ * format below.
  *
  * Compatible-choice selection is a sound three-valued (Kleene) evaluation by default (never wrongly excludes a
  * choice, but may keep one that turns out incompatible on every concrete assignment); an optional exact mode
@@ -191,7 +191,7 @@ protected:
     std::vector<std::vector<uint64_t>> choice_destinations;
     void visitChoice(uint64_t choice, BitVector& state_reached, std::queue<uint64_t>& unexplored) const;
 
-    // -- Kleene evaluation --------------------------------------------------------------------------------------
+    // Kleene evaluation
 
     enum class Tri : uint8_t { F = 0, U = 1, T = 2 };
     struct Interval { int64_t lo; int64_t hi; };
@@ -222,7 +222,7 @@ protected:
     void unionReasonTrue(int32_t node, BitVector& out) const;
     void unionReasonFalse(int32_t node, BitVector& out) const;
 
-    // -- exact (Z3) mode and areChoicesConsistent ----------------------------------------------------------------
+    // exact (Z3) mode and areChoicesConsistent
 
     // One Z3 context and one integer constant per parameter, for the object's whole lifetime (built once, in the
     // constructor); the family's domain constraints and the choices' formulas are added per query.

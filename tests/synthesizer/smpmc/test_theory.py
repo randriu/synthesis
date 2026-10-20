@@ -16,9 +16,7 @@ from helpers.helper import get_sketch_paths
 
 
 class TestColoredMdpTheoryOnFullAssignments:
-    """For a *complete* assignment (every parameter fixed), check()'s verdict has an unambiguous ground
-    truth: build the concrete DTMC directly and compare. This sidesteps needing to hand-derive which
-    option index corresponds to which sketch-level hole label."""
+    """For a *complete* assignment (every parameter fixed), check()'s verdict has an unambiguous ground truth: build the concrete DTMC directly and compare."""
 
     def test_every_full_assignment_agrees_with_direct_model_checking(self, smpmc_tiny_colored_mdp, smpmc_tiny_task):
         prop = smpmc_tiny_task.specification.constraints[0]
@@ -61,14 +59,9 @@ class TestColoredMdpTheoryOnFullAssignments:
 
 
 class TestColoredMdpTheorySingletonEta:
-    """Regression coverage for a real correctness bug found on models/tests/generic-maze: for a fully- fixed (singleton) eta, ColoredMdp.build() hands back an
-    MDP-typed model even though it has exactly one choice per state, and solving that via minmax/policy iteration can disagree with the exact value
-    build_assignment()'s DTMC conversion gives for the mathematically identical process -- by an amount that lands just past model_checking_precision.
-
-    That was enough to make SynthesizerSMPMC's optimality loop treat a non-improving witness as still-viable and terminate with the wrong (much worse) optimum:
-    real 24-hole run converged to 36001.06 instead of the true minimum around 8.13. check() now uses build_assignment() directly whenever eta.size == 1,
-    sidestepping the disagreement rather than working around its symptom.
-    """
+    """For a fully fixed (singleton) eta, check() computes the value on build_assignment()'s DTMC and not on the MDP-typed model that ColoredMdp.build()
+    returns, whose minmax solve can differ from the exact value by slightly more than model_checking_precision: enough to make SynthesizerSMPMC's optimality
+    loop treat a non-improving witness as still viable."""
 
     def test_a_full_assignment_is_checked_via_the_exact_dtmc_value_not_build(self):
         sketch_path, props_path = get_sketch_paths("tests/generic-maze")
@@ -81,11 +74,8 @@ class TestColoredMdpTheorySingletonEta:
         expected = colored_mdp.build_assignment(assignment).model_check_property(prop, alt=False).value
 
         fixed = {p: assignment.parameter_options(p)[0] for p in range(assignment.num_parameters)}
-        # a threshold exactly at the expected value: if check() ever computed this via build() (MDP-typed,
-        # minmax-solved) instead of build_assignment() (DTMC-typed, exact), the two values would disagree
-        # by an amount straddling model_checking_precision, and this refutation query would come back as
-        # inconclusive (None) instead of correctly refuted -- exactly the bug that let a non-improving
-        # witness through in the real run.
+        # a threshold exactly at the expected value: computed via build() (MDP-typed, minmax-solved) instead of build_assignment() (DTMC-typed, exact), the
+        # value could differ by an amount straddling model_checking_precision, and this refutation would come back inconclusive (None)
         prop.update_optimum(expected)
         result = theory.check(fixed, polarity=True)
 
@@ -96,10 +86,10 @@ class TestColoredMdpTheorySingletonEta:
 
 
 class TestColoredMdpTheoryOutOfRangeValues:
-    """Regression test: an out-of-range option must be treated as inconclusive (letting the plain in_range() Boolean constraint reject it), not passed through
-    to ColoredMdp.build() -- which previously crashed stormpy's submodel construction with a deadlock-state error for some out-of-range partial assignments.
+    """An out-of-range option is inconclusive (the plain in_range() constraint rejects it) and is not passed on to ColoredMdp.build(), whose submodel
+    construction would fail with a deadlock-state error.
 
-    See checker.py's check() for the guard this tests.
+    See the guard in checker.py's check().
     """
 
     def test_out_of_range_option_is_inconclusive_not_a_crash(self, smpmc_tiny_colored_mdp, smpmc_tiny_task):
@@ -156,14 +146,11 @@ class TestColoredMdpTheoryRelevantParameters:
 
 
 class TestColoredMdpTheoryRewardConvergence:
-    """Regression coverage for _model_check's value-iteration-to-policy-iteration escalation.
+    """_model_check escalates from value iteration to policy iteration when the capped value iteration has not converged.
 
-    models/tests/generic-maze is a genuine, naturally-occurring example of the failure mode this guards
-    against: R{"steps"}max=?[F "goal"] is a large but finite value (~903.9 million) that value iteration
-    converges to pathologically slowly -- capped VI (see Property.initialize's max_minmax_iterations)
-    returns a wildly wrong snapshot (order 10^3-10^7, depending on the cap) long before it gets anywhere
-    close, while the min direction of the very same property converges immediately with plain VI. This is
-    not a synthetic scenario; it's the exact model that originally exposed the bug (see conversation).
+    models/tests/generic-maze is a natural example: R{"steps"}max=?[F "goal"] is a large but finite value (~903.9 million) that value iteration approaches so
+    slowly that the capped run (see Property.initialize's max_minmax_iterations) returns a snapshot that is off by orders of magnitude, while the min direction
+    of the same property converges immediately.
     """
 
     def test_the_slow_converging_direction_escalates_to_the_correct_value(self):
@@ -280,10 +267,8 @@ class TestColoredMdpTheoryCache:
 
 
 class TestColoredMdpTheoryStatisticWiring:
-    """check() is optionally given the run's Statistic object, feeding SMPMC into the same
-    iteration-counting/status-throttling/progress-percentage machinery AR and CEGIS already use (see
-    Statistic.iteration/.status in paynt/synthesizer/statistic.py) -- this is what backs --method smpmc's
-    periodic "progress X%, ..., iters = {...}, opt = ..." log line."""
+    """The theory's check() can be given the run's Statistic object, which feeds the iteration counting and the throttled status line that AR and CEGIS use too
+    (see Statistic.iteration/.status in paynt/synthesizer/statistic.py)."""
 
     def _theory_with_real_stat(self, colored_mdp, task):
         synthesizer = paynt.synthesizer.smpmc.SynthesizerSMPMC(colored_mdp, task)
@@ -294,8 +279,7 @@ class TestColoredMdpTheoryStatisticWiring:
         return synthesizer, theory
 
     def test_stat_is_optional(self, smpmc_tiny_colored_mdp, smpmc_tiny_task):
-        """The default (no stat argument) must keep working -- test_propagator.py's fake-theory tests and every other test_theory.py test above construct
-        ColoredMdpTheory this way."""
+        """ColoredMdpTheory works without a stat argument, the default."""
         prop = smpmc_tiny_task.specification.constraints[0]
         theory = paynt.synthesizer.smpmc.checker.ColoredMdpTheory(smpmc_tiny_colored_mdp, prop)
         assert theory.stat is None
@@ -320,8 +304,7 @@ class TestColoredMdpTheoryStatisticWiring:
     def test_a_fresh_refutation_increments_explored_on_the_synthesizer(self, smpmc_tiny_colored_mdp, smpmc_tiny_task):
         synthesizer, theory = self._theory_with_real_stat(smpmc_tiny_colored_mdp, smpmc_tiny_task)
         assert synthesizer.explored == 0
-        # {x1=1 (index 0)} alone is enough to refute viable for this sketch (P>=0.1[F "done"] fails for
-        # every combination with x1's label 1 and x2's label 3 -- see test_theory.py's ground-truth sweep)
+        # {x1=1, x2=3} (option indices 0 and 0) is enough to refute viable for this sketch: P>=0.1[F "done"] fails for it (see the ground-truth sweep above)
         result = theory.check({0: 0, 1: 0}, True)
         assert result is not None, "expected a refutation to set up this test meaningfully"
         assert synthesizer.explored > 0

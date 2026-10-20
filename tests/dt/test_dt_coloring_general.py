@@ -1,7 +1,7 @@
-"""Phase 2 differential tests: decision_tree_coloring (paynt.dt.coloring_general) against ColoringSmt, on the two tracked DT fixtures (dt-orchard: Pmax; dt-
-maze: Rmin).
+"""Differential tests of decision_tree_coloring (paynt.dt.coloring_general) against ColoringSmt, on the two tracked DT fixtures (dt-orchard: Pmax; dt-maze:
+Rmin).
 
-reset_tree(general=True) is the only entry point exercised -- it, not decision_tree_coloring directly, is DtColoredMdpFactory's own contract.
+reset_tree(general=True) is the only entry point exercised: it, not decision_tree_coloring directly, is DtColoredMdpFactory's own contract.
 """
 
 from __future__ import annotations
@@ -19,8 +19,8 @@ from helpers.helper import get_sketch_paths
 
 PROJECTS = ["tests/dt-orchard", "tests/dt-maze"]
 DEPTHS = [0, 1, 2]
-# where the general coloring's areChoicesConsistent is checked against ColoringSmt's: its satisfiable queries cost seconds on dt-orchard at depth 1 and up to
-# half a minute at depth 2 (ColoringSmt: well under a second), so that case is left out
+# the cases in which areChoicesConsistent of the general coloring is checked against ColoringSmt's: its satisfiable queries are far slower than ColoringSmt's
+# from depth 1 on, so the deeper cases are left out
 CONSISTENCY_CASES = [("tests/dt-orchard", 0), ("tests/dt-orchard", 1), ("tests/dt-maze", 0), ("tests/dt-maze", 1), ("tests/dt-maze", 2)]
 
 
@@ -258,7 +258,7 @@ def tree_coloring_inputs(num_actions, dont_care_action=0):
 
 class TestManyActions:
     """The actions unavailable at a state are one signed 64-bit word (ColoringBuilder.in_bits), so with a don't-care action an unavailable action can have index
-    62 at most; a model with more used to fail in pybind with an opaque TypeError."""
+    62 at most; a model with more is refused with a clear error."""
 
     def test_the_highest_action_that_fits_is_supported(self):
         coloring, parameter_info = paynt.dt.coloring_general.decision_tree_coloring(**tree_coloring_inputs(63))

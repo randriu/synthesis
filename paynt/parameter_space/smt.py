@@ -77,10 +77,7 @@ class SmtSolver:
         # SMT solver containing description of the unexplored design space
         self.solver = z3.Solver()
 
-        # for each parameter contains a corresponding solver variable. BitVec (not Int, despite CEGIS
-        # never going through a z3.UserPropagateBase where that would matter) so this can share both the
-        # variable-construction helper and the ConstraintContext shape with SMPMC's encoding -- see
-        # paynt/parameter_space/bitvec.py and paynt/parameter_space/constraints/constraint.py.
+        # for each parameter contains a corresponding solver variable
         self.solver_vars: list[Any]
         self.solver_vars, self.width, _name_to_parameter = paynt.parameter_space.bitvec.parameter_bitvec_variables(parameter_space)
         # for each parameter contains a list of equalities [p==opt1,p==opt2,...],
@@ -95,9 +92,7 @@ class SmtSolver:
             clauses = [self.create_parameter_clause(parameter, option) for option in parameter_space.parameter_options(parameter)]
             self.solver_clauses.append(clauses)
 
-        # custom constraint (e.g. --constraint costs/prob0/prob1), built once here rather than per node:
-        # the clauses reference only self.solver_vars/width, not any node-specific narrowing, and some
-        # constraints (e.g. costs) are expensive enough that rebuilding per node would be wasteful
+        # custom constraint (e.g. --constraint costs/prob0/prob1), built once here rather than per node
         self.constraint_clauses: list[Any] = []
         if constraint is not None:
             assert colored_mdp is not None and task is not None, "constraint requires colored_mdp and task"

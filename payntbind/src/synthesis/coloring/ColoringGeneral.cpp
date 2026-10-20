@@ -10,9 +10,7 @@
 
 namespace synthesis {
 
-// ==================================================================================================================
 // construction
-// ==================================================================================================================
 
 ColoringGeneral::ColoringGeneral(
     std::vector<uint64_t> const& row_groups,
@@ -244,9 +242,7 @@ std::tuple<int32_t, std::vector<int64_t>, std::vector<int64_t>, bool, bool> Colo
     return {choice_root[choice], state_data[state], choice_data[choice], state_is_relevant[state], choice == row_groups[state]};
 }
 
-// ==================================================================================================================
 // Kleene evaluation
-// ==================================================================================================================
 
 ColoringGeneral::Tri ColoringGeneral::evalFormula(int32_t node) {
     Scope scope = node_scope[node];
@@ -450,9 +446,7 @@ ColoringGeneral::Tri ColoringGeneral::evalInBits(int32_t param_term, int32_t dat
     return any_in ? Tri::T : Tri::F;
 }
 
-// ==================================================================================================================
 // selectCompatibleChoices
-// ==================================================================================================================
 
 BitVector ColoringGeneral::selectCompatibleChoices(Family const& family) {
     return selectCompatibleChoices(family, BitVector(numChoices(),true));
@@ -518,9 +512,7 @@ BitVector ColoringGeneral::selectCompatibleChoices(Family const& family, BitVect
     return selection;
 }
 
-// ==================================================================================================================
 // relevantParameters
-// ==================================================================================================================
 
 void ColoringGeneral::unionReasonTrue(int32_t node, BitVector& out) const {
     NodeOp op = node_op[node];
@@ -597,9 +589,7 @@ BitVector ColoringGeneral::relevantParameters(Family const& family, std::vector<
     return result;
 }
 
-// ==================================================================================================================
 // exact (Z3) mode
-// ==================================================================================================================
 
 z3::expr ColoringGeneral::domainConstraint(uint64_t parameter, z3::expr const& var, Family const& family, z3::context& ctx) const {
     z3::expr_vector options(ctx);
@@ -703,9 +693,7 @@ bool ColoringGeneral::exactSat(
     return solver.check() == z3::sat;
 }
 
-// ==================================================================================================================
 // areChoicesConsistent
-// ==================================================================================================================
 
 std::vector<std::vector<uint64_t>> ColoringGeneral::extractAssignment(z3::model const& model) const {
     std::vector<std::vector<uint64_t>> result(num_parameters);

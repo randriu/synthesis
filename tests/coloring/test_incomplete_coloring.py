@@ -2,8 +2,8 @@
 
 The induced model is then an MDP, and the specification is to hold for the best resolution of the choices left. The example is dt-maze with "the relevant states
 with x == v all play the same action": one parameter per v, whose options are the actions all those states offer, and every other choice left uncolored -- a
-problem that, with a parameter per state, would have 5^13 assignments, and here has between 5 and 625. The optimum is found by brute force, one MDP check per
-assignment, and every engine must agree with it.
+problem that, with a parameter per state, would have 5^13 assignments, and here has 5 or 125. The optimum is found by brute force, one MDP check per assignment,
+and every engine must agree with it.
 """
 
 from __future__ import annotations

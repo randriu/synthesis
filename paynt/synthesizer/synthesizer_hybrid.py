@@ -95,9 +95,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
     def synthesize_one(self, node: paynt.synthesizer.search_node.SearchNode) -> paynt.parameter_space.parameter_space.ParameterSpace | None:
 
         self.conflict_generator.initialize()
-        # deliberately not threading self.constraint through here, even though it exists on this instance
-        # (inherited from SynthesizerCEGIS.__init__ via this class's MRO): Hybrid doesn't support custom
-        # constraints yet, so this omission is intentional, not an oversight.
+        # self.constraint is deliberately not passed on: Hybrid does not support custom constraints yet
         smt_solver = paynt.parameter_space.smt.SmtSolver(self.colored_mdp.parameter_space)
 
         # AR-CEGIS loop
