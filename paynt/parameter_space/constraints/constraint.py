@@ -1,6 +1,5 @@
 """Constraint: the shared extension point for custom SMT constraints over the parameter space, usable by both SynthesizerSMPMC (natively -- a constraint can
-reference the viable(...) predicate, e.g. to wrap it in a quantifier for robust synthesis) and CEGIS's SmtSolver.
-"""
+reference the viable(...) predicate, e.g. to wrap it in a quantifier for robust synthesis) and CEGIS's SmtSolver."""
 
 from __future__ import annotations
 

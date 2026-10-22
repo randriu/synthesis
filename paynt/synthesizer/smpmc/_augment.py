@@ -1,6 +1,5 @@
 """Turn a family ColoredMdp (feature_kind "family": the sketch's parameters pick the environment, the agent's policy stays nondeterministic) into a generic one
-where the policy is explicit parameters too -- so robust synthesis can quantify existentially over the policy and universally over the environment.
-"""
+where the policy is explicit parameters too -- so robust synthesis can quantify existentially over the policy and universally over the environment."""
 
 from __future__ import annotations
 

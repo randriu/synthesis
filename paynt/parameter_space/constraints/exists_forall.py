@@ -1,5 +1,7 @@
 """ExistsForallConstraint: robust synthesis (arXiv:2511.08078, Section 4.4) -- exists a choice of the non-quantified parameters such that viable(...) holds for
-every in-range choice of ctx.forall_parameters. Z3 decides this via MBQI; the theory solver needs nothing quantifier-specific.
+every in-range choice of ctx.forall_parameters.
+
+Z3 decides this via MBQI; the theory solver needs nothing quantifier-specific.
 """
 
 from __future__ import annotations

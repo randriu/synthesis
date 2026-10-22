@@ -1,6 +1,5 @@
 """CostsConstraint: bound the total cost of the chosen parameter options by a threshold, where per- (parameter, option) costs are read from a sketch.costs
-sidecar file.
-"""
+sidecar file."""
 
 from __future__ import annotations
 

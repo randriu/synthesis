@@ -1,6 +1,5 @@
-"""Decision trees as a general coloring (see paynt/utils/coloring_builder.py).
-It is an alternative to ColoringSmt for the same DtColoredMdpFactory/DtInfo/ParameterSpace shape,
-selected per depth with reset_tree(general=True).
+"""Decision trees as a general coloring (see paynt/utils/coloring_builder.py). It is an alternative to ColoringSmt for the same
+DtColoredMdpFactory/DtInfo/ParameterSpace shape, selected per depth with reset_tree(general=True).
 
 For info about the coloring refer to https://arxiv.org/abs/2501.10126
 """

@@ -1,6 +1,5 @@
 """Algorithm 1 "CheckMDPs" (arXiv:2511.08078): decide whether a `viable(...)`/`not viable(...)` literal over a partial parameter assignment is refuted, by
-model-checking the induced sub-MDP with Storm.
-"""
+model-checking the induced sub-MDP with Storm."""
 
 from __future__ import annotations
 
