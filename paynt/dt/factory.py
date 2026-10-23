@@ -35,8 +35,6 @@ class DtColoredMdpFactory:
     def __init__(self, mdp: Any, build_task: paynt.dt.task.DtTask | None = None, use_exact: bool = False):
         self.build_task = build_task
         self.use_exact = use_exact
-        # build_task is optional here (see class docstring) -- getattr falls back to DtTask's own
-        # default when it is None
         add_dont_care_action = getattr(build_task, "add_dont_care_action", True)
 
         make_rewards_action_based(mdp)  # needed for initialization
