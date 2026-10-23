@@ -79,6 +79,12 @@ class Property:
     environment: stormpy.Environment | None = None
     # model checking precision
     model_checking_precision: float = 1e-4
+    # cap on minmax (value-iteration-family) solver iterations: without one, a non-converging direction (e.g. a reward property that never stabilizes) can hang
+    # indefinitely, which matters most for SMPMC, as it model-checks once per relevant theory-solver decision
+    max_minmax_iterations: int = 10000
+    # TODO once Storm has a new release we should be able to check for convergence
+    # --sound: apply no iteration caps
+    sound: bool = False
 
     @classmethod
     def set_model_checking_precision(cls, precision: float) -> None:
@@ -91,6 +97,8 @@ class Property:
     def initialize(cls, use_exact: bool = False) -> None:
         cls.environment = stormpy.Environment()
         cls.set_model_checking_precision(cls.model_checking_precision)
+        if not cls.sound:
+            payntbind.synthesis.set_max_iterations_minmax(cls.environment.solver_environment.minmax_solver_environment, cls.max_minmax_iterations)
 
         se = cls.environment.solver_environment
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.native)

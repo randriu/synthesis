@@ -12,6 +12,8 @@
 #include <storm/utility/initialize.h>
 #include <storm/environment/solver/NativeSolverEnvironment.h>
 #include <storm/environment/solver/MinMaxSolverEnvironment.h>
+#include <storm/environment/solver/GmmxxSolverEnvironment.h>
+#include <storm/environment/solver/SolverEnvironment.h>
 #include <storm/storage/SparseMatrix.h>
 #include <storm/models/sparse/Model.h>
 
@@ -67,6 +69,22 @@ void define_helpers(py::module& m) {
     });
     m.def("set_precision_minmax", [](storm::MinMaxSolverEnvironment& nsenv, double value) {
         nsenv.setPrecision(storm::utility::convertNumber<storm::RationalNumber>(value));
+    });
+    m.def("set_max_iterations_minmax", [](storm::MinMaxSolverEnvironment& nsenv, uint64_t value) {
+        nsenv.setMaximalNumberOfIterations(value);
+    });
+    // MinMaxSolverEnvironment's own iteration cap bounds the *outer* policy-improvement loop of policy iteration, but
+    // each outer iteration evaluates the current policy via an inner linear equation solve (gmmxx by default), which
+    // has its own iteration cap. On a large model that inner solve can dominate the running time by itself, so it needs
+    // capping too.
+    m.def("set_max_iterations_gmmxx", [](storm::SolverEnvironment& senv, uint64_t value) {
+        senv.gmmxx().setMaximalNumberOfIterations(value);
+    });
+    // gmmxx's default method (GMRES) also restarts its Krylov subspace every getRestartThreshold() iterations (see
+    // GmmxxLinearEquationSolver.cpp's gmm::gmres call), a limit separate from setMaximalNumberOfIterations, so raising
+    // the iteration cap alone does not stop a solve that ends at the restart threshold.
+    m.def("set_restart_threshold_gmmxx", [](storm::SolverEnvironment& senv, uint64_t value) {
+        senv.gmmxx().setRestartThreshold(value);
     });
 
     m.def("transform_until_to_eventually", &synthesis::transformUntilToEventually<double>, py::arg("formula"));
