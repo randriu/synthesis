@@ -1,7 +1,6 @@
-"""A SynthesisTask pairs an underlying PCTL specification with the generic synthesis knobs the AR/CEGIS/Hybrid/OneByOne algorithms read (as opposed to feature-
-specific build knobs like DT's tree_depth or POMDP's memory_size, which live on a separate, non-inheriting per-feature task class owned by that feature's
-colored-MDP factory instead -- see e.g. paynt.dt.task.DtTask). Each synthesis run constructs its own SynthesisTask, so per-run settings never leak between two
-syntheses running in the same process.
+"""A SynthesisTask pairs an underlying PCTL specification with the generic synthesis knobs the AR/CEGIS/Hybrid/OneByOne algorithms read.
+
+Each synthesis run constructs its own SynthesisTask, so per-run settings never leak between two syntheses running in the same process.
 
 Constructing a SynthesisTask is the one canonical way to turn a list of raw stormpy properties into a
 Specification; every parser should funnel through this (or paynt.specification.property.construct_specification

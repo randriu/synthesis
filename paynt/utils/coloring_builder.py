@@ -1,17 +1,8 @@
 """Builder for colorings given by formulas: the authoring side of payntbind.synthesis.Coloring and payntbind.synthesis.ColoringGeneral.
 
-The standard Coloring gives every choice a conjunction of (parameter = option) pairs. A ColoringGeneral (SMPMC paper,
-arXiv:2511.08078, Definition 2) instead colors every choice with an arbitrary quantifier-free formula over the finite
-parameter space: the choice is enabled under a full parameter assignment iff the assignment satisfies its formula.
-ColoringBuilder is how either is defined, entirely in Python -- the C++ engine is generic and never needs touching to
-support a new kind of coloring. A color is written once, as a formula, and build() produces the standard coloring whenever
-every color is a conjunction of (parameter = option) pairs -- the cheap representation every engine understands -- and the
-general one otherwise.
-
-Colors are written as ordinary z3py formulas over the coloring's own parameter variables (one per declared parameter,
-value = option index) and optional per-state/per-choice data columns, and ColoringBuilder translates them into the flat
-node table ColoringGeneral's constructor expects. No z3 term ever crosses into C++ (payntbind links a different Z3
-build than z3py, so the two cannot share objects): the walker below reads a z3py AST and re-emits it as plain data.
+A color is written once, as a z3py formula over the coloring's parameter variables (one per declared parameter, value = option index) and optional
+per-state/per-choice data columns. build() produces the standard Coloring whenever every color is a conjunction of (parameter = option) pairs, the cheap
+representation every engine understands, and a ColoringGeneral otherwise; ColoringGeneral.h describes its node table and how it is evaluated.
 
 Supported formula language (anything else raises ValueError with the offending sub-expression):
     formulas: True, False, Not, And, Or (any arity), Implies, If (boolean result), ==, !=, <, <=, >, >=
@@ -20,6 +11,10 @@ Supported formula language (anything else raises ValueError with the offending s
               "p in {o1,o2,...}" atom instead of a chain of (possibly imprecise, see ColoringGeneral) equalities;
               ColoringBuilder.in_bits(p, data) similarly compiles to an exact "p's value is a set bit of the
               (per-state/choice) data word" atom (data is interpreted as a 64-bit bitmask, one bit per option).
+
+Colors whose comparisons each relate a bare parameter to data or constants, without Not, and whose Ands join parts over different parameters, are evaluated
+exactly on families; others may select choices that no member of the family enables, which is sound over-approximation.
+It's good to keep this in mind, e.g. use Or(p == 1, p == 2) over And(p >= 1, p <= 2).
 
 Example: "the environment parameter is 0 or 2, or the state's flag is set" for choices [3, 7], and "the shared-action parameter is 'left'" for choice 5,
 over an existing parameter_space:
@@ -40,7 +35,7 @@ ColoredMdp.has_general_coloring).
 
 A coloring need not enable exactly one choice in every state: leaving choices uncolored (always enabled) next to others gives an incomplete coloring, whose
 full assignments are MDPs that engines check for the best resolution of the choices left -- say, "the relevant states with x == 5 play the same action", which
-is `builder.share_action(parameter, states, choice_to_action)`. That is supported for a single property, and every reachable state must keep at least one choice
+is `builder.share_action(parameter, states, choice_to_action)`. Every reachable state must keep at least one choice
 (check_definition(..., complete=False) tests both the parameter space and the colors). See paynt.colored_mdp.
 
 The builder itself only needs a parameter *count* (a coloring built from a structural template, e.g. a decision tree, determines its own parameter layout from

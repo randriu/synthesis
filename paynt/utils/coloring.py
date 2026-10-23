@@ -96,21 +96,6 @@ def choice_formula(coloring: Any, choice: int, parameter_space: paynt.parameter_
     """The color of a choice of a general coloring, as a z3py formula over the parameters, which are named as in the parameter space if it is given (see
     parameter_variables), and p0, p1, ... if not.
 
-    A full parameter assignment enables the choice iff it satisfies the formula. The value of a variable is the index of an option, as everywhere in a
-    coloring; the label of an option, which is for display, is parameter_space.parameter_to_option_labels[parameter][option]. The data of the coloring that the
-    color reads (the columns of the state of the choice and of the choice itself) is substituted into the formula, and the formula is simplified, so what is
-    left is the part that depends on the parameters.
-
-    The formula does not restrict the parameters to their options, which parameter_space_formula does. Two kinds of choices have no color of their own: an
-    uncolored choice is enabled by every assignment, and at an irrelevant state (see the state_is_relevant of ColoringBuilder, which the coloring of a decision
-    tree uses for the states with nothing to decide) only the first choice is enabled, whatever the assignment is, as in selectCompatibleChoices without base
-    choices. The formula of such a choice is True, or False.
-
-    Example, to put the color of a choice into a solver of your own, with the options of the parameters:
-
-        space = colored_mdp.parameter_space
-        solver.add(parameter_space_formula(space), choice_formula(colored_mdp.coloring, choice, space))
-
     :param coloring: a payntbind ColoringGeneral, e.g. the coloring of a ColoredMdp for which has_general_coloring holds
     :param choice: a choice of the underlying MDP
     :param parameter_space: the parameter space that the coloring is defined over, e.g. that of the ColoredMdp, which has the names of the parameters; without
@@ -163,6 +148,8 @@ def _rebuild_formula(table: tuple[Any, ...], root: int, state_row: list[int], ch
 
     The node table is a DAG that is built bottom-up, so a node has a larger id than its operands, and the formula is rebuilt from the leaves up without any
     recursion. A recursive walk would exceed Python's limit on the chain of disjuncts that a decision tree of depth 10 makes, one for each of its leaves.
+
+    Every ColoringGeneral::NodeOp needs a case here.
     """
     ops, node_a, node_b, node_c, option_sets = table
     needed = {root}

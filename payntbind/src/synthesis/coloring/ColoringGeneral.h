@@ -19,21 +19,34 @@ namespace synthesis {
 using BitVector = storm::storage::BitVector;
 
 /**
- * A general coloring (SMPMC paper, arXiv:2511.08078, Definition 2): every choice is colored by an arbitrary
- * quantifier-free formula over a finite parameter space, rather than Coloring's conjunction of (hole,option) pairs.
- * A full parameter assignment theta enables a choice c iff theta satisfies c's color.
+ * A general coloring: each choice of the quotient MDP is colored by a quantifier-free formula over the parameters,
+ * and an assignment to parameters enables a choice iff it satisfies the formula.
  *
- * Choices sharing a formula shape ("template") are distinguished by per-state/per-choice data columns, so one
- * formula (an entry in a small, hash-consed node table, built once by the caller -- see
- * paynt/utils/coloring_builder.py) can color arbitrarily many choices without one Z3-sized formula per choice.
+ * Representation. The colors are a node table built in Python by paynt/utils/coloring_builder.py; the constructor lists
+ * the operands of each NodeOp. Colors are written in z3py, which links a potentially different Z3 than this library, 
+ * so they arrive as plain data. Data columns (a row per state and per choice) let one formula color many choices. 
+ * Invariants: children have smaller ids than their parents; parameter values are option indices; 
+ * choice_root[c] == -1 means that c is uncolored, i.e. always enabled.
  *
- * Unlike ColoringSmt (specialized for decision-tree synthesis), this class is generic: it knows nothing about
- * trees or any other coloring kind, and a new coloring is authored entirely in Python against the node-table
- * format below.
+ * Three readers implement the meaning of the table and must agree with the z3py formula: the Kleene evaluation
+ * (selectCompatibleChoices, relevantParameters), the Z3 translation (areChoicesConsistent, exact mode) and
+ * paynt.utils.coloring.choice_formula. A new NodeOp needs a case in the constructor's scope/support pass,
+ * computeFormula or computeTerm, buildFormula or buildTerm, unionReasonTrue/False, the builder and choice_formula.
  *
- * Compatible-choice selection is a sound three-valued (Kleene) evaluation by default (never wrongly excludes a
- * choice, but may keep one that turns out incompatible on every concrete assignment); an optional exact mode
- * resolves undecided colors with an incremental Z3 check, at extra cost per query.
+ * Kleene evaluation. Under a given assignment to the parameters, a formula evaluates to T (every member satisfies it), 
+ * F (no member does) or U (unknown), and a term to an interval that contains its value in every member. 
+ * A choice is selected unless its formula is evaluated to F.
+ * Every step over-approximates, so a choice that some member enables is never dropped, and on a full assignment the
+ * result is exact. On a partial assignment it is exact if every comparison is between a bare parameter and data or constants
+ * (InSetF and InBitsF are of this kind) and, in addition, every parameter occurs at most once in the color, or the color
+ * has no negation and every And joins parts over different parameters (decision trees, lifted standard colorings).
+ * Otherwise it may keep a choice that no member enables, e.g. `And(p >= 1, p <= 2)` or `p + 1 == 3 for p in {0, 3};` that
+ * only enlarges the sub-MDP, meaning it is still a safe abstraction. 
+ * Deciding this exactly is NP-complete in general! Exact mode does it with Z3, much more slowly.
+ *
+ * A node is evaluated once per query, per state or per choice, depending on whether it reads no data, state data or
+ * choice data; epoch counters invalidate these caches. The caches and the query context are members: one query at a
+ * time, not thread-safe.
  */
 class ColoringGeneral {
 public:
@@ -64,15 +77,15 @@ public:
      *     EqF / NeF / LtF / LeF / GtF / GeF: a, b = child TERM node ids.
      *     InSetF: a = a term node id that must be a bare ParamTerm; b = index into option_sets.
      *     InBitsF: a = a term node id that must be a bare ParamTerm; b = a term node id evaluating to a 64-bit
-     *       bitmask (e.g. a data column); true iff the parameter's value is a set bit.
+     *       bitmask (e.g. a data column); true iff the parameter's value is a set bit. The bitmask must not depend on
+     *       a parameter (checked when evaluated); options >= 64 are never set.
      * @param option_sets for InSetF nodes, a pool of constant option sets (each a sorted vector of distinct
-     *   option indices)
+     *   option indices; the order is not checked)
      * @param choice_root for each choice, the id of its color's root FORMULA node, or -1 if the choice is
      *   uncolored (always enabled under any assignment, matching Coloring's own convention)
      * @param state_data, choice_data per-state / per-choice data columns, row-major ([entity][column])
-     * @param state_is_relevant irrelevant states are never evaluated: selectCompatibleChoices enables only their
-     *   first choice present in base_choices, exactly like ColoringSmt. Defaults to "every state is relevant" when
-     *   given an empty BitVector.
+     * @param state_is_relevant irrelevant states are never evaluated (see selectCompatibleChoices). A BitVector whose
+     *   size is not the number of states, e.g. an empty one, makes every state relevant.
      */
     ColoringGeneral(
         std::vector<uint64_t> const& row_groups,
@@ -90,8 +103,8 @@ public:
 
     /**
      * Lift a plain Coloring (a conjunction of (hole,option) pairs per choice) into a ColoringGeneral, built as a
-     * conjunction of exact equality atoms. Used for differential testing against Coloring, and to run the generic
-     * engines (CEGIS/OneByOne/SMPMC) on a colored MDP built with the standard Coloring.
+     * conjunction of exact equality atoms. Used for differential testing against Coloring. 
+     * It has no data columns, and every state is relevant.
      */
     static std::shared_ptr<ColoringGeneral> fromColoring(
         Family const& family, std::vector<uint64_t> const& row_groups, Coloring const& coloring
@@ -103,31 +116,39 @@ public:
      */
     void enableStateExploration(uint64_t initial_state, std::vector<std::vector<uint64_t>> const& choice_destinations);
 
-    /** Enable exact resolution of Kleene-undecided colors via an incremental Z3 check (extra cost per query). */
+    /** Decide the colors that the Kleene evaluation leaves unknown with Z3, one solver per such choice: 
+     * exact, but orders of magnitude slower. */
     void setExactMode(bool exact);
 
-    /** Get a mask of choices compatible with the family (kept unless certainly FALSE). */
+    /**
+     * The choices that some member of the family may enable: at a relevant state, every uncolored choice and every
+     * colored one whose color is not F; at an irrelevant state, its first choice, whatever its color. With state
+     * exploration, only the states reached from the initial state get choices.
+     * @throws storm::exceptions::UnexpectedException if a reached relevant state keeps no choice: no member of the
+     *   family enables a choice there.
+     */
     BitVector selectCompatibleChoices(Family const& family);
     /**
-     * As above, restricting the colored-choice search to base_choices. Sound whenever family is a narrowing of
-     * whatever family produced base_choices -- see Coloring::selectCompatibleChoices for the argument, identical
-     * here. Uncolored choices are always included, exactly as in Coloring.
+     * As above, but a colored choice must also be in base_choices, and an irrelevant state gets its first choice in
+     * base_choices (none, without an error, if there is none). Sound when family narrows the family that produced
+     * base_choices.
      */
     BitVector selectCompatibleChoices(Family const& family, BitVector const& base_choices);
 
-    /** Static (family-independent) per-state parameter supports, in Coloring's own format. */
+    /** Static per-state parameter supports: the parameters in the colors of the state's choices, whatever the family. */
     std::vector<BitVector> const& getStateToHoles() const;
 
     /**
      * Per-query refinement of getStateToHoles, for conflict minimization (Theorem 6 of the SMPMC paper): a set P of
-     * parameters such that widening the domain of any parameter outside P (keeping those in P as in \p family) selects
-     * exactly the same choices at each of the given (underlying-MDP) states.
+     * parameters such that widening the domain of any parameter outside P (keeping those in P as in family) selects
+     * exactly the same choices at each of the given (underlying-MDP) states, as selectCompatibleChoices selects them.
+     * Irrelevant states contribute nothing.
      *
-     * It is the union, over every choice of those states whose color is certainly FALSE under \p family, of a Kleene
+     * It is the union, over every choice of those states whose color is certainly FALSE under family, of a Kleene
      * "reason": parameters that alone keep that color FALSE. A choice that is selected needs no reason, since Kleene
      * evaluation is monotone under domain-widening (a selected choice stays selected). In exact mode a color that is
      * undecided may still have been excluded by the exact check, and that has no Kleene reason, so its whole support
-     * counts. Hence, for the reachable states of the sub-MDP induced by \p family, the sub-MDP -- and any refutation
+     * counts. Hence, for the reachable states of the sub-MDP induced by family, the sub-MDP -- and any refutation
      * drawn from it -- is unchanged by such a widening.
      *
      * Unlike getStateToHoles, for a decision-tree coloring this is only the decisions and thresholds actually tested
@@ -138,9 +159,8 @@ public:
     /**
      * Verify whether the given choices have a common satisfying parameter assignment (within the given family), i.e.
      * whether the conjunction of their colors is satisfiable. Choices at irrelevant states and uncolored choices
-     * impose nothing. This is ColoringSmt::areChoicesConsistent without harmonization: no split is proposed for an
-     * inconsistent choice set.
-     * @return (A,B): A iff the choices are consistent; if A holds, B is a satisfying assignment (one option per
+     * impose nothing. Decided by Z3, without the Kleene evaluation; no split is proposed for an inconsistent choice set.
+     * @return (A,B): A iff the choices are consistent; if A holds, B is a satisfying assignment (one option for every
      *   parameter); otherwise B is empty (an empty list per parameter).
      */
     std::pair<bool,std::vector<std::vector<uint64_t>>> areChoicesConsistent(BitVector const& choices, Family const& family);
@@ -155,7 +175,7 @@ public:
      * What the color of a choice is made of: (root, state_row, choice_row, state_is_relevant, is_first_of_state).
      * root is the formula node of the color in the node table, or -1 if the choice is uncolored. state_row and choice_row are the data rows (the columns
      * that the formula reads) of the choice's state and of the choice itself. selectCompatibleChoices evaluates the color only at a relevant state; at an
-     * irrelevant one it enables the first choice only, which is_first_of_state tells apart.
+     * irrelevant one it enables the first choice only, which is_first_of_state tells apart (with base_choices, the first one in base_choices instead).
      * @throws std::out_of_range if there is no such choice
      */
     std::tuple<int32_t, std::vector<int64_t>, std::vector<int64_t>, bool, bool> getChoiceColor(uint64_t choice) const;
@@ -180,6 +200,7 @@ protected:
     const BitVector state_is_relevant;
 
     // build-time derived info
+    // the cache of a node: it reads no data (Query), state data (State) or choice data (Choice)
     enum class Scope : uint8_t { Query = 0, State = 1, Choice = 2 };
     std::vector<Scope> node_scope;
     std::vector<BitVector> node_support; // per node, the parameters (transitively) referenced

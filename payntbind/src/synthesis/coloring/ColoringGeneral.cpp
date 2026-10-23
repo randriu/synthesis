@@ -337,11 +337,13 @@ ColoringGeneral::Interval ColoringGeneral::computeTerm(int32_t node) {
     switch(op) {
         case NodeOp::ConstTerm: return {a64,a64};
         case NodeOp::ParamTerm: {
+            // the options are sorted, so this is [smallest, largest]; every parameter must have an option
             auto const& opts = family->holeOptions((uint64_t)a64);
             return {(int64_t)opts.front(), (int64_t)opts.back()};
         }
         case NodeOp::StateColTerm: { int64_t v = state_data[current_state][(uint64_t)a64]; return {v,v}; }
         case NodeOp::ChoiceColTerm: { int64_t v = choice_data[current_choice][(uint64_t)a64]; return {v,v}; }
+        // no overflow check: values are assumed to stay far from the int64 limits
         case NodeOp::AddTerm: { auto ia = evalTerm(a), ib = evalTerm(b); return {ia.lo+ib.lo, ia.hi+ib.hi}; }
         case NodeOp::SubTerm: { auto ia = evalTerm(a), ib = evalTerm(b); return {ia.lo-ib.hi, ia.hi-ib.lo}; }
         case NodeOp::MulTerm: {
@@ -364,9 +366,8 @@ ColoringGeneral::Interval ColoringGeneral::computeTerm(int32_t node) {
 }
 
 ColoringGeneral::Tri ColoringGeneral::evalComparison(NodeOp op, int32_t a, int32_t b) {
-    // exactness boost: if one side is a bare parameter and the other side's interval is currently a single
-    // concrete value, use Family's exact option mask instead of the (possibly loose) interval hull -- this is
-    // what reproduces ColoringSmt's exact selection semantics for e.g. `leaf_param == choice_data("action")`
+    // A bare parameter against a single value is decided exactly from the family's options (the interval hull would
+    // ignore the gaps between them). A negative value is never an option.
     if(op == NodeOp::EqF or op == NodeOp::NeF) {
         bool a_is_param = node_op[a] == NodeOp::ParamTerm;
         bool b_is_param = node_op[b] == NodeOp::ParamTerm;
@@ -439,7 +440,7 @@ ColoringGeneral::Tri ColoringGeneral::evalInBits(int32_t param_term, int32_t dat
     auto const& domain = family->holeOptions(p);
     bool any_in = false, any_out = false;
     for(uint64_t v: domain) {
-        bool bit = v < 64 and ((word >> v) & 1ULL);
+        bool bit = v < 64 and ((word >> v) & 1ULL); // options from 64 on are never set
         (bit ? any_in : any_out) = true;
         if(any_in and any_out) return Tri::U;
     }
@@ -474,6 +475,7 @@ BitVector ColoringGeneral::selectCompatibleChoices(Family const& family, BitVect
         ++state_epoch;
 
         if(not state_is_relevant[state]) {
+            // its first choice in base_choices, whatever its color (none if there is none)
             for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
                 if(not base_choices[choice]) continue;
                 selection.set(choice,true);
@@ -486,7 +488,7 @@ BitVector ColoringGeneral::selectCompatibleChoices(Family const& family, BitVect
         bool any_enabled = false;
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
             if(choice_root[choice] < 0) {
-                // uncolored: always included, regardless of base_choices -- matches Coloring's own invariant
+                // uncolored: always enabled, even outside base_choices
                 any_enabled = true;
                 selection.set(choice,true);
                 visitChoice(choice,state_reached,unexplored);
